@@ -1,0 +1,11 @@
+{
+  // Estilo de la casa RootCause (igual que la edición Windows):
+  // tablas compactas |---|---| y párrafos sin corte duro a 80 columnas.
+  "config": {
+    "MD013": false,
+    "MD033": false,
+    "MD041": false,
+    "MD060": false
+  },
+  "ignores": ["android/**", "ios/**", "build/**", ".dart_tool/**"]
+}

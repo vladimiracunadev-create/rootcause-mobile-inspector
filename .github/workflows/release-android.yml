@@ -1,0 +1,158 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Release Android — RootCause Mobile Inspector
+#
+# Se dispara con un tag `v*` (p. ej. v0.1.0) y publica un GitHub Release con:
+#   - RootCause-Mobile-Inspector-<versión>-android.apk (release, firmado)
+#   - SHA256SUMS.txt (integridad)
+#
+# Firma:
+#   - Si los secretos ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD /
+#     ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD están configurados, firma con
+#     el keystore permanente del proyecto (modo `release-key`).
+#   - Si NO están, genera un keystore efímero en el runner (modo
+#     `ephemeral-ci-key`): el APK queda firmado e instalable, pero la clave
+#     cambia entre releases. Ver docs/RELEASE_MOVIL.md para fijar la clave.
+#
+# Robustez: tag debe coincidir con la versión de pubspec.yaml, tests como
+# puerta previa, actions pinneadas a SHA, permissions mínimos.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Release Android
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: "3.44.6"
+
+jobs:
+  release:
+    name: APK firmado + GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Verificar coherencia tag ↔ pubspec.yaml
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PUBSPEC_VERSION="$(grep -E '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          echo "tag=$TAG_VERSION pubspec=$PUBSPEC_VERSION"
+          if [ "$TAG_VERSION" != "$PUBSPEC_VERSION" ]; then
+            echo "::error::El tag v$TAG_VERSION no coincide con pubspec.yaml ($PUBSPEC_VERSION)."
+            exit 1
+          fi
+
+      - name: JDK 17
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar Flutter (tag exacto)
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Dependencias
+        run: flutter pub get
+
+      - name: Tests (puerta previa al release)
+        run: flutter test
+
+      - name: Preparar firma
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            {
+              echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.jks"
+              echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+              echo "ANDROID_KEY_ALIAS=$KEY_ALIAS"
+              echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD"
+              echo "SIGNING_MODE=release-key"
+            } >> "$GITHUB_ENV"
+          else
+            EPHEMERAL_PASS="$(openssl rand -hex 24)"
+            keytool -genkeypair -keystore "$RUNNER_TEMP/release.jks" \
+              -alias rootcause -keyalg RSA -keysize 4096 -validity 3650 \
+              -storepass "$EPHEMERAL_PASS" -keypass "$EPHEMERAL_PASS" \
+              -dname "CN=RootCause CI ephemeral, O=RootCause Mobile Inspector"
+            {
+              echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.jks"
+              echo "ANDROID_KEYSTORE_PASSWORD=$EPHEMERAL_PASS"
+              echo "ANDROID_KEY_ALIAS=rootcause"
+              echo "ANDROID_KEY_PASSWORD=$EPHEMERAL_PASS"
+              echo "SIGNING_MODE=ephemeral-ci-key"
+            } >> "$GITHUB_ENV"
+            echo "::warning::Secretos de firma no configurados: APK firmado con clave EFÍMERA de CI (docs/RELEASE_MOVIL.md)."
+          fi
+
+      - name: Build APK release firmado
+        run: flutter build apk --release
+
+      - name: Preparar artefactos
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_REF_NAME" = "main" ] || [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            VERSION="$(grep -E '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          fi
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk \
+            "dist/RootCause-Mobile-Inspector-${VERSION}-android.apk"
+          cd dist
+          sha256sum "RootCause-Mobile-Inspector-${VERSION}-android.apk" > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Crear GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## RootCause Mobile Inspector v${RELEASE_VERSION} (Android)"
+            echo ""
+            echo "Sensor forense de diagnóstico para móviles — hermano de"
+            echo "[rootcause-windows-inspector](https://github.com/vladimiracunadev-create/rootcause-windows-inspector)."
+            echo ""
+            echo "| Artefacto | Contenido |"
+            echo "|---|---|"
+            echo "| \`RootCause-Mobile-Inspector-${RELEASE_VERSION}-android.apk\` | App Android (release) |"
+            echo "| \`SHA256SUMS.txt\` | Hash de integridad |"
+            echo ""
+            echo "**Modo de firma:** \`${SIGNING_MODE}\`"
+            echo ""
+            echo "### Instalación"
+            echo "1. Descarga el APK en el teléfono."
+            echo "2. Autoriza la instalación de orígenes desconocidos para tu navegador/gestor de archivos."
+            echo "3. Verifica integridad: \`sha256sum\` debe coincidir con \`SHA256SUMS.txt\`."
+            echo ""
+            echo "iOS: la app compila en CI, pero distribuir un .ipa requiere cuenta Apple Developer — ver \`docs/RELEASE_MOVIL.md\`."
+          } > release-notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            --title "RootCause Mobile Inspector v${RELEASE_VERSION}" \
+            --notes-file release-notes.md \
+            dist/*
+
+      - name: Artefacto del workflow (respaldo)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rootcause-mobile-release-android
+          path: dist/
+          retention-days: 30
+          if-no-files-found: error
