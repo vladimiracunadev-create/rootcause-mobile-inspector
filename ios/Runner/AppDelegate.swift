@@ -21,7 +21,7 @@ import UIKit
 
     let channel = FlutterMethodChannel(
       name: "rootcause/collectors",
-      binaryMessenger: engineBridge.applicationBinaryMessenger
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
     )
     channel.setMethodCallHandler { call, result in
       switch call.method {
