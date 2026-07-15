@@ -21,7 +21,11 @@
   consumo real de batería/datos por app
 - [ ] Notificación local cuando el veredicto pasa a Critical
 
-## v0.3.x — iOS de primera clase
+## v0.3.x — iOS de primera clase (EN PAUSA)
+
+> Decisión 2026-07-15: la distribución iOS queda en pausa por decisión del
+> autor. El build iOS se mantiene compilando en CI como vigilancia de
+> regresión del código compartido, sin trabajo adicional de plataforma.
 
 - [ ] Cuenta Apple Developer + `release-ios.yml` (TestFlight)
 - [ ] Colector iOS ampliado (memoria con mach APIs, jailbreak avanzado)

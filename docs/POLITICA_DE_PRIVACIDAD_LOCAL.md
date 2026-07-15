@@ -1,0 +1,37 @@
+# Política de privacidad local
+
+La misma política que la edición Windows, aplicada al móvil: **la
+privacidad se demuestra por diseño, no por promesa.**
+
+## Qué datos toca la app
+
+| Dato | Se lee | Se guarda | Sale del dispositivo |
+|---|---|---|---|
+| Memoria total/disponible | ✅ | En historial local | ❌ (solo si TÚ exportas) |
+| Almacenamiento libre/total | ✅ | En historial local | ❌ |
+| Batería (nivel, temperatura, salud) | ✅ | En historial local | ❌ |
+| Estado de red (transporte, VPN, medida) | ✅ | En historial local | ❌ |
+| Lista de apps y permisos que SOLICITAN (Android) | ✅ | En historial local | ❌ |
+| Contenido de tu tráfico de red | ❌ nunca | — | — |
+| SMS, contactos, fotos, archivos personales | ❌ nunca | — | — |
+| Identificadores de publicidad / cuentas | ❌ nunca | — | — |
+
+## Garantías verificables en el código
+
+1. **Sin permiso INTERNET**: el manifest principal de Android no lo declara;
+   el APK de release no puede abrir conexiones salientes. Verificable en
+   [`android/app/src/main/AndroidManifest.xml`](../android/app/src/main/AndroidManifest.xml).
+2. **Historial en el sandbox**: `rootcause-history.jsonl` vive en el
+   directorio privado de la app; desinstalar la app lo elimina.
+3. **Export solo manual**: el JSON forense se copia al portapapeles y se
+   guarda en la carpeta de documentos de la app únicamente cuando pulsas
+   exportar. No hay sincronización, ni cuentas, ni "nube".
+4. **Sin analytics ni crash reporting**: cero SDKs de terceros
+   (`pubspec.yaml` no tiene dependencias externas).
+
+## Lo que esto significa
+
+- Nadie —incluido el autor— recibe datos de tu dispositivo.
+- La evidencia es tuya: se queda contigo hasta que decidas compartirla.
+- Si un tercero te pide el export JSON, revisa antes su contenido: incluye
+  nombres de apps instaladas y métricas del equipo.

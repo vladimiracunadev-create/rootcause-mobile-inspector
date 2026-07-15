@@ -6,9 +6,11 @@
 | [`MANUAL_USUARIO.md`](MANUAL_USUARIO.md) | Qué hace cada pestaña de la app, en claro |
 | [`DETECCION_AMENAZAS.md`](DETECCION_AMENAZAS.md) | Mapa honesto: qué detecta hoy un sensor móvil y qué queda fuera por diseño del SO |
 | [`LIMITACIONES.md`](LIMITACIONES.md) | Límites por plataforma (Android vs iOS) |
+| [`POLITICA_DE_PRIVACIDAD_LOCAL.md`](POLITICA_DE_PRIVACIDAD_LOCAL.md) | Qué datos toca la app y las garantías verificables en el código |
 | [`BUILD_MOVIL.md`](BUILD_MOVIL.md) | Compilar Android e iOS desde el código fuente |
 | [`CI_GITHUB.md`](CI_GITHUB.md) | Workflows de CI/CD, pinneo a SHA y réplica local |
 | [`RELEASE_MOVIL.md`](RELEASE_MOVIL.md) | Proceso de release: firma Android, secretos, camino a iOS |
+| [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) | Problemas comunes de instalación, uso y build |
 | [`ROADMAP.md`](ROADMAP.md) | Estado actual y evolución prevista |
 
 Documentos raíz:

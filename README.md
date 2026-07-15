@@ -19,6 +19,10 @@
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
 [![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](docs/ROADMAP.md)
 
+📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
+
+---
+
 **RootCause Mobile Inspector es el hermano móvil de
 [rootcause-windows-inspector](https://github.com/vladimiracunadev-create/rootcause-windows-inspector):**
 un sensor forense de diagnóstico para **Android e iOS**, construido con **Flutter**
@@ -45,7 +49,7 @@ indicadores de root/jailbreak) y deja evidencia exportable.
 | Plataforma | Estado | Distribución |
 |---|---|---|
 | **Android** (8.0+, API 26) | Producción | APK firmado en [Releases](../../releases) |
-| **iOS** (13+) | Compila en CI (`--no-codesign`) | Requiere cuenta Apple Developer → [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) |
+| **iOS** (13+) | Compila en CI (`--no-codesign`) · distribución **en pausa** | Requiere cuenta Apple Developer → [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) |
 
 El código compartido (`lib/`) es idéntico en ambas plataformas; los colectores
 nativos declaran honestamente qué puede observarse en cada sistema operativo
@@ -167,8 +171,41 @@ Cada release Android publica:
 | `RootCause-Mobile-Inspector-<versión>-android.apk` | App Android release firmada |
 | `SHA256SUMS.txt` | Hash de integridad |
 
+### Instalar el APK en tu teléfono
+
+1. Desde el teléfono, abre el [último release](../../releases/latest) y
+   descarga el `.apk`.
+2. Al abrirlo, Android pedirá autorizar la **instalación desde orígenes
+   desconocidos** para tu navegador o gestor de archivos — es lo normal
+   para apps fuera de Play Store.
+3. (Recomendado) Verifica la integridad: el SHA-256 del archivo debe
+   coincidir con `SHA256SUMS.txt` del release.
+4. Abre **RootCause** y pulsa ↻ para tu primera captura.
+
 Proceso completo (incluida la firma y el camino a iOS/App Store) →
 [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md)
+
+---
+
+## 📁 Estado de entrega del repositorio
+
+### ✅ Incluye
+
+- Código fuente completo (Dart compartido + Kotlin + Swift)
+- APK release firmado publicado en Releases con hash de integridad
+- Motor de reglas local con umbrales configurables y 6 familias de hallazgo
+- Auditoría de superficie de permisos por app (Android)
+- Historial local de capturas + export JSON forense
+- Interfaz bilingüe español/inglés con tema claro/oscuro
+- CI multiplataforma y release automatizado por tag (actions pinneadas a SHA)
+- Documentación de arquitectura, operación, amenazas y límites por plataforma
+
+### ❌ No incluye
+
+- `.ipa` de iOS distribuible (requiere cuenta Apple Developer; **en pausa**)
+- Publicación en Google Play / App Store
+- Inspección de tráfico de red por app (fuera de alcance v0.1)
+- Cualquier promesa que Android/iOS no permitan cumplir a una app de usuario
 
 ---
 
@@ -191,8 +228,8 @@ Detalle completo → [`docs/LIMITACIONES.md`](docs/LIMITACIONES.md)
 | Perfil | Documento |
 |---|---|
 | 🧑‍💻 Desarrollador | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/BUILD_MOVIL.md`](docs/BUILD_MOVIL.md) |
-| 👤 Usuario final | [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) |
-| 🛡️ Seguridad | [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md) · [`SECURITY.md`](SECURITY.md) |
+| 👤 Usuario final | [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) · [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
+| 🛡️ Seguridad | [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md) · [`docs/POLITICA_DE_PRIVACIDAD_LOCAL.md`](docs/POLITICA_DE_PRIVACIDAD_LOCAL.md) · [`SECURITY.md`](SECURITY.md) |
 | 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
 | 📑 Todo | [`docs/INDEX.md`](docs/INDEX.md) |
 

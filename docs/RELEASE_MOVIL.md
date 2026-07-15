@@ -59,7 +59,11 @@ gh secret set ANDROID_KEY_PASSWORD -R $repo        # contraseña de la clave
 > ⚠️ El keystore y sus contraseñas NUNCA se versionan. `.gitignore` ya
 > excluye `*.jks`, `*.keystore` y `keystore.properties`.
 
-## iOS (camino documentado, pendiente de cuenta)
+## iOS (camino documentado, EN PAUSA)
+
+> Decisión 2026-07-15: la distribución iOS queda **en pausa** por decisión
+> del autor. El build iOS sigue compilando en CI solo como vigilancia de
+> regresión del código compartido.
 
 Estado actual: la app iOS **compila en CI** sin firma (job `build-ios`).
 Para distribuir hace falta:
