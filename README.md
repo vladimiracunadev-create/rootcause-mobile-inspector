@@ -235,7 +235,7 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 - Motor de reglas local con umbrales configurables y 6 familias de hallazgo
 - Auditoría de superficie de permisos por app (Android)
 - Historial local de capturas + export JSON forense
-- Interfaz bilingüe español/inglés con tema claro/oscuro
+- Interfaz bilingüe (español por defecto, inglés a un toque) con tema claro/oscuro
 - CI multiplataforma y release automatizado por tag (actions pinneadas a SHA)
 - Documentación de arquitectura, operación, amenazas y límites por plataforma
 

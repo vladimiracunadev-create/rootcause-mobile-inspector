@@ -5,7 +5,6 @@
 library;
 
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,10 +53,42 @@ class _InspectorHomeState extends State<InspectorHome> {
   List<HistoryRow> _history = const [];
   bool _loading = true;
 
+  // Español por defecto, como el hermano Windows (`es` por defecto,
+  // `en` disponible); el usuario cambia con el botón de idioma y la
+  // preferencia persiste junto al historial.
+  bool _spanish = true;
+
   @override
   void initState() {
     super.initState();
+    _loadLanguage();
     _refresh();
+  }
+
+  Future<File?> _languageFile() async {
+    final dir = await _collectors.documentsPath();
+    return dir == null ? null : File('$dir/rootcause-language');
+  }
+
+  Future<void> _loadLanguage() async {
+    try {
+      final file = await _languageFile();
+      if (file == null || !await file.exists()) return;
+      final code = (await file.readAsString()).trim();
+      if (mounted) setState(() => _spanish = code != 'en');
+    } on FileSystemException {
+      // Sin preferencia guardada se queda el idioma por defecto.
+    }
+  }
+
+  Future<void> _toggleLanguage() async {
+    setState(() => _spanish = !_spanish);
+    try {
+      final file = await _languageFile();
+      await file?.writeAsString(_spanish ? 'es' : 'en', flush: true);
+    } on FileSystemException {
+      // El cambio aplica en la sesión aunque no se pueda persistir.
+    }
   }
 
   Future<void> _refresh() async {
@@ -114,9 +145,7 @@ class _InspectorHomeState extends State<InspectorHome> {
 
   @override
   Widget build(BuildContext context) {
-    final strings = AppStrings.forLanguageCode(
-      ui.PlatformDispatcher.instance.locale.languageCode,
-    );
+    final strings = AppStrings(_spanish);
     final snapshot = _snapshot;
     final verdict = _verdict;
 
@@ -126,6 +155,11 @@ class _InspectorHomeState extends State<InspectorHome> {
         appBar: AppBar(
           title: const Text('RootCause'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.translate),
+              tooltip: strings.actionLanguage,
+              onPressed: _toggleLanguage,
+            ),
             IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: strings.actionRefresh,

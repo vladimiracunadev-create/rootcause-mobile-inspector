@@ -24,6 +24,17 @@ Write-Host "AVD: $avd" -ForegroundColor Cyan
 # 2. Arrancar el emulador con ventana (si no está ya corriendo)
 $running = (& $adb devices) -match 'emulator-\d+\s+device'
 if (-not $running) {
+    # Si la última posición de ventana quedó fuera de pantalla, se borra
+    # para que el emulador arranque centrado (evita la ventana "cortada").
+    $userIni = "$env:USERPROFILE\.android\avd\$avd.avd\emulator-user.ini"
+    if (Test-Path $userIni) {
+        $pos = Get-Content $userIni | Where-Object { $_ -match '^window\.(x|y)\s*=\s*(-?\d+)' }
+        $offscreen = $pos | Where-Object { [int]($_ -replace '.*=\s*', '') -lt 0 }
+        if ($offscreen) {
+            Write-Host 'Posición de ventana fuera de pantalla — restaurando…' -ForegroundColor Yellow
+            Remove-Item $userIni -Force
+        }
+    }
     Write-Host 'Arrancando emulador (ventana visible)…' -ForegroundColor Cyan
     Start-Process $emu -ArgumentList '-avd', $avd, '-no-snapshot-save', '-gpu', 'auto'
 }

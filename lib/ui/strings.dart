@@ -9,9 +9,6 @@ import '../core/models.dart';
 class AppStrings {
   const AppStrings(this.spanish);
 
-  factory AppStrings.forLanguageCode(String code) =>
-      AppStrings(code.toLowerCase().startsWith('es'));
-
   final bool spanish;
 
   String _t(String es, String en) => spanish ? es : en;
@@ -26,6 +23,7 @@ class AppStrings {
   String get tabAbout => _t('Acerca', 'About');
 
   // Acciones
+  String get actionLanguage => _t('Switch to English', 'Cambiar a español');
   String get actionRefresh => _t('Actualizar captura', 'Refresh snapshot');
   String get actionExport =>
       _t('Exportar JSON forense', 'Export forensic JSON');

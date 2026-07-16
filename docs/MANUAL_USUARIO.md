@@ -84,7 +84,9 @@ comparable entre dispositivos y con RootCause para Windows.
 
 ## Idioma
 
-La app está en **español e inglés**; usa el idioma del sistema.
+La app está en **español e inglés** — español por defecto, como toda la
+familia RootCause. El botón 🌐 de la barra superior cambia al inglés y la
+preferencia se recuerda entre sesiones.
 
 ## Qué NO hace esta app
 

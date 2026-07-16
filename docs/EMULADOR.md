@@ -72,6 +72,20 @@ teléfonos físicos y darán "app no instalada" en el emulador).
 El emulador sirve para **probar UI y flujo**. La evaluación real de
 detección se hace en un teléfono físico con apps de verdad.
 
+## Si la ventana del emulador aparece cortada o fuera de pantalla
+
+El emulador recuerda su última posición de ventana. Si quedó arrastrada
+fuera del monitor (por ejemplo, solo se ve la mitad inferior), cierra el
+emulador y borra su posición guardada:
+
+```powershell
+Remove-Item "$env:USERPROFILE\.android\avd\<NOMBRE_AVD>.avd\emulator-user.ini"
+```
+
+Al arrancar de nuevo, la ventana aparece centrada. `scripts/emulador.ps1`
+hace esta corrección automáticamente si detecta una posición fuera de la
+pantalla.
+
 ## Alternativas de terceros
 
 BlueStacks, Genymotion, Waydroid (Linux), Windows Subsystem for Android

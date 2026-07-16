@@ -17,4 +17,22 @@ void main() {
     // Con snapshot neutro el veredicto existe y las 7 pestañas están.
     expect(find.byType(TabBar), findsOneWidget);
   });
+
+  testWidgets('arranca en español por defecto y el botón cambia a inglés', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const RootCauseApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Español por defecto aunque el entorno de test corre con locale en_US.
+    expect(find.text('Resumen'), findsOneWidget);
+    expect(find.text('Summary'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.translate));
+    await tester.pump();
+
+    expect(find.text('Summary'), findsOneWidget);
+    expect(find.text('Resumen'), findsNothing);
+  });
 }

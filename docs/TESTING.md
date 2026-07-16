@@ -35,7 +35,7 @@ lado Dart valida defensivamente todo lo que reciben.
 | `models_test.dart` | Un mapa vacío o con tipos basura del nativo degrada a snapshot neutro **sin crash**; la política de puntaje de apps (+1 permiso, +3 overlay/installer, +2 admin/sideload) y sus cortes 8/12 |
 | `snapshot_json_test.dart` | El export es JSON válido con `schemaVersion`, los ids de hallazgo salen sin traducir, `toJsonLine` es una sola línea parseable, y los caracteres especiales en etiquetas no rompen el formato |
 | `history_store_test.dart` | Orden más-reciente-primero, retención exacta (`maxRows`), una línea corrupta se ignora sin perder el resto, historial vacío no falla |
-| `widget_test.dart` | La app completa arranca sin canal nativo (MissingPluginException capturada) y renderiza las 7 pestañas |
+| `widget_test.dart` | La app completa arranca sin canal nativo (MissingPluginException capturada), renderiza las 7 pestañas, arranca **en español por defecto** aunque el sistema esté en inglés y el botón de idioma cambia a inglés |
 
 ## Ejecutar
 
