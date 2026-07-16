@@ -2,8 +2,24 @@
 
 ## Instalación del APK
 
+### ¿Cuál APK descargo?
+
+| APK | Para quién | Peso relativo |
+|---|---|---|
+| `…-arm64-v8a.apk` | **Recomendado**: cualquier teléfono moderno (64 bits, 2016+) | ≈ 1/3 del universal |
+| `…-armeabi-v7a.apk` | Teléfonos antiguos de 32 bits | ≈ 1/3 del universal |
+| `…-universal.apk` | Cualquier equipo, si no sabes cuál elegir | El más pesado (todas las ABIs) |
+
+> ¿Por qué el universal pesa ~45 MB? Empaqueta el engine de Flutter y el
+> código AOT para **tres arquitecturas de CPU a la vez**. Detalle completo
+> del trade-off (y por qué la edición Windows en Rust pesa menos) →
+> [`ARCHITECTURE.md`](ARCHITECTURE.md#trade-off-honesto-peso-del-apk-flutter-vs-rust).
+
+### Problemas frecuentes
+
 | Síntoma | Causa | Solución |
 |---|---|---|
+| "Aplicación no instalada" al usar un APK por ABI | ABI equivocada para tu CPU | Usa `arm64-v8a` (lo normal) o el `universal` |
 | "Aplicación no instalada" | Ya existe una versión firmada con otra clave (releases con firma efímera) | Desinstala la versión anterior e instala de nuevo |
 | Android bloquea la instalación | Orígenes desconocidos no autorizados | Ajustes → Apps → tu navegador → "Instalar apps desconocidas" |
 | Play Protect advierte | App fuera de Play Store, sin historial de reputación | Verifica el SHA-256 contra `SHA256SUMS.txt` del release y continúa |

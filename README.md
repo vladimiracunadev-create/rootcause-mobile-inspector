@@ -9,7 +9,7 @@
 ║   ██║  ██║╚██████╔╝╚██████╔╝   ██║   ╚██████╗██║  ██║╚██████╔╝███████║███████╗
 ║   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝    ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
 ║                M O B I L E   I N S P E C T O R
-║        Sensor forense de diagnóstico · Flutter · v0.1.0
+║        Sensor forense de diagnóstico · Flutter · v0.1.1
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -17,7 +17,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.1.1-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -166,15 +166,22 @@ Guía completa → [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md)
 
 Cada release Android publica:
 
-| Archivo | Contenido |
+| Archivo | Para quién |
 |---|---|
-| `RootCause-Mobile-Inspector-<versión>-android.apk` | App Android release firmada |
-| `SHA256SUMS.txt` | Hash de integridad |
+| `…-android-arm64-v8a.apk` | **Recomendado**: teléfonos modernos de 64 bits (≈ 1/3 del peso) |
+| `…-android-armeabi-v7a.apk` | Teléfonos antiguos de 32 bits |
+| `…-android-universal.apk` | Cualquier equipo (más pesado: incluye todas las ABIs) |
+| `SHA256SUMS.txt` | Hashes de integridad |
+
+> ¿Por qué el universal pesa más? Empaqueta el engine de Flutter para 3
+> arquitecturas de CPU. El trade-off completo (Flutter multiplataforma vs
+> binario Rust de la edición Windows) está explicado con números en
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#trade-off-honesto-peso-del-apk-flutter-vs-rust).
 
 ### Instalar el APK en tu teléfono
 
 1. Desde el teléfono, abre el [último release](../../releases/latest) y
-   descarga el `.apk`.
+   descarga el `.apk` **arm64-v8a** (o `universal` si no estás seguro).
 2. Al abrirlo, Android pedirá autorizar la **instalación desde orígenes
    desconocidos** para tu navegador o gestor de archivos — es lo normal
    para apps fuera de Play Store.

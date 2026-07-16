@@ -102,8 +102,13 @@ jobs:
             echo "::warning::Secretos de firma no configurados: APK firmado con clave EFÍMERA de CI (docs/RELEASE_MOVIL.md)."
           fi
 
-      - name: Build APK release firmado
-        run: flutter build apk --release
+      # Dos builds: por-ABI (APK liviano para cada arquitectura, ~1/3 del
+      # peso) + universal (compatibilidad garantizada). El segundo build
+      # reutiliza el trabajo de Gradle del primero.
+      - name: Build APKs release firmados (por ABI + universal)
+        run: |
+          flutter build apk --release --split-per-abi
+          flutter build apk --release
 
       - name: Preparar artefactos
         run: |
@@ -112,11 +117,17 @@ jobs:
             VERSION="$(grep -E '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
           fi
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk \
-            "dist/RootCause-Mobile-Inspector-${VERSION}-android.apk"
+          OUT=build/app/outputs/flutter-apk
+          cp "$OUT/app-arm64-v8a-release.apk" \
+            "dist/RootCause-Mobile-Inspector-${VERSION}-android-arm64-v8a.apk"
+          cp "$OUT/app-armeabi-v7a-release.apk" \
+            "dist/RootCause-Mobile-Inspector-${VERSION}-android-armeabi-v7a.apk"
+          cp "$OUT/app-release.apk" \
+            "dist/RootCause-Mobile-Inspector-${VERSION}-android-universal.apk"
           cd dist
-          sha256sum "RootCause-Mobile-Inspector-${VERSION}-android.apk" > SHA256SUMS.txt
+          sha256sum ./*.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
+          ls -lh
           echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Crear GitHub Release
@@ -130,19 +141,21 @@ jobs:
             echo "Sensor forense de diagnóstico para móviles — hermano de"
             echo "[rootcause-windows-inspector](https://github.com/vladimiracunadev-create/rootcause-windows-inspector)."
             echo ""
-            echo "| Artefacto | Contenido |"
+            echo "| Artefacto | Para quién |"
             echo "|---|---|"
-            echo "| \`RootCause-Mobile-Inspector-${RELEASE_VERSION}-android.apk\` | App Android (release) |"
-            echo "| \`SHA256SUMS.txt\` | Hash de integridad |"
+            echo "| \`…-android-arm64-v8a.apk\` | **Recomendado**: cualquier teléfono moderno (64 bits, 2016+) |"
+            echo "| \`…-android-armeabi-v7a.apk\` | Teléfonos antiguos de 32 bits |"
+            echo "| \`…-android-universal.apk\` | Cualquier equipo (más pesado: incluye todas las ABIs) |"
+            echo "| \`SHA256SUMS.txt\` | Hashes de integridad |"
             echo ""
             echo "**Modo de firma:** \`${SIGNING_MODE}\`"
             echo ""
             echo "### Instalación"
-            echo "1. Descarga el APK en el teléfono."
+            echo "1. Descarga el APK \`arm64-v8a\` en el teléfono (o \`universal\` si dudas)."
             echo "2. Autoriza la instalación de orígenes desconocidos para tu navegador/gestor de archivos."
             echo "3. Verifica integridad: \`sha256sum\` debe coincidir con \`SHA256SUMS.txt\`."
             echo ""
-            echo "iOS: la app compila en CI, pero distribuir un .ipa requiere cuenta Apple Developer — ver \`docs/RELEASE_MOVIL.md\`."
+            echo "iOS: en pausa — el código compila en CI, distribuir requiere cuenta Apple Developer (\`docs/RELEASE_MOVIL.md\`)."
           } > release-notes.md
           gh release create "$GITHUB_REF_NAME" \
             --title "RootCause Mobile Inspector v${RELEASE_VERSION}" \

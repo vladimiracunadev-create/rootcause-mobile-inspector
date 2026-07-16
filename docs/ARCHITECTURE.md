@@ -102,7 +102,38 @@ sandbox; nada sale del dispositivo por sí solo.
 
 | Decisión | Razón |
 |---|---|
+| Flutter vs binario nativo (Rust) | Un solo código para Android **e** iOS; ver trade-off de peso abajo |
 | MethodChannel propio vs plugins pub.dev | Menos dependencias de terceros, contrato único auditable, control total de qué se lee |
 | JSON Lines vs sqflite | Cero deps nativas extra; el volumen (500 capturas) no justifica SQL |
 | Sin permiso INTERNET | Privacidad verificable por diseño, no por promesa |
 | Ids de hallazgo estables | Evidencia comparable entre dispositivos y con RootCause Windows |
+
+## Trade-off honesto: peso del APK (Flutter vs Rust)
+
+La edición Windows está escrita en Rust y compila a un binario nativo de
+~4–18 MB sin runtime. La edición móvil eligió Flutter para tener **un solo
+código base en Android e iOS** (requisito del producto), y eso tiene un
+costo declarado:
+
+| Componente dentro del APK | Peso aproximado |
+|---|---|
+| Engine de Flutter (renderizado Impeller/Skia, C++) | ~9–10 MB **por arquitectura** |
+| Código Dart compilado AOT + runtime Dart | ~4–6 MB por arquitectura |
+| Recursos, ICU, manifest, firma | ~2 MB |
+
+El APK **universal** empaqueta TRES arquitecturas (arm64-v8a, armeabi-v7a,
+x86_64) → todo lo anterior ×3 ≈ **45 MB**. Por eso el release publica
+también APKs **divididos por ABI** (`--split-per-abi`): el APK que tu
+teléfono realmente necesita pesa ≈ **1/3** del universal.
+
+Mitigaciones ya aplicadas: R8 + shrink de recursos, tree-shaking de
+iconos (la fuente Material pasa de 1.6 MB a ~2 KB) y cero dependencias
+pub externas. Lo que NO se puede quitar es el engine de Flutter: es el
+precio del multiplataforma. Un núcleo Rust compartido vía FFI (colectores
+en Rust, UI en Flutter) queda evaluado en el
+[ROADMAP](ROADMAP.md) como evolución posible si el peso o el consumo se
+vuelven críticos.
+
+En **consumo en ejecución** la app sigue la filosofía RootCause: captura
+puntual bajo demanda (sin daemon residente), sin red, y el trabajo pesado
+(enumerar apps) corre una sola vez por captura fuera del hilo de UI.

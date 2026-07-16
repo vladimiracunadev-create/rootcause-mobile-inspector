@@ -1,6 +1,14 @@
 # Roadmap
 
-## v0.1.0 — Fundación multiplataforma (actual)
+## v0.1.1 — Landing + APKs por ABI (actual)
+
+- ✅ Landing page en GitHub Pages (mismo esquema que la edición Windows)
+- ✅ Release publica APKs divididos por ABI (arm64-v8a / armeabi-v7a,
+  ≈ 1/3 del peso) además del universal
+- ✅ Trade-off de peso Flutter vs Rust documentado con números en
+  ARCHITECTURE.md
+
+## v0.1.0 — Fundación multiplataforma
 
 - ✅ Arquitectura Flutter: núcleo Dart compartido + colectores nativos
   (Kotlin/Swift) por MethodChannel
@@ -38,6 +46,7 @@
 | VPN local para inspección de tráfico | Gran superficie de código y de confianza; contradice "cero red" v0.1 |
 | Análisis de APK (hashes contra listas) | Requiere red o bases locales grandes |
 | Modo empresa (MDM) | Primero validar el producto individual |
+| Núcleo Rust compartido vía FFI (colectores en Rust, UI Flutter) | Ganancia real solo si el peso/consumo se vuelven críticos; hoy el costo de complejidad no se justifica — ver trade-off en [ARCHITECTURE.md](ARCHITECTURE.md#trade-off-honesto-peso-del-apk-flutter-vs-rust) |
 
 ## Principios que no cambian
 

@@ -23,9 +23,10 @@ El workflow [`release-android.yml`](../.github/workflows/release-android.yml):
 
 1. Verifica coherencia tag ↔ `pubspec.yaml`.
 2. Corre los tests (puerta de calidad).
-3. Compila el APK release **firmado**.
-4. Publica el GitHub Release con el APK + `SHA256SUMS.txt` y notas con el
-   modo de firma usado.
+3. Compila los APKs release **firmados**: uno por ABI (`arm64-v8a`,
+   `armeabi-v7a`, ≈ 1/3 del peso cada uno) más el `universal`.
+4. Publica el GitHub Release con los 3 APKs + `SHA256SUMS.txt` y notas con
+   el modo de firma usado.
 
 ### 3. Verificar (obligatorio, no opcional)
 

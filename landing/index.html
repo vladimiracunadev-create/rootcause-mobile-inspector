@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="RootCause Mobile Inspector — sensor forense de diagnóstico para Android e iOS (Flutter). Toda distorsión anómala de recursos (memoria, almacenamiento, batería, superficie de permisos) puede ser el primer indicio de una amenaza. Telemetría: cero." />
+  <meta property="og:title" content="RootCause Mobile Inspector — sensor forense para Android e iOS" />
+  <meta property="og:description"
+    content="El indicio temprano de que algo ocurre en tu teléfono. Motor de reglas local, auditoría de permisos, evidencia exportable. Telemetría: cero." />
+  <meta property="og:type" content="website" />
+  <title>RootCause Mobile Inspector</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════  NAV  ═══════════════════════════════ -->
+  <header class="nav">
+    <div class="nav-inner">
+      <span class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="10" stroke="#1f6feb" stroke-width="1.5" />
+          <circle cx="11" cy="11" r="5" stroke="#1f6feb" stroke-width="1.5" />
+          <circle cx="11" cy="11" r="1.5" fill="#1f6feb" />
+        </svg>
+        RootCause Mobile
+      </span>
+      <nav class="nav-links">
+        <a href="#features">Características</a>
+        <a href="#honesty">Honestidad</a>
+        <a href="#privacy">Privacidad</a>
+        <a href="#install">Instalación</a>
+        <a href="#family">Familia</a>
+        <a href="#download" class="btn-nav">Descargar APK</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════  HERO  ══════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="ascii-block">
+        <pre>
+██████╗  ██████╗  ██████╗ ████████╗ ██████╗  █████╗ ██╗   ██╗███████╗███████╗
+██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝██╔════╝ ██╔══██╗██║   ██║██╔════╝██╔════╝
+███████╔╝██║   ██║██║   ██║   ██║   ██║      ███████║██║   ██║███████╗█████╗
+██╔══██╗██║   ██║██║   ██║   ██║   ██║      ██╔══██║██║   ██║╚════██║██╔══╝
+██║  ██║╚██████╔╝╚██████╔╝   ██║   ╚██████╗ ██║  ██║╚██████╔╝███████║███████╗
+╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
+                        M O B I L E   I N S P E C T O R
+</pre>
+      </div>
+
+      <p class="hero-sub">
+        Sensor <strong>forense de diagnóstico</strong> para Android e iOS.<br />
+        Toda distorsión anómala de recursos —memoria, almacenamiento, batería, superficie de permisos—<br />
+        puede ser el <strong>primer indicio de que algo está ocurriendo</strong>.
+      </p>
+
+      <div class="badges">
+        <img src="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/ci.yml/badge.svg" alt="CI" />
+        <img src="https://img.shields.io/badge/Flutter-3.44-blue.svg" alt="Flutter 3.44" />
+        <img src="https://img.shields.io/badge/platform-Android%208%2B%20%7C%20iOS%2013%2B-lightgrey.svg" alt="Android 8+ / iOS 13+" />
+        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache 2.0" />
+        <img src="https://img.shields.io/badge/versión-0.1.1-brightgreen.svg" alt="v0.1.1" />
+        <img src="https://img.shields.io/badge/telemetría-cero-success.svg" alt="Telemetría cero" />
+      </div>
+
+      <div class="hero-cta">
+        <a href="#download" class="btn-primary">⬇ Descargar APK</a>
+        <a href="#install" class="btn-ghost">📖 Instrucciones</a>
+      </div>
+
+      <p class="hero-tagline"><em>Diagnóstico primero. Intervención después.</em></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  FEATURES  ══════════════════════════ -->
+  <section id="features" class="section">
+    <div class="container">
+      <h2 class="section-title">⚡ Características</h2>
+      <p class="section-sub">Siete pestañas para diagnosticar tu teléfono sin herramientas externas ni cuentas.</p>
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">🚦</div>
+          <h3>Semáforo con evidencia</h3>
+          <p>Veredicto global 🟢🟡🔴 sustentado por hallazgos: cada uno con severidad, evidencia concreta y
+            recomendación accionable.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <h3>Motor de reglas local</h3>
+          <p>Presión de memoria, almacenamiento crítico, temperatura y salud de batería, apps riesgosas e indicadores
+            de root — umbrales configurables, 100 % en el dispositivo.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>Auditoría de permisos</h3>
+          <p>Puntaje de riesgo por app según los permisos peligrosos que <em>solicita</em>: cámara, micrófono, SMS,
+            ubicación, overlay, instalación de paquetes y sideload. (Android)</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🛡</div>
+          <h3>Indicadores de root/jailbreak</h3>
+          <p>Binarios <code>su</code> en rutas conocidas, builds test-keys, escritura fuera del sandbox. Un indicio
+            honesto, nunca presentado como prueba.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📡</div>
+          <h3>Estado de red</h3>
+          <p>Transporte activo (WiFi/celular), VPN detectada, red medida, ancho de banda estimado y tráfico acumulado
+            del sistema — sin inspeccionar tu contenido.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🗃</div>
+          <h3>Historial local</h3>
+          <p>Cada captura queda persistida en el sandbox (últimas 500). Compara cómo evoluciona la memoria, el disco y
+            el riesgo entre días.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📤</div>
+          <h3>Export JSON forense</h3>
+          <p>Evidencia con ids estables neutrales al idioma (<code>mem-pressure</code>, <code>risky-apps</code>…),
+            comparable entre dispositivos y con la edición Windows.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <h3>Bilingüe y sin fricción</h3>
+          <p>Español e inglés según el idioma del sistema. Tema claro/oscuro. Sin cuentas, sin registro, sin anuncios.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  HONESTY  ═══════════════════════════ -->
+  <section id="honesty" class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">🤝 Honestidad por plataforma</h2>
+      <p class="section-sub">Un sensor móvil solo puede prometer lo que el sistema operativo permite observar.</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>Android</h3>
+          <p>Memoria, almacenamiento, batería (incl. temperatura), red, auditoría completa de permisos por app,
+            detección de sideload e indicadores de root. Android no permite ver CPU/RAM de <em>otras</em> apps desde
+            Android 8 — y lo decimos.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🍎</div>
+          <h3>iOS</h3>
+          <p>Memoria, almacenamiento, batería (sin temperatura: iOS no la expone), VPN e indicadores de jailbreak. iOS
+            no permite listar apps instaladas: la pestaña lo explica en vez de inventar datos. Distribución en pausa
+            (requiere cuenta Apple Developer).</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🚫</div>
+          <h3>Lo que NO es</h3>
+          <p>No es antivirus ni EDR: no elimina malware, no bloquea, no lee tu tráfico ni tus mensajes. Es el indicio
+            temprano que te dice <strong>dónde mirar</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  PRIVACY  ═══════════════════════════ -->
+  <section id="privacy" class="section">
+    <div class="container">
+      <h2 class="section-title">🔒 Privacidad por diseño, no por promesa</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">✂️</div>
+          <h3>Sin permiso INTERNET</h3>
+          <p>El APK de release no declara el permiso <code>INTERNET</code>: no <em>puede</em> abrir conexiones
+            salientes. Verificable en el manifest del código fuente.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>Cero dependencias externas</h3>
+          <p>Sin SDKs de analytics, sin crash reporting de terceros, sin librerías pub externas. Todo el código es
+            auditable en el repositorio.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏠</div>
+          <h3>La evidencia es tuya</h3>
+          <p>Historial y exports viven en el sandbox de la app. Solo salen del teléfono si tú los compartes.
+            Desinstalar borra todo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  DOWNLOAD  ══════════════════════════ -->
+  <section id="download" class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">⬇ Descargar</h2>
+      <p class="section-sub">
+        APKs firmados publicados en GitHub Releases con hash de integridad <code>SHA256SUMS.txt</code>.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>arm64-v8a (recomendado)</h3>
+          <p>Para prácticamente cualquier teléfono de 2016 en adelante. El APK más liviano para tu equipo.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📟</div>
+          <h3>armeabi-v7a</h3>
+          <p>Para equipos antiguos de 32 bits. Mismo producto, misma detección.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧰</div>
+          <h3>universal</h3>
+          <p>Un solo APK que funciona en cualquier ABI (más pesado: incluye todas las arquitecturas). Útil si no sabes
+            cuál elegir.</p>
+        </div>
+      </div>
+
+      <div class="hero-cta" style="margin-top:2rem">
+        <a class="btn-primary"
+          href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest">⬇ Último
+          release en GitHub</a>
+        <a class="btn-ghost"
+          href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector">⌂ Código fuente</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  INSTALL  ═══════════════════════════ -->
+  <section id="install" class="section">
+    <div class="container">
+      <h2 class="section-title">📖 Instalación en 4 pasos</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">1️⃣</div>
+          <h3>Descarga</h3>
+          <p>Desde el teléfono, abre el último release y descarga el APK <code>arm64-v8a</code> (o
+            <code>universal</code> si tienes dudas).</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">2️⃣</div>
+          <h3>Autoriza</h3>
+          <p>Android pedirá permitir la instalación desde orígenes desconocidos para tu navegador. Es lo normal para
+            apps fuera de Play Store.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">3️⃣</div>
+          <h3>Verifica (recomendado)</h3>
+          <p>El SHA-256 del archivo debe coincidir con <code>SHA256SUMS.txt</code> del release. Integridad
+            comprobable, no prometida.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">4️⃣</div>
+          <h3>Diagnostica</h3>
+          <p>Abre <strong>RootCause</strong> y pulsa ↻. El semáforo, los hallazgos y la evidencia aparecen en
+            segundos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  FAMILY  ════════════════════════════ -->
+  <section id="family" class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">👥 Familia RootCause</h2>
+      <p class="section-sub">La misma filosofía en cada plataforma: la distorsión de recursos como indicio temprano.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🖥</div>
+          <h3>RootCause Windows Inspector</h3>
+          <p>El hermano mayor: software forense de ciberseguridad para Windows, escrito en <strong>Rust</strong> para
+            máxima eficiencia de recursos. GUI nativa, CLI, ETW/WPR, baselines de persistencia y servicios.<br />
+            <a href="https://vladimiracunadev-create.github.io/rootcause-windows-inspector/">Página del producto →</a>
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>RootCause Mobile Inspector</h3>
+          <p>Esta edición: Flutter con núcleo Dart compartido y colectores nativos Kotlin/Swift, para llevar el mismo
+            diagnóstico honesto a Android e iOS con un solo código base.<br />
+            <a href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector">Repositorio →</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════  FOOTER  ════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>RootCause Mobile Inspector</h4>
+        <p>Sensor forense de diagnóstico para Android e iOS.<br />
+          Diagnóstico primero. Intervención después.<br />
+          Telemetría: cero.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector">Repositorio</a></li>
+          <li><a
+              href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest">Releases</a>
+          </li>
+          <li><a
+              href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/tree/main/docs">Documentación</a>
+          </li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Familia</h4>
+        <ul>
+          <li><a href="https://vladimiracunadev-create.github.io/rootcause-windows-inspector/">Windows Inspector</a>
+          </li>
+          <li><a href="https://github.com/vladimiracunadev-create">@vladimiracunadev-create</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Vladimir Acuña · Apache 2.0</p>
+    </div>
+  </footer>
+
+</body>
+
+</html>
