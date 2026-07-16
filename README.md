@@ -216,6 +216,11 @@ Cada release Android publica:
    coincidir con `SHA256SUMS.txt` del release.
 4. Abre **RootCause** y pulsa ↻ para tu primera captura.
 
+> ¿No sabes cuál APK elegir? Guía completa con árbol de decisión →
+> [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md#cuál-apk-descargo-guía-completa)
+> · ¿Sin teléfono a mano? Pruébalo en un emulador →
+> [`docs/EMULADOR.md`](docs/EMULADOR.md)
+
 Proceso completo (incluida la firma y el camino a iOS/App Store) →
 [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md)
 
@@ -261,10 +266,10 @@ Detalle completo → [`docs/LIMITACIONES.md`](docs/LIMITACIONES.md)
 
 | Perfil | Documento |
 |---|---|
-| 🧑‍💻 Desarrollador | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/BUILD_MOVIL.md`](docs/BUILD_MOVIL.md) |
-| 👤 Usuario final | [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) · [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
+| 🧑‍💻 Desarrollador | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/HEURISTICAS.md`](docs/HEURISTICAS.md) · [`docs/TESTING.md`](docs/TESTING.md) · [`docs/BUILD_MOVIL.md`](docs/BUILD_MOVIL.md) |
+| 👤 Usuario final | [`docs/MANUAL_PARA_NOVATOS.md`](docs/MANUAL_PARA_NOVATOS.md) · [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) · [`docs/EMULADOR.md`](docs/EMULADOR.md) · [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
 | 🛡️ Seguridad | [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md) · [`docs/POLITICA_DE_PRIVACIDAD_LOCAL.md`](docs/POLITICA_DE_PRIVACIDAD_LOCAL.md) · [`SECURITY.md`](SECURITY.md) |
-| 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
+| 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
 | 📑 Todo | [`docs/INDEX.md`](docs/INDEX.md) |
 
 ---
