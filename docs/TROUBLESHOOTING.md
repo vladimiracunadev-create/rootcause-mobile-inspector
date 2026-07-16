@@ -2,17 +2,51 @@
 
 ## Instalación del APK
 
-### ¿Cuál APK descargo?
+### ¿Cuál APK descargo? (guía completa)
 
-| APK | Para quién | Peso relativo |
-|---|---|---|
-| `…-arm64-v8a.apk` | **Recomendado**: cualquier teléfono moderno (64 bits, 2016+) | ≈ 1/3 del universal |
-| `…-armeabi-v7a.apk` | Teléfonos antiguos de 32 bits | ≈ 1/3 del universal |
-| `…-universal.apk` | Cualquier equipo, si no sabes cuál elegir | El más pesado (todas las ABIs) |
+```mermaid
+flowchart TD
+    A[¿Sabes la arquitectura de tu CPU?] -->|No y no quiero averiguarla| U[universal.apk<br/>funciona en todo, pesa 3×]
+    A -->|No, pero puedo mirar| B[Ajustes → Acerca del teléfono<br/>o instala CPU-Z / DevCheck]
+    A -->|Sí| C{¿Cuál es?}
+    B --> C
+    C -->|arm64-v8a / ARMv8 / 64 bits| R1[arm64-v8a.apk ✅ recomendado]
+    C -->|armeabi-v7a / ARMv7 / 32 bits| R2[armeabi-v7a.apk]
+    C -->|x86_64 - emulador de PC| U
+    R1 -.->|Si dice 'app no instalada'| U
+    R2 -.->|Si dice 'app no instalada'| U
+```
+
+**Regla práctica sin mirar nada**: si tu teléfono es de **2017 o
+posterior** (cualquier Samsung/Xiaomi/Motorola/Pixel/Huawei de gama media
+o alta), es **arm64-v8a** con ~99 % de certeza. Los APK por ABI pesan ≈
+16 MB contra 45 MB del universal.
+
+**Cómo confirmar tu arquitectura, de más fácil a más técnico:**
+
+1. **Por año/gama** (regla de arriba): 2017+ → `arm64-v8a`.
+2. **En el teléfono**: instala una app de info de hardware (CPU-Z,
+   DevCheck, AIDA64) y mira "CPU Architecture" / "Instruction Set":
+   - `ARMv8`, `AArch64`, `arm64` → `arm64-v8a`
+   - `ARMv7`, `armeabi` → `armeabi-v7a`
+3. **Con cable y ADB** (para técnicos):
+
+   ```bash
+   adb shell getprop ro.product.cpu.abi
+   # → arm64-v8a  |  armeabi-v7a  |  x86_64
+   ```
+
+4. **Emulador de Android en PC** (Android Studio/AVD): la imagen es
+   `x86_64` → usa el **universal** (incluye esa ABI).
+
+**¿Y si elijo mal?** No pasa nada grave: Android muestra "Aplicación no
+instalada" y listo — descarga entonces el `universal`, que funciona en
+cualquier equipo a cambio de peso extra.
 
 > ¿Por qué el universal pesa ~45 MB? Empaqueta el engine de Flutter y el
-> código AOT para **tres arquitecturas de CPU a la vez**. Detalle completo
-> del trade-off (y por qué la edición Windows en Rust pesa menos) →
+> código AOT para **tres arquitecturas de CPU a la vez** (cada una ~15 MB).
+> Detalle completo del trade-off (y por qué la edición Windows en Rust
+> pesa menos) →
 > [`ARCHITECTURE.md`](ARCHITECTURE.md#trade-off-honesto-peso-del-apk-flutter-vs-rust).
 
 ### Problemas frecuentes

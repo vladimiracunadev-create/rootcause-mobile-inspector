@@ -12,6 +12,10 @@ envía nada a ninguna parte.
 
 ## El semáforo
 
+<p align="center">
+  <img src="images/resumen.png" width="280" alt="Pestaña Resumen con semáforo verde y métricas" />
+</p>
+
 Arriba de la pestaña **Resumen** siempre hay un veredicto:
 
 - 🟢 **Normal** — nada fuera de lo esperado.

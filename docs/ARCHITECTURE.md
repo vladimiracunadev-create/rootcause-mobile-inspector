@@ -4,19 +4,30 @@
 
 RootCause Mobile Inspector usa **Flutter** con una separación estricta en tres capas:
 
-```text
-┌───────────────────────────────────────────────────────────┐
-│  UI (lib/ui/ + lib/main.dart)                             │
-│  Material 3 · tabs · semáforo · export · bilingüe ES/EN   │
-├───────────────────────────────────────────────────────────┤
-│  Núcleo compartido (lib/core/) — Dart puro, sin Flutter   │
-│  models.dart · rule_engine.dart · snapshot_json.dart      │
-│  history_store.dart                                       │
-├───────────────────────────────────────────────────────────┤
-│  Colectores nativos (MethodChannel "rootcause/collectors")│
-│  android/ → Kotlin (MainActivity.kt)                      │
-│  ios/     → Swift  (AppDelegate.swift)                    │
-└───────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph UI["🖼 UI — lib/ui/ + lib/main.dart"]
+        TABS["7 pestañas Material 3"]
+        SEM["Semáforo + hallazgos"]
+        I18N["Bilingüe ES/EN"]
+    end
+
+    subgraph CORE["🧠 Núcleo compartido — lib/core/ (Dart puro, sin Flutter)"]
+        MODELS["models.dart<br/>Snapshot · Finding · Verdict"]
+        ENGINE["rule_engine.dart<br/>6 familias de reglas"]
+        JSON["snapshot_json.dart<br/>export forense"]
+        HIST["history_store.dart<br/>JSON Lines · retención 500"]
+    end
+
+    subgraph NATIVE["📟 Colectores nativos — MethodChannel 'rootcause/collectors'"]
+        KT["android/ · Kotlin<br/>MainActivity + AndroidCollectors"]
+        SW["ios/ · Swift<br/>AppDelegate + IosCollectors"]
+    end
+
+    UI --> CORE
+    CORE --> NATIVE
+    KT --> API_A["APIs públicas Android<br/>ActivityManager · StatFs · PackageManager<br/>BatteryManager · ConnectivityManager"]
+    SW --> API_I["APIs públicas iOS<br/>ProcessInfo · FileManager · UIDevice"]
 ```
 
 ### Por qué Flutter
@@ -64,6 +75,30 @@ Reglas del contrato:
 - Los ids de hallazgo (`mem-pressure`, `storage-low`, `battery-temp`,
   `battery-health`, `risky-apps`, `root-indicators`) son estables y neutrales
   al idioma — mismos principios que la edición Windows.
+
+## Ciclo de vida de una captura
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    participant UI as UI (main.dart)
+    participant CH as MethodChannel
+    participant N as Nativo (Kotlin/Swift)
+    participant RE as RuleEngine (Dart)
+    participant HS as HistoryStore
+
+    U->>UI: pulsa ↻ (o al abrir la app)
+    UI->>CH: invokeMethod("collect")
+    CH->>N: collect()
+    Note over N: Lectura de APIs públicas<br/>fuera del hilo de UI
+    N-->>CH: mapa con memoria, storage,<br/>batería, red, apps, device
+    CH-->>UI: Snapshot (validación defensiva:<br/>campo ausente → default seguro)
+    UI->>RE: evaluate(snapshot)
+    RE-->>UI: Verdict (semáforo + score + findings)
+    UI->>HS: append(JSON line) + trim(500)
+    UI-->>U: semáforo, hallazgos con evidencia<br/>y recomendación
+```
 
 ## Motor de reglas (lib/core/rule_engine.dart)
 

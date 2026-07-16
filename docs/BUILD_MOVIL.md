@@ -58,6 +58,43 @@ $env:ANDROID_KEY_PASSWORD="..."
 flutter build apk --release
 ```
 
+## Probar el APK en un emulador (sin teléfono)
+
+El **Android Emulator** oficial (incluido con Android Studio) ejecuta un
+Android completo en tu PC. En el emulador la CPU es `x86_64`, así que usa
+el APK **universal** del release.
+
+### Vía Android Studio (fácil)
+
+1. Android Studio → **Device Manager** → *Create Virtual Device* →
+   elige un teléfono (p. ej. "Medium Phone") y una imagen de sistema
+   reciente → Finish.
+2. Pulsa ▶ para arrancar el emulador.
+3. **Arrastra y suelta** el APK universal sobre la ventana del emulador —
+   se instala solo.
+
+### Vía línea de comandos (reproducible)
+
+```powershell
+$sdk = "$env:LOCALAPPDATA\Android\Sdk"
+
+# Listar AVDs existentes y arrancar uno
+& "$sdk\emulator\emulator.exe" -list-avds
+& "$sdk\emulator\emulator.exe" -avd <NOMBRE_AVD>
+
+# Instalar y lanzar el APK (con el emulador ya arrancado)
+& "$sdk\platform-tools\adb.exe" install RootCause-Mobile-Inspector-<v>-android-universal.apk
+& "$sdk\platform-tools\adb.exe" shell monkey -p com.rootcause.mobileinspector 1
+```
+
+Alternativas de terceros (BlueStacks, Genymotion, Waydroid en Linux)
+también funcionan, pero el AVD oficial es el único que replica Android
+sin modificaciones — mejor para validar comportamiento real.
+
+> Nota honesta: en el emulador algunas señales pierden sentido (batería
+> simulada, sin sideload real); es ideal para probar la UI y el flujo,
+> no para evaluar la detección completa.
+
 ## iOS
 
 Requiere macOS con Xcode.

@@ -91,6 +91,21 @@ flutter build apk --release
 
 ---
 
+## 📸 Capturas
+
+La app corriendo en un dispositivo Android real (verificada también en el
+emulador AVD oficial — el APK universal incluye la ABI `x86_64`):
+
+<p align="center">
+  <img src="docs/images/resumen.png" width="260" alt="Pestaña Resumen: semáforo verde, memoria, almacenamiento y batería" />
+  &nbsp;&nbsp;
+  <img src="docs/images/dispositivo.png" width="260" alt="Pestaña Dispositivo: hardware, parche de seguridad e indicadores de root" />
+  &nbsp;&nbsp;
+  <img src="docs/images/apps.png" width="260" alt="Pestaña Apps: auditoría de superficie de permisos" />
+</p>
+
+---
+
 ## 🛡️ Secciones de la app
 
 | Pestaña | Descripción |
@@ -109,6 +124,18 @@ al idioma (comparables entre dispositivos y con la edición Windows).
 ---
 
 ## 🧠 Motor de reglas local
+
+```mermaid
+flowchart LR
+    N["📟 Colectores nativos<br/>Kotlin · Swift"] -->|MethodChannel| S["Snapshot"]
+    S --> E["🧠 Motor de reglas<br/>Dart puro"]
+    E --> V{"Veredicto"}
+    V -->|"🟢"| OK["Normal"]
+    V -->|"🟡"| W["Advertencia + hallazgos"]
+    V -->|"🔴"| C["Crítico + hallazgos"]
+    E --> H[("🗃 Historial local<br/>500 capturas")]
+    E --> X["📤 Export JSON forense"]
+```
 
 El mismo principio que el rule engine del RootCause de escritorio, portado a
 Dart puro (100 % testeable sin dispositivo):

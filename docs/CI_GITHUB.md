@@ -1,11 +1,48 @@
 # CI/CD en GitHub Actions
 
+## Vista de pájaro
+
+```mermaid
+flowchart LR
+    subgraph TRIGGERS["Disparadores"]
+        P["push / PR a main"]
+        T["tag v*"]
+        L["cambio en landing/"]
+    end
+
+    subgraph CI["ci.yml"]
+        Q["quality<br/>format + analyze + tests"]
+        BA["build-android<br/>APK release"]
+        BI["build-ios<br/>sin firma (macos)"]
+    end
+
+    subgraph REL["release-android.yml"]
+        V["tag ↔ pubspec"] --> TE["tests (puerta)"]
+        TE --> S{"¿secretos<br/>de firma?"}
+        S -->|sí| K1["firma release-key"]
+        S -->|no| K2["firma efímera CI<br/>+ warning"]
+        K1 --> B["APKs: arm64-v8a ·<br/>armeabi-v7a · universal"]
+        K2 --> B
+        B --> SH["SHA256SUMS.txt"]
+        SH --> GR["GitHub Release"]
+    end
+
+    subgraph PAGES["deploy-landing.yml"]
+        DP["landing/ → GitHub Pages"]
+    end
+
+    P --> Q & BA & BI
+    T --> V
+    L --> DP
+```
+
 ## Workflows
 
 | Workflow | Disparo | Qué hace |
 |---|---|---|
 | [`ci.yml`](../.github/workflows/ci.yml) | push/PR a `main`, manual | `quality` (formato + analyze + tests) · `build-android` (APK release) · `build-ios` (build sin firma en macOS) |
-| [`release-android.yml`](../.github/workflows/release-android.yml) | tag `v*`, manual | coherencia tag↔pubspec → tests → APK firmado → `SHA256SUMS.txt` → GitHub Release |
+| [`release-android.yml`](../.github/workflows/release-android.yml) | tag `v*`, manual | coherencia tag↔pubspec → tests → APKs firmados (por ABI + universal) → `SHA256SUMS.txt` → GitHub Release |
+| [`deploy-landing.yml`](../.github/workflows/deploy-landing.yml) | cambios en `landing/`, manual | publica la landing en GitHub Pages |
 
 ## Decisiones de robustez
 
