@@ -1,6 +1,20 @@
 # Roadmap
 
-## v0.3.0 — El sensor que avisa (actual)
+## v0.4.0 — Consumo real, parche antiguo y widget (actual)
+
+- ✅ **Tiempo en pantalla por app** (opt-in REAL: el permiso especial de
+  acceso de uso solo puede concederlo el usuario en Ajustes): cada app
+  muestra su uso de 24 h y la lista se ordena por consumo — la respuesta
+  a "¿qué app me está gastando el teléfono?". Sin permiso, la columna no
+  existe y un botón lleva a la pantalla del sistema.
+- ✅ Regla **`patch-old`**: parche de seguridad ≥ 180 días → warning,
+  ≥ 365 → critical, con botón "Buscar actualizaciones". En iOS se omite
+  (no hay fecha de parche que evaluar).
+- ✅ **Widget de pantalla de inicio**: el semáforo + puntaje + hora sin
+  abrir la app; se refresca tras cada captura (también las del Worker)
+  y al tocarlo abre RootCause.
+
+## v0.3.0 — El sensor que avisa
 
 El monitoreo continuo cierra el círculo: vigilar → detectar → avisar.
 
@@ -75,14 +89,11 @@ diferencia", "no puedo ver dispositivos cerca".
 - ✅ UI Material 3 bilingüe ES/EN con semáforo y evidencia
 - ✅ CI multiplataforma (Android + iOS) y release Android automatizado
 
-## v0.3.x+ — Profundidad Android (pendiente)
+## Pendiente
 
-- [ ] Regla de parche de seguridad antiguo (> N meses → warning)
-- [ ] Permiso `PACKAGE_USAGE_STATS` opcional (opt-in del usuario) para
-  consumo real de batería/datos por app
-- [ ] Widget de pantalla de inicio con el semáforo
 - [ ] Cercanía: histórico de escaneos entre sesiones (opt-in) para
   detectar rastreadores a lo largo de días
+- [ ] Refinamiento del widget (tamaños, tema del sistema)
 
 ## v0.3.x — iOS de primera clase (EN PAUSA)
 

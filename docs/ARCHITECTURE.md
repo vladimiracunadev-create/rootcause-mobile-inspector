@@ -59,6 +59,8 @@ Canal: `rootcause/collectors`. Métodos:
 - `requestNotificationPermissions` / `notifyCritical(title, body)` →
   permiso (Android 13+) y notificación LOCAL de veredicto crítico; el
   Dart la dispara solo en la transición a crítico
+- `refreshWidget` → actualiza el widget del launcher con la última
+  captura (el provider corre en el mismo proceso y lee el historial)
 
 La política de captura vive en UN solo lugar (`lib/platform/capture_service.dart`):
 colecta → baseline de apps → reglas con historial → persistencia →
@@ -143,6 +145,7 @@ Función pura `Snapshot → Verdict`:
 | `root-indicators` | ≥ 1 indicador | — |
 | `load-rising` | caída sostenida (≥ 15 pts en ≤ 6 h) de memoria disponible o disco libre a lo largo del historial | — |
 | `new-apps` | ≥ 1 app instalada desde la captura anterior (baseline) | — |
+| `patch-old` | parche ≥ 180 días | parche ≥ 365 días |
 
 Puntaje de riesgo por app (Android): +1 por permiso peligroso solicitado,
 +3 por `SYSTEM_ALERT_WINDOW` u `REQUEST_INSTALL_PACKAGES`, +2 por

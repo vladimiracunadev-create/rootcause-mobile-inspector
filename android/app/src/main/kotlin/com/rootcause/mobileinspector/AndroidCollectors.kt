@@ -1,6 +1,8 @@
 package com.rootcause.mobileinspector
 
 import android.app.ActivityManager
+import android.app.AppOpsManager
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -190,16 +192,50 @@ class AndroidCollectors(private val context: Context) {
      */
     private fun apps(): List<Map<String, Any?>> {
         val pm = context.packageManager
+        val usage = usageByPackage()
         return installedPackages(pm)
             .asSequence()
             .filter { it.applicationInfo != null }
             .filterNot { (it.applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0 }
             .filterNot { it.packageName == context.packageName }
-            .map { pkg -> appEntry(pm, pkg) }
+            .map { pkg -> appEntry(pm, pkg, usage) }
             .toList()
     }
 
-    private fun appEntry(pm: PackageManager, pkg: PackageInfo): Map<String, Any?> {
+    /**
+     * Tiempo en primer plano por paquete (últimas 24 h) medido por el SO.
+     * Requiere el permiso especial de acceso de uso que el USUARIO concede
+     * en Ajustes (opt-in); sin él devuelve null y cada app reporta -1.
+     */
+    fun usageAccessGranted(): Boolean = try {
+        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        appOps.unsafeCheckOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            context.packageName,
+        ) == AppOpsManager.MODE_ALLOWED
+    } catch (_: Throwable) {
+        false
+    }
+
+    private fun usageByPackage(): Map<String, Long>? {
+        if (!usageAccessGranted()) return null
+        return try {
+            val usm = context.getSystemService(Context.USAGE_STATS_SERVICE)
+                as UsageStatsManager
+            val end = System.currentTimeMillis()
+            usm.queryAndAggregateUsageStats(end - 24L * 60 * 60 * 1000, end)
+                .mapValues { it.value.totalTimeInForeground }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun appEntry(
+        pm: PackageManager,
+        pkg: PackageInfo,
+        usage: Map<String, Long>?,
+    ): Map<String, Any?> {
         val requested = pkg.requestedPermissions?.toList() ?: emptyList()
         val dangerous = requested
             .filter { it in DANGEROUS_PERMISSIONS }
@@ -222,6 +258,7 @@ class AndroidCollectors(private val context: Context) {
             "dangerousPermissions" to dangerous,
             "specialFlags" to flags,
             "sideloaded" to isSideloaded(pm, pkg.packageName),
+            "foregroundMillis24h" to (usage?.get(pkg.packageName) ?: -1L),
         )
     }
 
@@ -263,6 +300,7 @@ class AndroidCollectors(private val context: Context) {
         "rootIndicators" to rootIndicators(),
         "appsAuditSupported" to true,
         "vendorSkin" to vendorSkin(),
+        "usageAccessGranted" to usageAccessGranted(),
     )
 
     /**

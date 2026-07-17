@@ -240,6 +240,7 @@ class SummaryScreen extends StatelessWidget {
     'storage-low' => ('free-space', strings.actionFreeSpace),
     'battery-temp' ||
     'battery-health' => ('battery', strings.actionBatteryUsage),
+    'patch-old' => ('system-update', strings.actionSystemUpdate),
     _ => null,
   };
 
@@ -345,16 +346,25 @@ class AppsScreen extends StatelessWidget {
     required this.apps,
     required this.auditSupported,
     required this.strings,
+    this.usageAccessGranted = false,
     this.onOpenApp,
+    this.onGrantUsageAccess,
   });
 
   final List<AppRisk> apps;
   final bool auditSupported;
   final AppStrings strings;
 
+  /// `true` cuando el usuario concedió el acceso de uso: las apps
+  /// muestran tiempo en pantalla y la lista se ordena por uso real.
+  final bool usageAccessGranted;
+
   /// Abre la ficha de sistema de la app (ahí se desinstala o se revocan
   /// permisos — la intervención real que el SO sí permite).
   final void Function(String packageName)? onOpenApp;
+
+  /// Abre la pantalla del sistema donde se concede el acceso de uso.
+  final VoidCallback? onGrantUsageAccess;
 
   @override
   Widget build(BuildContext context) {
@@ -365,6 +375,13 @@ class AppsScreen extends StatelessWidget {
       );
     }
     final risky = apps.where((a) => a.severity != Severity.normal).length;
+    // Con acceso de uso, lo que más consume va primero: la respuesta a
+    // "¿qué app me está gastando el teléfono?" queda arriba.
+    final ordered = usageAccessGranted
+        ? (apps.toList()..sort(
+            (a, b) => b.foregroundMillis24h.compareTo(a.foregroundMillis24h),
+          ))
+        : apps;
     return ListView(
       children: [
         SectionCard(
@@ -377,9 +394,24 @@ class AppsScreen extends StatelessWidget {
               strings.appsHonestyNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            if (!usageAccessGranted && onGrantUsageAccess != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                strings.appsUsageNote,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.timelapse, size: 16),
+                  label: Text(strings.appsUsageGrant),
+                  onPressed: onGrantUsageAccess,
+                ),
+              ),
+            ],
           ],
         ),
-        ...apps.map(
+        ...ordered.map(
           (app) => Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Padding(
@@ -407,6 +439,14 @@ class AppsScreen extends StatelessWidget {
                     app.packageName,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (app.foregroundMillis24h >= 0)
+                    Text(
+                      strings.appUsage(formatUptime(app.foregroundMillis24h)),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   if (app.dangerousPermissions.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(

@@ -16,7 +16,7 @@ y cubierto por tests en [`test/rule_engine_test.dart`](../test/rule_engine_test.
 4. **Ids estables** neutrales al idioma: la UI traduce; el export JSON
    conserva el id.
 
-## Las 8 familias
+## Las 9 familias
 
 ### 1 · `mem-pressure` — presión de memoria
 
@@ -138,6 +138,21 @@ inicializa el baseline EN SILENCIO (lo ya instalado no es "nuevo"); una
 app desinstalada se poda, así que reinstalar vuelve a contar como evento;
 en iOS no hay baseline porque no hay lista de apps que comparar.
 
+### 9 · `patch-old` — parche de seguridad antiguo (v0.4.0)
+
+| Condición | Severidad |
+|---|---|
+| Parche con ≥ 180 días de antigüedad | 🟡 WARNING |
+| Parche con ≥ 365 días de antigüedad | 🔴 CRITICAL |
+
+**Evidencia**: edad en días + fecha del parche. **Por qué**: cada mes sin
+parches acumula vulnerabilidades CONOCIDAS y públicas; a un año, el
+equipo es atacable con exploits documentados. **Honestidad**: solo se
+evalúa si la plataforma expone la fecha en formato parseable
+(Android: `YYYY-MM-DD`); iOS reporta su versión, no una fecha → regla
+omitida, no inventada. El hallazgo trae el botón "Buscar actualizaciones"
+que abre la pantalla de actualización del sistema.
+
 ## Veredicto global
 
 ```text
@@ -162,5 +177,4 @@ con configuraciones distintas.
 Cambiar un umbral por defecto significa tocar `RuleThresholds` y su test.
 Agregar una regla nueva significa: una función privada en el engine, un id
 nuevo documentado aquí, sus tests y sus strings ES/EN. El
-[ROADMAP](ROADMAP.md) lista las reglas previstas (parche de seguridad
-antiguo).
+[ROADMAP](ROADMAP.md) lista lo previsto.

@@ -189,6 +189,7 @@ class AppRisk {
     required this.sideloaded,
     required this.riskScore,
     required this.severity,
+    this.foregroundMillis24h = -1,
   });
 
   /// El puntaje y la severidad se calculan aquí (Dart compartido) a partir
@@ -222,6 +223,9 @@ class AppRisk {
       sideloaded: sideloaded,
       riskScore: score,
       severity: severity,
+      foregroundMillis24h: map['foregroundMillis24h'] is num
+          ? (map['foregroundMillis24h'] as num).toInt()
+          : -1,
     );
   }
 
@@ -233,6 +237,11 @@ class AppRisk {
   final bool sideloaded;
   final int riskScore;
   final Severity severity;
+
+  /// Tiempo en primer plano (ms) en las últimas 24 h, medido por el SO.
+  /// Solo existe con el permiso especial de acceso de uso (opt-in del
+  /// usuario en Ajustes); -1 = no disponible y la UI omite la fila.
+  final int foregroundMillis24h;
 }
 
 class DeviceInfo {
@@ -247,6 +256,7 @@ class DeviceInfo {
     required this.rootIndicators,
     required this.appsAuditSupported,
     this.vendorSkin = '',
+    this.usageAccessGranted = false,
   });
 
   factory DeviceInfo.fromMap(Map<Object?, Object?> map) => DeviceInfo(
@@ -260,6 +270,7 @@ class DeviceInfo {
     rootIndicators: _asStringList(map['rootIndicators']),
     appsAuditSupported: _asBool(map['appsAuditSupported']),
     vendorSkin: _asString(map['vendorSkin'], ''),
+    usageAccessGranted: _asBool(map['usageAccessGranted']),
   );
 
   final String manufacturer;
@@ -277,6 +288,10 @@ class DeviceInfo {
   /// Capa del fabricante ("One UI 8.5", "MIUI V14"…); vacío si es Android
   /// puro o la plataforma no la expone — la UI omite la fila.
   final String vendorSkin;
+
+  /// `true` si el usuario concedió el acceso de uso (permiso especial);
+  /// habilita el tiempo en pantalla por app.
+  final bool usageAccessGranted;
 }
 
 /// Captura completa del estado del dispositivo en un instante.

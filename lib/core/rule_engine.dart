@@ -19,6 +19,8 @@ class RuleThresholds {
     this.batteryTempCriticalCelsius = 45.0,
     this.riskyAppScoreThreshold = 8,
     this.riskyAppsCriticalCount = 5,
+    this.patchWarningDays = 180,
+    this.patchCriticalDays = 365,
   });
 
   final double memoryWarningRatio;
@@ -29,6 +31,10 @@ class RuleThresholds {
   final double batteryTempCriticalCelsius;
   final int riskyAppScoreThreshold;
   final int riskyAppsCriticalCount;
+
+  /// Edad del parche de seguridad (días) para advertencia y crítico.
+  final int patchWarningDays;
+  final int patchCriticalDays;
 }
 
 class RuleEngine {
@@ -53,6 +59,7 @@ class RuleEngine {
       ..._apps(snapshot),
       ..._newApps(newApps),
       ..._rootIndicators(snapshot),
+      ..._patchAge(snapshot),
       ..._trend(snapshot, history),
     ];
 
@@ -180,6 +187,37 @@ class RuleEngine {
         args: [indicators.length.toString(), indicators.join(', ')],
       ),
     ];
+  }
+
+  /// Parche de seguridad antiguo: cada mes sin parches acumula
+  /// vulnerabilidades CONOCIDAS y públicas. Solo se evalúa si la
+  /// plataforma expone la fecha en formato parseable (Android:
+  /// YYYY-MM-DD); iOS reporta su versión, no una fecha → regla omitida,
+  /// no inventada.
+  List<Finding> _patchAge(Snapshot s) {
+    final patchDate = DateTime.tryParse(s.device.securityPatch);
+    if (patchDate == null) return const [];
+    final now = DateTime.fromMillisecondsSinceEpoch(s.timestampMillis);
+    final days = now.difference(patchDate).inDays;
+    if (days >= thresholds.patchCriticalDays) {
+      return [
+        Finding(
+          id: 'patch-old',
+          severity: Severity.critical,
+          args: ['$days', s.device.securityPatch],
+        ),
+      ];
+    }
+    if (days >= thresholds.patchWarningDays) {
+      return [
+        Finding(
+          id: 'patch-old',
+          severity: Severity.warning,
+          args: ['$days', s.device.securityPatch],
+        ),
+      ];
+    }
+    return const [];
   }
 
   /// Carga en ascenso: la razón de existir del sistema aplicada al tiempo.

@@ -4,7 +4,7 @@ Este documento registra la decisión de licencia de RootCause Mobile Inspector y
 
 ## Licencia actual
 
-**Apache License 2.0**, desde la fundación del proyecto (v0.1.0) y vigente en v0.3.0. El texto completo está en [`LICENSE`](../LICENSE).
+**Apache License 2.0**, desde la fundación del proyecto (v0.1.0) y vigente en v0.4.0. El texto completo está en [`LICENSE`](../LICENSE).
 
 Es la misma licencia que el proyecto hermano, [rootcause-windows-inspector](https://github.com/vladimiracunadev-create/rootcause-windows-inspector), que documentó la decisión primero: misma familia, misma licencia. Este proyecto la hereda de forma consciente desde el primer commit, sin la etapa MIT inicial que tuvo la edición Windows.
 
@@ -66,3 +66,4 @@ La decisión de fondo (dual license vs mantener Apache 2.0 en una eventual v1.0)
 | v0.1.1 | Apache 2.0 | Sin cambios |
 | v0.2.1 | Apache 2.0 | Sin cambios |
 | v0.3.0 | Apache 2.0 | Sin cambios |
+| v0.4.0 | Apache 2.0 | Sin cambios |

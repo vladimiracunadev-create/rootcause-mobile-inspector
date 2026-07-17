@@ -52,6 +52,8 @@ Future<void> backgroundCapture() async {
           body: strings.alertCriticalBody,
         );
       }
+      // El widget del launcher se actualiza también desde el Worker.
+      await collectors.refreshWidget();
     }
   } on Exception {
     // Una captura fallida en segundo plano no debe tumbar el Worker.
@@ -155,6 +157,8 @@ class _InspectorHomeState extends State<InspectorHome> {
       _history = outcome.history;
       _loading = false;
     });
+    // El widget de pantalla de inicio refleja la captura recién tomada.
+    await _collectors.refreshWidget();
   }
 
   Future<void> _updateConfig(AppConfig next) async {
@@ -347,9 +351,11 @@ class _InspectorHomeState extends State<InspectorHome> {
                   AppsScreen(
                     apps: snapshot.apps,
                     auditSupported: snapshot.device.appsAuditSupported,
+                    usageAccessGranted: snapshot.device.usageAccessGranted,
                     strings: strings,
                     onOpenApp: (pkg) =>
                         _openSystemScreen('app-details', packageName: pkg),
+                    onGrantUsageAccess: () => _openSystemScreen('usage-access'),
                   ),
                   NetworkScreen(network: snapshot.network, strings: strings),
                   StorageScreen(

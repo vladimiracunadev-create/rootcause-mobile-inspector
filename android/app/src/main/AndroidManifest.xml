@@ -35,6 +35,13 @@
          es el propio dispositivo avisando. Android 13+ la pide en runtime. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Tiempo en pantalla por app (opt-in REAL: es un permiso especial
+         que solo el usuario puede conceder en Ajustes → Acceso de uso;
+         la app no puede autoconcedérselo). Sin él, la columna no existe. -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:label="RootCause Mobile Inspector"
         android:name=".RootCauseApplication"
@@ -75,6 +82,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Widget de pantalla de inicio: el semáforo sin abrir la app. -->
+        <receiver
+            android:name=".RootCauseWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/rootcause_widget_info" />
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

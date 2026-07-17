@@ -15,6 +15,7 @@ privacidad se demuestra por diseño, no por promesa.**
 | Volúmenes de almacenamiento (tarjeta SD: libre/total) | ✅ | En historial local | ❌ |
 | Dispositivos Bluetooth LE cercanos (escaneo manual opt-in) | ✅ solo al pulsar Escanear | ❌ solo en memoria de la sesión | ❌ nunca (ni siquiera en el export) |
 | Baseline de apps vistas (para detectar instalaciones nuevas) | ✅ | En el sandbox (`rootcause-apps-baseline.json`) | ❌ |
+| Tiempo en pantalla por app (solo si TÚ concedes el acceso de uso en Ajustes) | ✅ opt-in | En historial local | ❌ (solo si exportas) |
 | Contenido de tu tráfico de red | ❌ nunca | — | — |
 | SMS, contactos, fotos, archivos personales | ❌ nunca | — | — |
 | Identificadores de publicidad / cuentas | ❌ nunca | — | — |

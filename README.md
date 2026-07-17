@@ -11,7 +11,7 @@
 ║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
 ║                                                                                   ║
 ║                          M O B I L E   I N S P E C T O R                          ║
-║                  Sensor forense de diagnóstico · Flutter · v0.3.0                 ║
+║                  Sensor forense de diagnóstico · Flutter · v0.4.0                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -19,7 +19,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.3.0-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.4.0-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -121,7 +121,7 @@ ABI `x86_64`; verificada también en dispositivo Android real):
 | Pestaña | Descripción |
 |---|---|
 | **Resumen** | Semáforo global + hallazgos con evidencia, recomendación y **botón de intervención** (abre la pantalla del sistema donde tú sí puedes actuar) |
-| **Apps** | Auditoría de permisos peligrosos por app, con puntaje, flags (overlay, sideload, device-admin) y acceso a la ficha del sistema — Android |
+| **Apps** | Auditoría de permisos peligrosos por app + **tiempo en pantalla 24 h** con el acceso de uso (opt-in), ordenado por consumo, con acceso a la ficha del sistema — Android |
 | **Red** | Transporte activo (WiFi/celular), VPN, red medida, ancho de banda estimado y tráfico acumulado |
 | **Almacenamiento** | Volumen interno **+ tarjeta SD/USB si existen** (detección dinámica) + caché propia con botón de limpieza |
 | **Dispositivo** | Hardware, versión de OS, parche de seguridad e indicadores de root/jailbreak |
@@ -159,6 +159,8 @@ Dart puro (100 % testeable sin dispositivo):
 - **Apps nuevas** (v0.3.0): baseline de instalaciones entre capturas — el
   `persistence-change` de la edición Windows, en móvil
 - Indicadores de root/jailbreak
+- **Parche de seguridad antiguo** (v0.4.0): ≥ 180 días warning, ≥ 365
+  critical, con botón directo a la actualización del sistema
 - **Carga en ascenso** (v0.2.0): caída sostenida de memoria/disco a lo
   largo del historial — la distorsión que crece como indicio temprano
 
@@ -251,7 +253,8 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 
 - Código fuente completo (Dart compartido + Kotlin + Swift)
 - APK release firmado publicado en Releases con hash de integridad
-- Motor de reglas local con **umbrales modificables por el usuario** y 8 familias de hallazgo (incluidas la tendencia `load-rising` y el baseline `new-apps`)
+- Motor de reglas local con **umbrales modificables por el usuario** y 9 familias de hallazgo (incluidas la tendencia `load-rising`, el baseline `new-apps` y el parche antiguo `patch-old`)
+- **Tiempo en pantalla por app** con el acceso de uso (opt-in real del usuario) y **widget de pantalla de inicio** con el semáforo
 - Auto-captura configurable (5 min por defecto) + **captura en segundo plano** con WorkManager (opción solo-cargando) y **notificación local de veredicto crítico**
 - **Historial con gráfico de tendencia y comparación A→B** (deltas de memoria, disco, puntaje y apps riesgosas)
 - Auditoría de superficie de permisos por app (Android) con acceso a la ficha del sistema

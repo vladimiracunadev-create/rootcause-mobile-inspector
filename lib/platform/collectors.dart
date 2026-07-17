@@ -135,6 +135,18 @@ class PlatformCollectors {
     }
   }
 
+  /// Refresca el widget de pantalla de inicio con la última captura del
+  /// historial. Silencioso donde no hay widget (iOS, tests).
+  Future<void> refreshWidget() async {
+    try {
+      await _channel.invokeMethod<void>('refreshWidget');
+    } on PlatformException {
+      // Sin widget instalado no hay nada que refrescar.
+    } on MissingPluginException {
+      // Sin lado nativo (tests).
+    }
+  }
+
   /// Programa (o cancela) la captura periódica en segundo plano. Android la
   /// ejecuta con WorkManager (mínimo 15 minutos, impuesto por el SO);
   /// devuelve `false` donde no está soportado (iOS, tests).

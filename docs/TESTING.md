@@ -44,6 +44,7 @@ lado Dart valida defensivamente todo lo que reciben.
 | `nearby_test.dart` | Acumulación entre escaneos, persistencia exige ≥ 3 escaneos Y ≥ 10 min, resultados malformados se ignoran, el nombre conocido no se pierde |
 | `baseline_store_test.dart` | Primera captura inicializa EN SILENCIO, app nueva aparece UNA vez, reinstalar cuenta de nuevo, sin auditoría (iOS) no hay baseline, corrupto se reconstruye sin acusar |
 | `capture_service_test.dart` | La transición a crítico dispara `wentCritical` una sola vez (crítico sostenido no repite), y el hallazgo `new-apps` lleva cantidad, nombres y cuántas son riesgosas |
+| `patch_test.dart` | `patch-old` dispara en 180/365 días con la edad como evidencia, se omite con parche reciente o fecha no parseable (iOS); el uso por app degrada a -1 sin permiso y `usageAccessGranted` a false |
 | `widget_test.dart` | La app completa arranca sin canal nativo (MissingPluginException capturada), renderiza las 9 pestañas, arranca **en español por defecto** aunque el sistema esté en inglés y el botón de idioma cambia a inglés |
 
 ## Ejecutar

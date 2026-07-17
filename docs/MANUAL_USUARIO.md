@@ -45,6 +45,12 @@ maliciosa** — significa que su superficie de permisos merece una mirada.
 En iPhone esta pestaña indica que el sistema no permite listar apps: no es
 un fallo de RootCause, es diseño de iOS.
 
+Desde v0.4.0, si concedes el **acceso de uso** (permiso especial que solo
+tú puedes dar, en Ajustes del sistema — la app te lleva con un botón),
+cada app muestra su **tiempo en pantalla de las últimas 24 h** y la lista
+se ordena por consumo: la respuesta directa a "¿qué app me está gastando
+el teléfono?". Sin el permiso, esa columna simplemente no existe.
+
 ### Red
 
 Tipo de conexión (WiFi/celular/ethernet), si hay **VPN activa**, si la red
@@ -124,6 +130,13 @@ Todo persiste entre sesiones.
 ### Acerca
 
 Versión, autor, licencia y la política de privacidad local.
+
+## Widget de pantalla de inicio (v0.4.0)
+
+Mantén pulsada la pantalla de inicio → **Widgets** → RootCause: el
+semáforo, el puntaje y la hora de la última captura, sin abrir la app.
+Se actualiza solo tras cada captura (incluidas las de segundo plano) y
+al tocarlo abre RootCause.
 
 ## Intervenir desde un hallazgo
 

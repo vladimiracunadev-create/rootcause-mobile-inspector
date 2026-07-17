@@ -131,6 +131,15 @@ class AppStrings {
     'iOS does not allow listing installed apps. This is not a RootCause limitation: it is OS design.',
   );
   String appRiskScore(int score) => _t('riesgo $score', 'risk $score');
+  String appUsage(String time) => _t('Uso 24 h: $time', '24 h use: $time');
+  String get appsUsageGrant => _t(
+    'Ver tiempo en pantalla (permiso opcional)',
+    'See screen time (optional permission)',
+  );
+  String get appsUsageNote => _t(
+    'Con el acceso de uso (lo concedes tú en Ajustes del sistema) cada app muestra su tiempo en pantalla de las últimas 24 h y la lista se ordena por uso — la respuesta directa a "¿qué app me está gastando el teléfono?".',
+    'With usage access (you grant it in system Settings) each app shows its screen time over the last 24 h and the list sorts by usage — the direct answer to "which app is draining my phone?".',
+  );
   String appPerms(String perms) =>
       _t('Permisos peligrosos: $perms', 'Dangerous permissions: $perms');
   String appFlags(String flags) => _t('Flags: $flags', 'Flags: $flags');
@@ -186,6 +195,8 @@ class AppStrings {
   String get actionFreeSpace => _t('Liberar espacio', 'Free up space');
   String get actionBatteryUsage => _t('Ver batería', 'View battery');
   String get actionAppDetails => _t('Ver en el sistema', 'View in system');
+  String get actionSystemUpdate =>
+      _t('Buscar actualizaciones', 'Check for updates');
   String get actionUnavailable => _t(
     'Esa pantalla del sistema no está disponible en este equipo.',
     'That system screen is not available on this device.',
@@ -321,6 +332,7 @@ class AppStrings {
       'Apps nuevas desde la última captura',
       'New apps since last snapshot',
     ),
+    'patch-old' => _t('Parche de seguridad antiguo', 'Outdated security patch'),
     _ => f.id,
   };
 
@@ -366,6 +378,10 @@ class AppStrings {
         '$a0 app(s) instaladas desde la captura anterior: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} con superficie riesgosa o sideload.' : ''}',
         '$a0 app(s) installed since the previous snapshot: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} with risky surface or sideload.' : ''}',
       ),
+      'patch-old' => _t(
+        'El último parche de seguridad ($a1) tiene $a0 días.',
+        'The latest security patch ($a1) is $a0 days old.',
+      ),
       _ => f.args.join(', '),
     };
   }
@@ -402,6 +418,10 @@ class AppStrings {
     'new-apps' => _t(
       '¿Reconoces estas instalaciones? Si alguna llegó sola o por sideload, revísala en la pestaña Apps y su ficha del sistema.',
       'Do you recognize these installs? If any arrived on its own or via sideload, review it in the Apps tab and its system page.',
+    ),
+    'patch-old' => _t(
+      'Busca actualizaciones del sistema: un equipo sin parches acumula vulnerabilidades conocidas y públicas.',
+      'Check for system updates: an unpatched device accumulates known, public vulnerabilities.',
     ),
     _ => '',
   };

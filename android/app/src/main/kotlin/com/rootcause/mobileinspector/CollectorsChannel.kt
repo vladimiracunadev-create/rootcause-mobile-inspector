@@ -100,6 +100,11 @@ object CollectorsChannel {
                     call.argument<Int>("seconds") ?: 15,
                 ) { list -> mainHandler.post { result.success(list) } }
 
+                "refreshWidget" -> {
+                    RootCauseWidgetProvider.updateAll(context)
+                    result.success(null)
+                }
+
                 "configureBackgroundCapture" -> {
                     BackgroundCapture.configure(
                         context,
@@ -133,6 +138,8 @@ object CollectorsChannel {
                     Uri.parse("package:$packageName"),
                 )
             }
+            "usage-access" -> Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            "system-update" -> Intent("android.settings.SYSTEM_UPDATE_SETTINGS")
             "settings" -> Intent(Settings.ACTION_SETTINGS)
             else -> return false
         }

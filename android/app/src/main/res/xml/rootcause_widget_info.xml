@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El launcher refresca cada 30 min como respaldo; la app y el Worker
+     empujan actualizaciones tras cada captura vía refreshWidget. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/rootcause_widget"
+    android:resizeMode="horizontal"
+    android:widgetCategory="home_screen" />

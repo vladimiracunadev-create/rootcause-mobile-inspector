@@ -36,7 +36,7 @@ procesos está prometiendo algo que el SO no le permite hacer.
 | **Exfiltración de datos** | 🔴 No | Una app de usuario no puede inspeccionar tráfico ajeno sin ser VPN local. Fuera de alcance v0.1; el contador global de tráfico es contexto, no detección. |
 | **Ransomware móvil** | 🔴 No | Sin acceso al filesystem de otras apps no hay señal de cifrado masivo observable. |
 | **Phishing / smishing** | 🔴 No | Fuera de alcance: requiere leer SMS/notificaciones, contrario a la política de privacidad del producto. |
-| **Vulnerabilidades sin parchear** | 🟡 Contexto | La pestaña Dispositivo muestra el parche de seguridad; un parche muy antiguo es un hallazgo razonable para humanos (regla automática en roadmap). |
+| **Vulnerabilidades sin parchear** | 🟡 Regla automática (v0.4.0) | `patch-old`: parche ≥ 180 días → warning, ≥ 365 → critical, con botón a la actualización del sistema. No sabemos QUÉ CVEs aplican (eso requiere bases externas y red); sabemos que la ventana de exposición crece. |
 
 ## Por qué no prometemos más
 

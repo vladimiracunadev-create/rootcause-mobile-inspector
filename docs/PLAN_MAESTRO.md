@@ -1,6 +1,6 @@
 ﻿# Plan Maestro — RootCause Mobile Inspector
 
-**Versión base:** v0.3.0 · **Actualizado:** 2026-07-16
+**Versión base:** v0.4.0 · **Actualizado:** 2026-07-16
 **Propósito:** visión del producto y plan por fases. Este documento es la
 brújula; el detalle ítem por ítem vive en [ROADMAP.md](ROADMAP.md) y este plan
 nunca lo contradice.
@@ -25,23 +25,26 @@ RootCause Mobile   → sensor forense de bolsillo   (Flutter, Android + iOS)
 Ambos              → diagnóstico primero, intervención después
 ```
 
-## II. Fase actual — v0.2.x: sensor Android con control y tendencia
+## II. Fase actual — v0.4.x: el sensor que vigila, avisa y responde
 
 Qué hay hoy, verificable en el código y en los releases:
 
 - Núcleo Dart compartido + colectores nativos Kotlin/Swift por MethodChannel.
-- Motor de reglas local con 7 familias de hallazgo
+- Motor de reglas local con 9 familias de hallazgo
   (→ [HEURISTICAS.md](HEURISTICAS.md)), umbrales **modificables por el
-  usuario** y regla de tendencia `load-rising` sobre el historial.
-- Auto-captura configurable (5 min por defecto, como el original de
-  escritorio) + captura en segundo plano con WorkManager (opción
-  solo-cargando) ejecutando el mismo núcleo vía engine headless.
+  usuario**, tendencia `load-rising`, baseline de apps `new-apps`
+  (el `persistence-change` móvil) y parche antiguo `patch-old`.
+- Auto-captura configurable + captura en segundo plano con WorkManager
+  (opción solo-cargando) con **notificación local de veredicto crítico**
+  (solo transición) — todo por el mismo núcleo vía engine headless.
+- Tiempo en pantalla por app con el permiso de acceso de uso (opt-in
+  real) y **widget de pantalla de inicio** con el semáforo.
 - Auditoría de superficie de permisos por app (Android), indicadores
   honestos de root/jailbreak y volúmenes de almacenamiento (SD/USB).
 - Acciones de intervención que abren la pantalla exacta del sistema, y
   pestaña Cercanía (escaneo BLE opt-in, sin permiso INTERNET).
-- Historial local (JSON Lines, retención 500) + export JSON forense con ids
-  neutrales al idioma, comparables con la edición Windows.
+- Historial local (JSON Lines, retención 500) con tendencia visible y
+  comparación A→B + export JSON forense con ids neutrales al idioma.
 - APK firmado publicado por CI (por ABI + universal) y landing en GitHub Pages.
 
 **iOS: en pausa.** Decisión del autor (2026-07-15): la distribución iOS queda
@@ -51,20 +54,16 @@ plataforma.
 
 ## III. Fases siguientes
 
-### Fase 1 — v0.2.x: profundidad Android
+### Fase 1 — profundidad Android (lo que queda)
 
-La prioridad es profundizar donde ya hay producción. Ítems (detalle en
-[ROADMAP.md](ROADMAP.md)):
+La prioridad sigue siendo profundizar donde ya hay producción. Ítems
+(detalle en [ROADMAP.md](ROADMAP.md)):
 
-- Regla de parche de seguridad antiguo.
-- **Baseline de apps instaladas**: detectar apps nuevas entre capturas — el
-  equivalente móvil del `persistence-change` de la edición Windows. Es el paso
-  que lleva el patrón "estado bueno conocido → clasificar cambios" a móvil.
-- Comparación A vs B en Historial con deltas.
-- `PACKAGE_USAGE_STATS` opcional (opt-in del usuario) para consumo real por app.
-- Notificación local cuando el veredicto pasa a Critical.
+- Cercanía con histórico entre sesiones (opt-in) para rastreadores a lo
+  largo de días.
+- Refinamiento del widget (tamaños, tema del sistema).
 
-### Fase 2 — v0.3.x: iOS de primera clase (EN PAUSA)
+### Fase 2 — iOS de primera clase (EN PAUSA)
 
 Bloqueada por la decisión de la fase actual. Cuando se retome: cuenta Apple
 Developer + `release-ios.yml` (TestFlight), colector iOS ampliado y paridad de

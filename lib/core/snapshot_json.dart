@@ -68,6 +68,7 @@ class SnapshotJson {
           'sideloaded': a.sideloaded,
           'dangerousPermissions': a.dangerousPermissions,
           'specialFlags': a.specialFlags,
+          'foregroundMillis24h': a.foregroundMillis24h,
         },
     ],
     'device': {
@@ -81,6 +82,7 @@ class SnapshotJson {
       'rootIndicators': s.device.rootIndicators,
       'appsAuditSupported': s.device.appsAuditSupported,
       'vendorSkin': s.device.vendorSkin,
+      'usageAccessGranted': s.device.usageAccessGranted,
     },
   };
 

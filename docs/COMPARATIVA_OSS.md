@@ -5,7 +5,7 @@ considerar junto a (o en vez de) RootCause Mobile Inspector. Las herramientas
 ajenas se describen **solo en términos generales de su categoría**, sin
 versiones ni cifras: para datos exactos, consulta cada proyecto.
 
-**Dónde encaja RootCause Mobile (v0.3.0):** sensor forense **local y sin
+**Dónde encaja RootCause Mobile (v0.4.0):** sensor forense **local y sin
 red** (sin permiso `INTERNET` en release) que correlaciona varias señales del
 propio dispositivo — memoria, almacenamiento, batería, red, superficie de
 permisos por app, indicadores de root/jailbreak — y entrega un **veredicto

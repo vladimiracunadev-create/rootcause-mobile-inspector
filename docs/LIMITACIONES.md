@@ -22,7 +22,9 @@ soporta cada plataforma (`appsAuditSupported`) y la UI lo comunica.
 | Escaneo Bluetooth LE (Cercanía) | ✅ opt-in | ❌ | Fuera del alcance iOS actual (distribución en pausa) |
 | Captura en segundo plano | ✅ (WorkManager, mín. 15 min) | ❌ | BGTaskScheduler quedó fuera del alcance iOS actual |
 | Abrir pantallas del sistema (liberar espacio, batería, ficha de app) | ✅ | 🟡 solo ajustes de la propia app | iOS no expone esas pantallas a terceros |
-| CPU/RAM de OTRAS apps | ❌ | ❌ | Restringido por el SO desde Android 8 / siempre en iOS |
+| Tiempo en pantalla por app (24 h) | ✅ solo con acceso de uso (opt-in en Ajustes) | ❌ | Permiso especial `PACKAGE_USAGE_STATS`; la app no puede autoconcedérselo |
+| Widget de pantalla de inicio | ✅ | ❌ | Fuera del alcance iOS actual |
+| CPU/RAM de OTRAS apps | ❌ | ❌ | Restringido por el SO desde Android 8 / siempre en iOS (el tiempo en pantalla vía acceso de uso es lo máximo que el SO permite) |
 | Matar procesos ajenos | ❌ | ❌ | Restringido por el SO |
 | Inspección de tráfico por app | ❌ | ❌ | Requeriría actuar como VPN local (fuera de alcance v0.1) |
 
