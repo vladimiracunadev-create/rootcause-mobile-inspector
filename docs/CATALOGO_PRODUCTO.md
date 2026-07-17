@@ -1,4 +1,4 @@
-# Catálogo de la familia RootCause
+﻿# Catálogo de la familia RootCause
 
 Documento fuente de verdad para distinguir las **dos ediciones** de la familia
 RootCause: qué cubre cada una, qué comparten y a quién sirve cada una. Si una
@@ -9,7 +9,7 @@ documento tiene prioridad.
 
 | | RootCause **Windows** Inspector | RootCause **Mobile** Inspector |
 |---|---|---|
-| Versión | v0.19.0 | v0.2.0 |
+| Versión | v0.19.0 | v0.2.1 |
 | Lenguaje | Rust (GUI egui + CLI) | Flutter (Dart + Kotlin + Swift) |
 | Plataforma | Windows 10/11 | Android 8.0+ (producción) · iOS 13+ (compila en CI, distribución en pausa) |
 | Qué es | Sensor forense de escritorio con señales de comportamiento (persistencia, servicios, red local, anomalías) — declaradamente **no** un antivirus ni un EDR: complementa, no reemplaza | Sensor forense de bolsillo: distorsiones de memoria, almacenamiento, batería y red + auditoría de superficie de permisos por app |

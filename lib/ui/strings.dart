@@ -140,6 +140,7 @@ class AppStrings {
   String get deviceManufacturer => _t('Fabricante', 'Manufacturer');
   String get deviceModel => _t('Modelo', 'Model');
   String get deviceOs => _t('Sistema operativo', 'Operating system');
+  String get deviceSkin => _t('Capa del fabricante', 'Vendor skin');
   String get devicePatch => _t('Parche de seguridad', 'Security patch');
   String get deviceCores => _t('Núcleos de CPU', 'CPU cores');
   String get deviceUptime => _t('Tiempo encendido', 'Uptime');

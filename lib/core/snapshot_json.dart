@@ -80,6 +80,7 @@ class SnapshotJson {
       'uptimeMillis': s.device.uptimeMillis,
       'rootIndicators': s.device.rootIndicators,
       'appsAuditSupported': s.device.appsAuditSupported,
+      'vendorSkin': s.device.vendorSkin,
     },
   };
 

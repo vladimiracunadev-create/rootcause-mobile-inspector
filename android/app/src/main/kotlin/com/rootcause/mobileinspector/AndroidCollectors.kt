@@ -26,13 +26,25 @@ import java.io.File
 class AndroidCollectors(private val context: Context) {
 
     fun collect(): Map<String, Any?> = mapOf(
-        "memory" to memory(),
-        "storage" to storage(),
-        "battery" to battery(),
-        "network" to network(),
-        "apps" to apps(),
-        "device" to device(),
+        "memory" to safe { memory() },
+        "storage" to safe { storage() },
+        "battery" to safe { battery() },
+        "network" to safe { network() },
+        "apps" to safe { apps() },
+        "device" to safe { device() },
     )
+
+    /**
+     * Aísla cada colector: si una sección falla en un dispositivo concreto
+     * (Throwable incluido — un Error no debe matar el proceso), esa sección
+     * degrada a null y el Dart la convierte en valores neutros. Evidencia
+     * parcial es mejor que un crash de arranque.
+     */
+    private inline fun <T> safe(block: () -> T): T? = try {
+        block()
+    } catch (_: Throwable) {
+        null
+    }
 
     private fun memory(): Map<String, Any?> {
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -250,7 +262,35 @@ class AndroidCollectors(private val context: Context) {
         "uptimeMillis" to SystemClock.elapsedRealtime(),
         "rootIndicators" to rootIndicators(),
         "appsAuditSupported" to true,
+        "vendorSkin" to vendorSkin(),
     )
+
+    /**
+     * Capa del fabricante (One UI, MIUI, ColorOS, EMUI, OxygenOS) leída de
+     * las propiedades de sistema del vendor. Es informativa: si la lectura
+     * falla o el equipo es Android puro, se entrega cadena vacía y la UI
+     * omite la fila.
+     */
+    private fun vendorSkin(): String {
+        sysProp("ro.build.version.oneui")?.toIntOrNull()?.let { v ->
+            // Samsung codifica 8.5 como 80500: mayor*10000 + menor*100.
+            return if (v >= 10000) "One UI ${v / 10000}.${(v % 10000) / 100}" else "One UI $v"
+        }
+        sysProp("ro.miui.ui.version.name")?.let { return "MIUI $it" }
+        sysProp("ro.build.version.opporom")?.let { return "ColorOS $it" }
+        sysProp("ro.build.version.emui")?.let { return it.replace('_', ' ') }
+        sysProp("ro.build.version.oplusrom")?.let { return "OxygenOS/ColorOS $it" }
+        return ""
+    }
+
+    /** Lectura defensiva de una propiedad de sistema; null si no existe. */
+    private fun sysProp(name: String): String? = try {
+        val clazz = Class.forName("android.os.SystemProperties")
+        val get = clazz.getMethod("get", String::class.java)
+        (get.invoke(null, name) as? String)?.takeIf { it.isNotBlank() }
+    } catch (_: Throwable) {
+        null
+    }
 
     /**
      * Indicadores honestos de root: binarios `su` en rutas conocidas y build

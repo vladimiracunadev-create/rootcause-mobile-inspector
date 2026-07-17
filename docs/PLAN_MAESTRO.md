@@ -1,6 +1,6 @@
-# Plan Maestro — RootCause Mobile Inspector
+﻿# Plan Maestro — RootCause Mobile Inspector
 
-**Versión base:** v0.2.0 · **Actualizado:** 2026-07-16
+**Versión base:** v0.2.1 · **Actualizado:** 2026-07-16
 **Propósito:** visión del producto y plan por fases. Este documento es la
 brújula; el detalle ítem por ítem vive en [ROADMAP.md](ROADMAP.md) y este plan
 nunca lo contradice.

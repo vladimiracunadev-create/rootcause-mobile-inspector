@@ -1,6 +1,19 @@
 # Roadmap
 
-## v0.2.0 — Control, tendencia y cercanía (actual)
+## v0.2.1 — Arranque release reparado + capa del fabricante (actual)
+
+- ✅ **Fix del crash de primer arranque de v0.2.0 en release** (reportado
+  en un Samsung A35 5G y reproducido con el APK publicado): R8 eliminaba
+  el constructor de `WorkDatabase_Impl` que WorkManager instancia por
+  reflexión al iniciar el proceso. Triple corrección: reglas R8 explícitas
+  (`proguard-rules.pro`), inicialización de WorkManager **bajo demanda**
+  (nada corre en el arranque) y colectores aislados que capturan
+  `Throwable`. Verificado con el build release en emulador: arranque
+  limpio + worker en segundo plano escribiendo historial.
+- ✅ Pestaña Dispositivo muestra la **capa del fabricante** (One UI,
+  MIUI, ColorOS, EMUI…) cuando el equipo la expone.
+
+## v0.2.0 — Control, tendencia y cercanía
 
 Nace del feedback de uso real: "no tengo control para optimizar", "el
 original se actualizaba cada 5 minutos", "mi tarjeta SD no se

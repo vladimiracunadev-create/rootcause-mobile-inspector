@@ -62,10 +62,11 @@ para **limpiarla** (la única caché que una app puede limpiar es la suya).
 
 ### Dispositivo
 
-Fabricante, modelo, versión de OS, **parche de seguridad**, núcleos de CPU,
-tiempo encendido e **indicadores de root/jailbreak**. Un indicador es un
-indicio (un binario `su` presente, un build firmado con test-keys), no una
-prueba definitiva.
+Fabricante, modelo, versión de OS, **capa del fabricante** (One UI, MIUI,
+ColorOS… — solo si tu equipo la tiene), **parche de seguridad**, núcleos de
+CPU, tiempo encendido e **indicadores de root/jailbreak**. Un indicador es
+un indicio (un binario `su` presente, un build firmado con test-keys), no
+una prueba definitiva.
 
 ### Cercanía (v0.2.0)
 

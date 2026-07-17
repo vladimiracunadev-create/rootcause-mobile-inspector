@@ -81,7 +81,8 @@ El método `collect` devuelve:
   "device":  { "manufacturer": "...", "model": "...", "osVersion": "...",
                "sdkInt": 0, "securityPatch": "...", "cpuCores": 0,
                "uptimeMillis": 0, "rootIndicators": [],
-               "appsAuditSupported": true }
+               "appsAuditSupported": true,
+               "vendorSkin": "One UI 8.5" }
 }
 ```
 

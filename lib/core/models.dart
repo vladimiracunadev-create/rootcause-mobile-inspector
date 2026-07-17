@@ -246,6 +246,7 @@ class DeviceInfo {
     required this.uptimeMillis,
     required this.rootIndicators,
     required this.appsAuditSupported,
+    this.vendorSkin = '',
   });
 
   factory DeviceInfo.fromMap(Map<Object?, Object?> map) => DeviceInfo(
@@ -258,6 +259,7 @@ class DeviceInfo {
     uptimeMillis: _asInt(map['uptimeMillis']),
     rootIndicators: _asStringList(map['rootIndicators']),
     appsAuditSupported: _asBool(map['appsAuditSupported']),
+    vendorSkin: _asString(map['vendorSkin'], ''),
   );
 
   final String manufacturer;
@@ -271,6 +273,10 @@ class DeviceInfo {
 
   /// `false` en iOS: el SO no permite listar apps instaladas.
   final bool appsAuditSupported;
+
+  /// Capa del fabricante ("One UI 8.5", "MIUI V14"…); vacío si es Android
+  /// puro o la plataforma no la expone — la UI omite la fila.
+  final String vendorSkin;
 }
 
 /// Captura completa del estado del dispositivo en un instante.

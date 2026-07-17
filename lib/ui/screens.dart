@@ -620,6 +620,8 @@ class DeviceScreen extends StatelessWidget {
                 ? '${device.osVersion} (API ${device.sdkInt})'
                 : device.osVersion,
           ),
+          if (device.vendorSkin.isNotEmpty)
+            InfoRow(label: strings.deviceSkin, value: device.vendorSkin),
           InfoRow(label: strings.devicePatch, value: device.securityPatch),
           InfoRow(
             label: strings.deviceCores,

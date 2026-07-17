@@ -32,8 +32,22 @@
 
     <application
         android:label="RootCause Mobile Inspector"
-        android:name="${applicationName}"
+        android:name=".RootCauseApplication"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- WorkManager se inicializa BAJO DEMANDA (RootCauseApplication
+             implementa Configuration.Provider): se quita su inicializador
+             automático para que el primer arranque no ejecute nada extra. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -44,8 +44,10 @@ object CollectorsChannel {
                 "collect" -> Thread {
                     val payload = try {
                         AndroidCollectors(context).collect()
-                    } catch (_: Exception) {
-                        // El Dart degrada un mapa vacío a snapshot neutro.
+                    } catch (_: Throwable) {
+                        // Throwable, no solo Exception: un Error sin capturar
+                        // en este hilo mataría el proceso completo. El Dart
+                        // degrada un mapa vacío a snapshot neutro.
                         emptyMap<String, Any?>()
                     }
                     mainHandler.post { result.success(payload) }
@@ -64,7 +66,7 @@ object CollectorsChannel {
                 "clearOwnCache" -> Thread {
                     val freed = try {
                         clearOwnCache(context)
-                    } catch (_: Exception) {
+                    } catch (_: Throwable) {
                         0L
                     }
                     mainHandler.post { result.success(freed) }
