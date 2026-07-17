@@ -14,6 +14,7 @@ privacidad se demuestra por diseño, no por promesa.**
 | Lista de apps y permisos que SOLICITAN (Android) | ✅ | En historial local | ❌ |
 | Volúmenes de almacenamiento (tarjeta SD: libre/total) | ✅ | En historial local | ❌ |
 | Dispositivos Bluetooth LE cercanos (escaneo manual opt-in) | ✅ solo al pulsar Escanear | ❌ solo en memoria de la sesión | ❌ nunca (ni siquiera en el export) |
+| Baseline de apps vistas (para detectar instalaciones nuevas) | ✅ | En el sandbox (`rootcause-apps-baseline.json`) | ❌ |
 | Contenido de tu tráfico de red | ❌ nunca | — | — |
 | SMS, contactos, fotos, archivos personales | ❌ nunca | — | — |
 | Identificadores de publicidad / cuentas | ❌ nunca | — | — |
@@ -37,6 +38,10 @@ privacidad se demuestra por diseño, no por promesa.**
 6. **La captura en segundo plano es local**: el Worker ejecuta el mismo
    núcleo que la app abierta y escribe únicamente en el historial del
    sandbox. Sin permiso INTERNET, tampoco en segundo plano sale nada.
+7. **La alerta de crítico es una notificación LOCAL** (permiso
+   `POST_NOTIFICATIONS`, opt-out en Configuración): el dispositivo se
+   avisa a sí mismo. No existe infraestructura de push — no puede
+   existir sin INTERNET.
 
 ## Lo que esto significa
 

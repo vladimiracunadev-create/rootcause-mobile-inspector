@@ -11,7 +11,7 @@
 ║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
 ║                                                                                   ║
 ║                          M O B I L E   I N S P E C T O R                          ║
-║                  Sensor forense de diagnóstico · Flutter · v0.2.1                 ║
+║                  Sensor forense de diagnóstico · Flutter · v0.3.0                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -19,7 +19,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.2.1-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.3.0-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -107,11 +107,11 @@ ABI `x86_64`; verificada también en dispositivo Android real):
 </p>
 
 <p align="center">
+  <img src="docs/images/historial.png" width="260" alt="Pestaña Historial: gráfico de tendencia y comparación A a B con deltas" />
+  &nbsp;&nbsp;
+  <img src="docs/images/alerta-critica.png" width="260" alt="Notificación local: RootCause veredicto crítico" />
+  &nbsp;&nbsp;
   <img src="docs/images/cercania.png" width="260" alt="Pestaña Cercanía: escaneo Bluetooth LE manual" />
-  &nbsp;&nbsp;
-  <img src="docs/images/dispositivo.png" width="260" alt="Pestaña Dispositivo: hardware, parche de seguridad e indicadores de root" />
-  &nbsp;&nbsp;
-  <img src="docs/images/apps.png" width="260" alt="Pestaña Apps: auditoría de superficie de permisos" />
 </p>
 
 ---
@@ -126,8 +126,8 @@ ABI `x86_64`; verificada también en dispositivo Android real):
 | **Almacenamiento** | Volumen interno **+ tarjeta SD/USB si existen** (detección dinámica) + caché propia con botón de limpieza |
 | **Dispositivo** | Hardware, versión de OS, parche de seguridad e indicadores de root/jailbreak |
 | **Cercanía** | Escaneo Bluetooth LE manual (opt-in) con marca de **persistencia** — sin usar internet |
-| **Historial** | Capturas persistidas localmente; con auto-captura alimenta la regla de **carga en ascenso** |
-| **Configuración** | Auto-captura (5 min por defecto, como la edición Windows), captura en segundo plano (solo-cargando opcional), umbrales modificables e idioma |
+| **Historial** | Gráfico de **tendencia** (RAM/disco), **comparación A→B** con deltas, y la regla de carga en ascenso alimentada por la auto-captura |
+| **Configuración** | Auto-captura (5 min por defecto, como la edición Windows), captura en segundo plano (solo-cargando opcional) con **alerta local de crítico**, umbrales modificables e idioma |
 | **Acerca** | Versión, autor, filosofía y política de privacidad local |
 
 Toda captura puede exportarse como **JSON forense** con ids de hallazgo neutrales
@@ -156,6 +156,8 @@ Dart puro (100 % testeable sin dispositivo):
 - Almacenamiento crítico (ratio libre del volumen de datos)
 - Temperatura y salud de batería
 - Apps con puntaje de riesgo alto por superficie de permisos
+- **Apps nuevas** (v0.3.0): baseline de instalaciones entre capturas — el
+  `persistence-change` de la edición Windows, en móvil
 - Indicadores de root/jailbreak
 - **Carga en ascenso** (v0.2.0): caída sostenida de memoria/disco a lo
   largo del historial — la distorsión que crece como indicio temprano
@@ -249,8 +251,9 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 
 - Código fuente completo (Dart compartido + Kotlin + Swift)
 - APK release firmado publicado en Releases con hash de integridad
-- Motor de reglas local con **umbrales modificables por el usuario** y 7 familias de hallazgo (incluida la tendencia `load-rising`)
-- Auto-captura configurable (5 min por defecto) + **captura en segundo plano** con WorkManager (opción solo-cargando)
+- Motor de reglas local con **umbrales modificables por el usuario** y 8 familias de hallazgo (incluidas la tendencia `load-rising` y el baseline `new-apps`)
+- Auto-captura configurable (5 min por defecto) + **captura en segundo plano** con WorkManager (opción solo-cargando) y **notificación local de veredicto crítico**
+- **Historial con gráfico de tendencia y comparación A→B** (deltas de memoria, disco, puntaje y apps riesgosas)
 - Auditoría de superficie de permisos por app (Android) con acceso a la ficha del sistema
 - Volúmenes de almacenamiento (tarjeta SD/USB) detectados dinámicamente
 - Escaneo Bluetooth LE opt-in (Cercanía) sin permiso INTERNET

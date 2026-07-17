@@ -80,11 +80,30 @@ cercanos** (Bluetooth).
 
 ### Historial
 
-Cada captura queda guardada en el teléfono (últimas 500). Sirve para
-comparar: ¿la memoria disponible viene bajando? ¿apareció una app riesgosa
-que ayer no estaba? Con la auto-captura activada, el historial se alimenta
-solo y la regla de **carga en ascenso** puede avisarte cuando algo consume
-recursos de forma sostenida.
+Cada captura queda guardada en el teléfono (últimas 500). Desde v0.3.0
+además lo VES: un **gráfico de tendencia** (RAM disponible y disco libre
+sobre las últimas capturas) y **comparación A → B** — tocas dos capturas
+y te muestra los deltas de memoria, disco, puntaje y apps riesgosas. Con
+la auto-captura activada, el historial se alimenta solo y la regla de
+**carga en ascenso** avisa cuando algo consume recursos de forma
+sostenida.
+
+### El sensor que avisa (v0.3.0)
+
+<p align="center">
+  <img src="images/alerta-critica.png" width="280" alt="Notificación local: RootCause veredicto CRÍTICO" />
+</p>
+
+Dos vigilantes automáticos:
+
+- **Alerta de crítico**: si una captura en segundo plano pasa a CRÍTICO,
+  el teléfono te lo notifica — solo en la transición, no cada 15 minutos.
+  Es una notificación **local**: la app sigue sin usar internet.
+- **Apps nuevas**: cada captura compara las apps instaladas contra la
+  anterior. Si apareció una que no estaba, sale como hallazgo con sus
+  permisos — el malware llega instalándose, y esto lo delata aunque tú no
+  hayas abierto la app en días. La primera captura no acusa a nadie: solo
+  registra lo que ya había.
 
 ### Configuración (v0.2.0)
 
@@ -96,6 +115,8 @@ Como en el RootCause de escritorio:
   15 minutos (lo impone Android, no RootCause), con opción de hacerlo
   **solo cuando el teléfono está cargando**.
 - **Umbrales de detección** modificables al instante.
+- **Notificación de crítico** en segundo plano (activada por defecto;
+  Android 13+ pedirá el permiso de notificaciones la primera vez).
 - **Idioma** español/inglés.
 
 Todo persiste entre sesiones.

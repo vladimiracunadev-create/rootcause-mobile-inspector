@@ -30,6 +30,11 @@
         android:name="android.permission.BLUETOOTH_ADMIN"
         android:maxSdkVersion="30" />
 
+    <!-- Notificación LOCAL cuando una captura en segundo plano pasa a
+         crítico (opt-in en Configuración). Sin INTERNET no hay push:
+         es el propio dispositivo avisando. Android 13+ la pide en runtime. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="RootCause Mobile Inspector"
         android:name=".RootCauseApplication"

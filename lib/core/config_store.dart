@@ -16,6 +16,7 @@ class AppConfig {
     this.autoRefreshMinutes = 5,
     this.backgroundCapture = false,
     this.backgroundChargingOnly = true,
+    this.notifyCritical = true,
     this.memoryWarningPct = 20,
     this.memoryCriticalPct = 10,
     this.storageWarningPct = 15,
@@ -39,6 +40,7 @@ class AppConfig {
         map['backgroundChargingOnly'],
         d.backgroundChargingOnly,
       ),
+      notifyCritical: asBool(map['notifyCritical'], d.notifyCritical),
       memoryWarningPct: asInt(map['memoryWarningPct'], d.memoryWarningPct),
       memoryCriticalPct: asInt(map['memoryCriticalPct'], d.memoryCriticalPct),
       storageWarningPct: asInt(map['storageWarningPct'], d.storageWarningPct),
@@ -63,6 +65,10 @@ class AppConfig {
   final int autoRefreshMinutes;
   final bool backgroundCapture;
   final bool backgroundChargingOnly;
+
+  /// Notificación local cuando una captura en segundo plano pasa a
+  /// CRÍTICO. Local de verdad: sin permiso INTERNET no hay push posible.
+  final bool notifyCritical;
   final int memoryWarningPct;
   final int memoryCriticalPct;
   final int storageWarningPct;
@@ -84,6 +90,7 @@ class AppConfig {
     int? autoRefreshMinutes,
     bool? backgroundCapture,
     bool? backgroundChargingOnly,
+    bool? notifyCritical,
     int? memoryWarningPct,
     int? memoryCriticalPct,
     int? storageWarningPct,
@@ -96,6 +103,7 @@ class AppConfig {
     backgroundCapture: backgroundCapture ?? this.backgroundCapture,
     backgroundChargingOnly:
         backgroundChargingOnly ?? this.backgroundChargingOnly,
+    notifyCritical: notifyCritical ?? this.notifyCritical,
     memoryWarningPct: memoryWarningPct ?? this.memoryWarningPct,
     memoryCriticalPct: memoryCriticalPct ?? this.memoryCriticalPct,
     storageWarningPct: storageWarningPct ?? this.storageWarningPct,
@@ -111,6 +119,7 @@ class AppConfig {
     'autoRefreshMinutes': autoRefreshMinutes,
     'backgroundCapture': backgroundCapture,
     'backgroundChargingOnly': backgroundChargingOnly,
+    'notifyCritical': notifyCritical,
     'memoryWarningPct': memoryWarningPct,
     'memoryCriticalPct': memoryCriticalPct,
     'storageWarningPct': storageWarningPct,

@@ -38,12 +38,20 @@ class RuleEngine {
 
   /// [history] son las capturas previas (la más reciente primero) para la
   /// regla de tendencia; sin historial la regla simplemente se omite.
-  Verdict evaluate(Snapshot snapshot, {List<HistoryRow> history = const []}) {
+  /// [newApps] son las apps que el baseline detectó como instaladas desde
+  /// la captura anterior (equivalente móvil del `persistence-change` de la
+  /// edición Windows).
+  Verdict evaluate(
+    Snapshot snapshot, {
+    List<HistoryRow> history = const [],
+    List<AppRisk> newApps = const [],
+  }) {
     final findings = <Finding>[
       ..._memory(snapshot),
       ..._storage(snapshot),
       ..._battery(snapshot),
       ..._apps(snapshot),
+      ..._newApps(newApps),
       ..._rootIndicators(snapshot),
       ..._trend(snapshot, history),
     ];
@@ -138,6 +146,26 @@ class RuleEngine {
         id: 'risky-apps',
         severity: severity,
         args: [risky.length.toString(), names],
+      ),
+    ];
+  }
+
+  /// Apps instaladas desde la captura anterior. Es transitorio a propósito:
+  /// aparece en la captura que detecta la instalación y el baseline la
+  /// absorbe después — como la alerta de persistencia del escritorio.
+  /// WARNING siempre: una instalación que tú hiciste se descarta en dos
+  /// segundos; una que no reconoces es exactamente el indicio que buscamos.
+  List<Finding> _newApps(List<AppRisk> newApps) {
+    if (newApps.isEmpty) return const [];
+    final names = newApps.take(3).map((a) => a.label).join(', ');
+    final risky = newApps.where(
+      (a) => a.severity != Severity.normal || a.sideloaded,
+    );
+    return [
+      Finding(
+        id: 'new-apps',
+        severity: Severity.warning,
+        args: [newApps.length.toString(), names, risky.length.toString()],
       ),
     ];
   }

@@ -205,6 +205,10 @@ class AppStrings {
   );
   String get settingsChargingOnly =>
       _t('Solo cuando está cargando', 'Only while charging');
+  String get settingsNotifyCritical => _t(
+    'Notificar si una captura en segundo plano pasa a Crítico',
+    'Notify if a background capture turns Critical',
+  );
   String get settingsBackgroundUnsupported =>
       _t('No disponible en este SO.', 'Not available on this OS.');
   String get settingsThresholdsTitle =>
@@ -268,6 +272,30 @@ class AppStrings {
   String nearbySeen(int scans) =>
       _t('visto en $scans escaneo(s)', 'seen in $scans scan(s)');
 
+  // Alerta local de veredicto crítico
+  String get alertCriticalTitle =>
+      _t('RootCause: veredicto CRÍTICO', 'RootCause: CRITICAL verdict');
+  String get alertCriticalBody => _t(
+    'La última captura en segundo plano detectó una distorsión seria. Abre la app para ver la evidencia.',
+    'The latest background snapshot detected a serious distortion. Open the app to see the evidence.',
+  );
+
+  // Historial: tendencia y comparación
+  String get trendTitle =>
+      _t('Tendencia de las últimas capturas', 'Trend across recent snapshots');
+  String get trendMemLegend => _t('RAM disponible %', 'Available RAM %');
+  String get trendStorageLegend => _t('Disco libre %', 'Free storage %');
+  String get compareHint => _t(
+    'Toca dos capturas para compararlas (A → B).',
+    'Tap two snapshots to compare them (A → B).',
+  );
+  String get compareTitle => _t('Comparación A → B', 'Comparison A → B');
+  String get compareClear => _t('Quitar selección', 'Clear selection');
+  String get compareMem => _t('RAM disponible', 'Available RAM');
+  String get compareStorage => _t('Disco libre', 'Free storage');
+  String get compareScore => _t('Puntaje', 'Score');
+  String get compareRisky => _t('Apps riesgosas', 'Risky apps');
+
   // Hallazgos (ids estables → texto localizado)
   String findingTitle(Finding f) => switch (f.id) {
     'mem-pressure' => _t('Presión de memoria', 'Memory pressure'),
@@ -289,6 +317,10 @@ class AppStrings {
       'Root/jailbreak indicators',
     ),
     'load-rising' => _t('Carga en ascenso sostenido', 'Sustained rising load'),
+    'new-apps' => _t(
+      'Apps nuevas desde la última captura',
+      'New apps since last snapshot',
+    ),
     _ => f.id,
   };
 
@@ -330,6 +362,10 @@ class AppStrings {
         'La ${_metricName(a0)} cayó de $a1 % a ${f.args.length > 2 ? f.args[2] : '?'} % de forma sostenida en las últimas capturas.',
         'The ${_metricName(a0)} fell steadily from $a1 % to ${f.args.length > 2 ? f.args[2] : '?'} % across recent snapshots.',
       ),
+      'new-apps' => _t(
+        '$a0 app(s) instaladas desde la captura anterior: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} con superficie riesgosa o sideload.' : ''}',
+        '$a0 app(s) installed since the previous snapshot: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} with risky surface or sideload.' : ''}',
+      ),
       _ => f.args.join(', '),
     };
   }
@@ -362,6 +398,10 @@ class AppStrings {
     'load-rising' => _t(
       'Algo consume el recurso de forma continua. Compara las capturas del Historial y revisa qué cambió (app nueva, sincronización, proceso atascado).',
       'Something is steadily consuming the resource. Compare History snapshots and review what changed (new app, sync, stuck process).',
+    ),
+    'new-apps' => _t(
+      '¿Reconoces estas instalaciones? Si alguna llegó sola o por sideload, revísala en la pestaña Apps y su ficha del sistema.',
+      'Do you recognize these installs? If any arrived on its own or via sideload, review it in the Apps tab and its system page.',
     ),
     _ => '',
   };

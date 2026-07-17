@@ -19,13 +19,15 @@ procesos está prometiendo algo que el SO no le permite hacer.
 | Indicadores de root/jailbreak | rutas `su`, build test-keys / rutas Cydia y escritura fuera de sandbox | `root-indicators` |
 | VPN activa / red medida | `NetworkCapabilities` / `NWPathMonitor` | visible en pestaña Red |
 | Carga en ascenso sostenido (v0.2.0) | serie de capturas del historial local | `load-rising` |
+| Apps instaladas entre capturas (v0.3.0) | baseline local de paquetes vistos | `new-apps` |
+| Transición del veredicto a crítico (v0.3.0) | captura en segundo plano + notificación LOCAL | alerta en el dispositivo |
 | Dispositivos BLE persistentes cerca (v0.2.0) | escaneo manual opt-in `BluetoothLeScanner` (Android) | marca PERSISTENTE en pestaña Cercanía (no entra al export) |
 
 ## Amenaza por amenaza
 
 | Familia | ¿RootCause Mobile la ve? | Detalle honesto |
 |---|---|---|
-| **Apps espía (stalkerware)** | 🟡 Parcial | Si solicita la tríada típica (micrófono+ubicación+SMS) y llegó por sideload, su puntaje de riesgo sube y aparece en `risky-apps`. No podemos ver si los permisos se USAN, solo si se solicitan. |
+| **Apps espía (stalkerware)** | 🟡 Parcial | Si solicita la tríada típica (micrófono+ubicación+SMS) y llegó por sideload, su puntaje de riesgo sube y aparece en `risky-apps`. Desde v0.3.0, si se instala mientras RootCause vigila, además aparece como `new-apps` en la siguiente captura. No podemos ver si los permisos se USAN, solo si se solicitan. |
 | **Malware con overlay (bankers)** | 🟡 Parcial | `SYSTEM_ALERT_WINDOW` solicitado suma +3 al puntaje. No detectamos el overlay en acto. |
 | **Droppers (instalan otros APK)** | 🟡 Parcial | `REQUEST_INSTALL_PACKAGES` suma +3; sideload suma +2. |
 | **Root/jailbreak malicioso o heredado** | 🟡 Indicio | Binarios `su`, test-keys, rutas de jailbreak. Un dispositivo rooteado a propósito da el mismo indicio: contexto humano necesario. |

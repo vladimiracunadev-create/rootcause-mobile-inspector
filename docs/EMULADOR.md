@@ -10,7 +10,7 @@ exactamente como en un teléfono.
   <img src="images/dispositivo.png" width="240" alt="RootCause corriendo en el emulador — pestaña Dispositivo" />
 </p>
 
-> Capturas reales de v0.2.0 corriendo en el AVD "Medium Phone" con
+> Capturas reales de la app corriendo en el AVD "Medium Phone" con
 > Android 16 (API 36).
 
 ## Camino 1 — Un solo comando (recomendado)

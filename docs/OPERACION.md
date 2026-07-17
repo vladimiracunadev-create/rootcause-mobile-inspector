@@ -105,6 +105,7 @@ las decisiones son tuyas.
 | Historial (máx. 500 capturas) | `rootcause-history.jsonl` | Sandbox de la app |
 | Exports JSON | `rootcause-snapshot-<timestamp>.json` | Sandbox de la app |
 | Configuración (idioma, intervalos, umbrales) | `rootcause-config.json` | Sandbox de la app |
+| Baseline de apps vistas (detección de instalaciones) | `rootcause-apps-baseline.json` | Sandbox de la app |
 
 El sandbox es el directorio privado de la app (en Android, el `filesDir` de
 `com.rootcause.mobileinspector`; en iOS, su carpeta Documents). Ninguna otra

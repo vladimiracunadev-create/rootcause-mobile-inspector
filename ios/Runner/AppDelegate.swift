@@ -51,9 +51,11 @@ import UIKit
           let freed = IosCollectors.clearOwnCache()
           DispatchQueue.main.async { result(freed) }
         }
-      case "requestBlePermissions", "configureBackgroundCapture":
-        // Escaneo BLE y captura en segundo plano: fuera del alcance iOS
-        // actual (distribución en pausa). Se declara, no se simula.
+      case "requestBlePermissions", "configureBackgroundCapture",
+        "requestNotificationPermissions", "notifyCritical":
+        // Escaneo BLE, captura en segundo plano y notificaciones locales:
+        // fuera del alcance iOS actual (distribución en pausa). Se
+        // declara, no se simula.
         result(false)
       case "bleScan":
         result(nil)

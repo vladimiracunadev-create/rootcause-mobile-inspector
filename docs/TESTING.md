@@ -42,6 +42,8 @@ lado Dart valida defensivamente todo lo que reciben.
 | `config_store_test.dart` | Defaults correctos, round-trip completo, config corrupto degrada sin crash, migración del archivo de idioma v0.1.x, los umbrales alimentan el motor |
 | `volumes_test.dart` | Sin campo `volumes` → lista vacía (teléfono sin SD); entradas basura degradan a neutro; el export JSON incluye los volúmenes |
 | `nearby_test.dart` | Acumulación entre escaneos, persistencia exige ≥ 3 escaneos Y ≥ 10 min, resultados malformados se ignoran, el nombre conocido no se pierde |
+| `baseline_store_test.dart` | Primera captura inicializa EN SILENCIO, app nueva aparece UNA vez, reinstalar cuenta de nuevo, sin auditoría (iOS) no hay baseline, corrupto se reconstruye sin acusar |
+| `capture_service_test.dart` | La transición a crítico dispara `wentCritical` una sola vez (crítico sostenido no repite), y el hallazgo `new-apps` lleva cantidad, nombres y cuántas son riesgosas |
 | `widget_test.dart` | La app completa arranca sin canal nativo (MissingPluginException capturada), renderiza las 9 pestañas, arranca **en español por defecto** aunque el sistema esté en inglés y el botón de idioma cambia a inglés |
 
 ## Ejecutar

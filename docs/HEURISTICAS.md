@@ -16,7 +16,7 @@ y cubierto por tests en [`test/rule_engine_test.dart`](../test/rule_engine_test.
 4. **Ids estables** neutrales al idioma: la UI traduce; el export JSON
    conserva el id.
 
-## Las 7 familias
+## Las 8 familias
 
 ### 1 · `mem-pressure` — presión de memoria
 
@@ -120,6 +120,24 @@ distorsión que crece de forma sostenida es el indicio temprano, aunque
 ningún umbral absoluto haya disparado todavía. Requiere historial: con la
 auto-captura activada la serie se alimenta sola.
 
+### 8 · `new-apps` — apps nuevas desde la última captura (v0.3.0)
+
+| Condición | Severidad |
+|---|---|
+| ≥ 1 app instalada que no estaba en el baseline de la captura anterior | 🟡 WARNING |
+
+El equivalente móvil del `persistence-change` de la edición Windows: el
+malware llega **instalándose**. El baseline (`rootcause-apps-baseline.json`)
+registra cada paquete visto; la comparación es transitoria a propósito —
+el hallazgo aparece en la captura que detecta la instalación y el
+baseline lo absorbe después.
+
+**Evidencia**: cantidad, nombres (hasta 3) y cuántas de las nuevas tienen
+superficie riesgosa o sideload. **Honestidad**: la primera captura
+inicializa el baseline EN SILENCIO (lo ya instalado no es "nuevo"); una
+app desinstalada se poda, así que reinstalar vuelve a contar como evento;
+en iOS no hay baseline porque no hay lista de apps que comparar.
+
 ## Veredicto global
 
 ```text
@@ -145,4 +163,4 @@ Cambiar un umbral por defecto significa tocar `RuleThresholds` y su test.
 Agregar una regla nueva significa: una función privada en el engine, un id
 nuevo documentado aquí, sus tests y sus strings ES/EN. El
 [ROADMAP](ROADMAP.md) lista las reglas previstas (parche de seguridad
-antiguo, baseline de apps entre capturas).
+antiguo).

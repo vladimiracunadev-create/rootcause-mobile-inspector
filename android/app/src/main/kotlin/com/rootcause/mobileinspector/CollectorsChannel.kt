@@ -31,12 +31,14 @@ object CollectorsChannel {
 
     const val NAME = "rootcause/collectors"
     const val BLE_REQUEST_CODE = 7401
+    const val NOTIF_REQUEST_CODE = 7402
 
     fun register(
         messenger: BinaryMessenger,
         context: Context,
         activity: Activity? = null,
         onRequestBlePermissions: ((MethodChannel.Result) -> Unit)? = null,
+        onRequestNotificationPermissions: ((MethodChannel.Result) -> Unit)? = null,
     ) {
         val mainHandler = Handler(Looper.getMainLooper())
         MethodChannel(messenger, NAME).setMethodCallHandler { call, result ->
@@ -77,6 +79,21 @@ object CollectorsChannel {
                     onRequestBlePermissions != null -> onRequestBlePermissions(result)
                     else -> result.success(false)
                 }
+
+                "requestNotificationPermissions" -> when {
+                    NotificationHelper.permissionGranted(context) -> result.success(true)
+                    onRequestNotificationPermissions != null ->
+                        onRequestNotificationPermissions(result)
+                    else -> result.success(false)
+                }
+
+                "notifyCritical" -> result.success(
+                    NotificationHelper.notifyCritical(
+                        context,
+                        call.argument<String>("title") ?: "RootCause",
+                        call.argument<String>("body") ?: "",
+                    ),
+                )
 
                 "bleScan" -> bleScan(
                     context,

@@ -17,6 +17,7 @@ import 'core/nearby.dart';
 import 'core/rule_engine.dart';
 import 'core/snapshot_json.dart';
 import 'meta.dart';
+import 'platform/capture_service.dart';
 import 'platform/collectors.dart';
 import 'ui/screens.dart';
 import 'ui/strings.dart';
@@ -36,16 +37,21 @@ Future<void> backgroundCapture() async {
   const control = MethodChannel('rootcause/background');
   try {
     const collectors = PlatformCollectors();
-    final snapshot = await collectors.collect();
     final dir = await collectors.documentsPath();
     if (dir != null) {
       final config = await ConfigStore(dir).load();
-      final store = HistoryStore(dir);
-      final prior = await store.recent();
-      final verdict = RuleEngine(
-        thresholds: config.thresholds,
-      ).evaluate(snapshot, history: prior);
-      await store.append(SnapshotJson.toJsonLine(snapshot, verdict));
+      final outcome = await const CaptureService(
+        collectors,
+      ).capture(config: config, directoryPath: dir);
+      // La alerta avisa solo en la TRANSICIÓN a crítico, en el idioma
+      // configurado. Local de verdad: sin INTERNET no hay push posible.
+      if (config.notifyCritical && outcome.wentCritical) {
+        final strings = AppStrings(config.spanish);
+        await collectors.notifyCritical(
+          title: strings.alertCriticalTitle,
+          body: strings.alertCriticalBody,
+        );
+      }
     }
   } on Exception {
     // Una captura fallida en segundo plano no debe tumbar el Worker.
@@ -82,10 +88,11 @@ class InspectorHome extends StatefulWidget {
 
 class _InspectorHomeState extends State<InspectorHome> {
   static const _collectors = PlatformCollectors();
+  static const _captureService = CaptureService(_collectors);
 
   ConfigStore? _configStore;
   AppConfig _config = const AppConfig();
-  HistoryStore? _store;
+  String? _dataDir;
   Snapshot? _snapshot;
   Verdict? _verdict;
   List<HistoryRow> _history = const [];
@@ -111,8 +118,8 @@ class _InspectorHomeState extends State<InspectorHome> {
     try {
       final dir = await _collectors.documentsPath();
       if (dir != null) {
+        _dataDir = dir;
         _configStore = ConfigStore(dir);
-        _store = HistoryStore(dir);
         final config = await _configStore!.load();
         if (mounted) setState(() => _config = config);
       }
@@ -132,38 +139,20 @@ class _InspectorHomeState extends State<InspectorHome> {
     });
   }
 
-  RuleEngine get _engine => RuleEngine(thresholds: _config.thresholds);
-
   Future<void> _refresh() async {
     setState(() => _loading = true);
-    final snapshot = await _collectors.collect();
-
-    // El historial previo alimenta la regla de tendencia; la captura nueva
-    // se persiste después con su veredicto (evidencia, no telemetría).
-    var history = _history;
-    var prior = const <HistoryRow>[];
-    try {
-      if (_store != null) {
-        prior = await _store!.recent();
-      }
-    } on FileSystemException {
-      // Sin historial no se bloquea el diagnóstico en vivo.
-    }
-    final verdict = _engine.evaluate(snapshot, history: prior);
-    try {
-      if (_store != null) {
-        await _store!.append(SnapshotJson.toJsonLine(snapshot, verdict));
-        history = await _store!.recent();
-      }
-    } on FileSystemException {
-      history = prior;
-    }
+    // Mismo flujo que el Worker de segundo plano (CaptureService): colecta,
+    // baseline de apps, reglas con historial y persistencia — una política.
+    final outcome = await _captureService.capture(
+      config: _config,
+      directoryPath: _dataDir,
+    );
 
     if (!mounted) return;
     setState(() {
-      _snapshot = snapshot;
-      _verdict = verdict;
-      _history = history;
+      _snapshot = outcome.snapshot;
+      _verdict = outcome.verdict;
+      _history = outcome.history;
       _loading = false;
     });
   }
@@ -175,6 +164,13 @@ class _InspectorHomeState extends State<InspectorHome> {
 
     if (next.autoRefreshMinutes != prev.autoRefreshMinutes) {
       _applyAutoRefresh();
+    }
+    // El permiso de notificaciones se pide al activar lo que las usa
+    // (Android 13+); si el usuario lo niega, la alerta simplemente no
+    // aparece y el resto sigue funcionando.
+    if ((next.backgroundCapture && !prev.backgroundCapture) ||
+        (next.notifyCritical && !prev.notifyCritical)) {
+      await _collectors.requestNotificationPermissions();
     }
     if (next.backgroundCapture != prev.backgroundCapture ||
         next.backgroundChargingOnly != prev.backgroundChargingOnly) {

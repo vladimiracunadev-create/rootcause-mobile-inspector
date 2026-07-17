@@ -17,7 +17,7 @@ Complemento verificable de [`RELEASE_MOVIL.md`](RELEASE_MOVIL.md): aquel documen
 
 ```powershell
 Select-String '^version:' pubspec.yaml
-# Ej.: version: 0.2.1+4 — semver Y build number incrementados respecto al release anterior
+# Ej.: version: 0.3.0+5 — semver Y build number incrementados respecto al release anterior
 ```
 
 - [ ] Docs y landing coherentes con la nueva versión (las menciones históricas de changelog se conservan; las de "versión actual" no pueden quedar viejas):
@@ -40,8 +40,8 @@ git pull --ff-only
 
 ```bash
 git log --oneline -1
-git tag v0.2.1
-git push origin v0.2.1
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 - [ ] Si se espera firma con la clave permanente (`release-key`), los 4 secretos deben existir ANTES de pushear el tag; si faltan, el workflow usa una clave efímera de CI (`ephemeral-ci-key`) y actualizar la app requerirá desinstalar:
@@ -64,20 +64,20 @@ gh run list --workflow=release-android.yml --limit 1
 - [ ] El release publica los 4 assets — 2 APKs por ABI, el universal y `SHA256SUMS.txt`:
 
 ```bash
-gh release view v0.2.1
+gh release view v0.3.0
 # …-arm64-v8a.apk, …-armeabi-v7a.apk, …-universal.apk, SHA256SUMS.txt
 ```
 
 - [ ] Las notas del release declaran el modo de firma real (`release-key` o `ephemeral-ci-key`):
 
 ```bash
-gh release view v0.2.1 --json body --jq .body | grep -i "modo de firma"
+gh release view v0.3.0 --json body --jq .body | grep -i "modo de firma"
 ```
 
 - [ ] Hash SHA-256 verificado en local — debe coincidir carácter a carácter con `SHA256SUMS.txt`:
 
 ```powershell
-gh release download v0.2.1 -p '*universal.apk' -p 'SHA256SUMS.txt' -D "$env:TEMP\rc-verify" --clobber
+gh release download v0.3.0 -p '*universal.apk' -p 'SHA256SUMS.txt' -D "$env:TEMP\rc-verify" --clobber
 Get-FileHash "$env:TEMP\rc-verify\*universal.apk" -Algorithm SHA256
 Get-Content "$env:TEMP\rc-verify\SHA256SUMS.txt"
 ```

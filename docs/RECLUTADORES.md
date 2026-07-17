@@ -7,7 +7,7 @@
 
 ## 1. Resumen ejecutivo
 
-**RootCause Mobile Inspector** (v0.2.1) es un sensor forense de diagnóstico
+**RootCause Mobile Inspector** (v0.3.0) es un sensor forense de diagnóstico
 para **Android e iOS**, construido con **Flutter 3.44.6 / Dart 3.12**. Es el
 hermano móvil de
 [rootcause-windows-inspector](https://github.com/vladimiracunadev-create/rootcause-windows-inspector)
@@ -34,9 +34,9 @@ diagnóstico y evidencia, con sus límites declarados por escrito.
 ### Motor de reglas Dart puro, 100 % testeable
 
 - `lib/core/rule_engine.dart` no toca plataforma: recibe un snapshot y
-  produce hallazgos con severidad, evidencia y recomendación (7 familias,
-  incluida la tendencia temporal `load-rising`, especificadas en
-  [HEURISTICAS.md](HEURISTICAS.md)).
+  produce hallazgos con severidad, evidencia y recomendación (8 familias,
+  incluidas la tendencia temporal `load-rising` y el baseline de apps
+  `new-apps`, especificadas en [HEURISTICAS.md](HEURISTICAS.md)).
 - Suite de tests sobre el núcleo Dart (motor, modelos, export forense,
   historial) más tests de widget — corre en segundos, sin dispositivo ni
   emulador (→ [TESTING.md](TESTING.md)).

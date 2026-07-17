@@ -19,6 +19,7 @@ flowchart TB
         HIST["history_store.dart<br/>JSON Lines · retención 500"]
         CFG["config_store.dart<br/>intervalos · umbrales · idioma"]
         NEAR["nearby.dart<br/>sesión BLE en memoria"]
+        BASE["baseline_store.dart<br/>apps vistas (persistence-change móvil)"]
     end
 
     subgraph NATIVE["📟 Colectores nativos — MethodChannel 'rootcause/collectors'"]
@@ -55,6 +56,14 @@ Canal: `rootcause/collectors`. Métodos:
   manual (lista `address`/`name`/`rssi`; `null` = no soportado)
 - `configureBackgroundCapture(enabled, chargingOnly)` → programa o cancela
   la captura periódica con WorkManager (Android)
+- `requestNotificationPermissions` / `notifyCritical(title, body)` →
+  permiso (Android 13+) y notificación LOCAL de veredicto crítico; el
+  Dart la dispara solo en la transición a crítico
+
+La política de captura vive en UN solo lugar (`lib/platform/capture_service.dart`):
+colecta → baseline de apps → reglas con historial → persistencia →
+detección de transición a crítico. La app abierta y el Worker headless
+ejecutan esa misma función.
 
 En Android el canal se registra desde `CollectorsChannel` tanto en la
 Activity como en el engine **headless** del `BackgroundCaptureWorker`: la
@@ -133,6 +142,7 @@ Función pura `Snapshot → Verdict`:
 | `risky-apps` | ≥ 1 app con score ≥ 8 | ≥ 5 apps con score ≥ 8 |
 | `root-indicators` | ≥ 1 indicador | — |
 | `load-rising` | caída sostenida (≥ 15 pts en ≤ 6 h) de memoria disponible o disco libre a lo largo del historial | — |
+| `new-apps` | ≥ 1 app instalada desde la captura anterior (baseline) | — |
 
 Puntaje de riesgo por app (Android): +1 por permiso peligroso solicitado,
 +3 por `SYSTEM_ALERT_WINDOW` u `REQUEST_INSTALL_PACKAGES`, +2 por

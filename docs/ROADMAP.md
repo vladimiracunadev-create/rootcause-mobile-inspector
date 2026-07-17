@@ -1,6 +1,25 @@
 # Roadmap
 
-## v0.2.1 — Arranque release reparado + capa del fabricante (actual)
+## v0.3.0 — El sensor que avisa (actual)
+
+El monitoreo continuo cierra el círculo: vigilar → detectar → avisar.
+
+- ✅ **Notificación local de veredicto crítico**: cuando una captura en
+  segundo plano pasa a CRÍTICO, el teléfono avisa — solo en la
+  transición, no cada 15 minutos. 100 % local (sin INTERNET no hay push:
+  es el dispositivo avisándose a sí mismo). Opt-out en Configuración.
+- ✅ **Baseline de apps** (`new-apps`): detecta apps instaladas entre
+  capturas — el equivalente móvil del `persistence-change` de la edición
+  Windows. Primera captura silenciosa; reinstalar también cuenta.
+- ✅ **Tendencia visible + comparación A→B** en Historial: gráfico de RAM
+  disponible y disco libre sobre las capturas, y selección de dos
+  capturas con deltas (memoria, disco, puntaje, apps riesgosas).
+- ✅ Flujo de captura unificado (`CaptureService`): la app abierta y el
+  Worker ejecutan exactamente la misma política.
+- Verificado end-to-end con el build release en emulador: la alerta
+  crítica se disparó en vivo al forzar umbrales.
+
+## v0.2.1 — Arranque release reparado + capa del fabricante
 
 - ✅ **Fix del crash de primer arranque de v0.2.0 en release** (reportado
   en un Samsung A35 5G y reproducido con el APK publicado): R8 eliminaba
@@ -56,15 +75,14 @@ diferencia", "no puedo ver dispositivos cerca".
 - ✅ UI Material 3 bilingüe ES/EN con semáforo y evidencia
 - ✅ CI multiplataforma (Android + iOS) y release Android automatizado
 
-## v0.2.x — Profundidad Android (pendiente)
+## v0.3.x+ — Profundidad Android (pendiente)
 
 - [ ] Regla de parche de seguridad antiguo (> N meses → warning)
-- [ ] Baseline de apps instaladas: detectar apps NUEVAS entre capturas
-  (equivalente móvil del `persistence-change` de la edición Windows)
-- [ ] Comparación A vs B en el tab Historial con deltas
 - [ ] Permiso `PACKAGE_USAGE_STATS` opcional (opt-in del usuario) para
   consumo real de batería/datos por app
-- [ ] Notificación local cuando el veredicto pasa a Critical
+- [ ] Widget de pantalla de inicio con el semáforo
+- [ ] Cercanía: histórico de escaneos entre sesiones (opt-in) para
+  detectar rastreadores a lo largo de días
 
 ## v0.3.x — iOS de primera clase (EN PAUSA)
 

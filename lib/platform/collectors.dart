@@ -100,6 +100,41 @@ class PlatformCollectors {
     }
   }
 
+  /// Pide el permiso de notificaciones (Android 13+; en versiones previas
+  /// no existe y se considera concedido). `false` si el usuario lo negó.
+  Future<bool> requestNotificationPermissions() async {
+    try {
+      return await _channel.invokeMethod<bool>(
+            'requestNotificationPermissions',
+          ) ??
+          false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  /// Notificación LOCAL de veredicto crítico (sin INTERNET no existe el
+  /// push; esto es una notificación del propio dispositivo). `false` si
+  /// falta el permiso o la plataforma no lo soporta.
+  Future<bool> notifyCritical({
+    required String title,
+    required String body,
+  }) async {
+    try {
+      return await _channel.invokeMethod<bool>('notifyCritical', {
+            'title': title,
+            'body': body,
+          }) ??
+          false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
   /// Programa (o cancela) la captura periódica en segundo plano. Android la
   /// ejecuta con WorkManager (mínimo 15 minutos, impuesto por el SO);
   /// devuelve `false` donde no está soportado (iOS, tests).
