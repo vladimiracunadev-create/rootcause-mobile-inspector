@@ -18,6 +18,8 @@ procesos está prometiendo algo que el SO no le permite hacer.
 | Overlay / instalador de paquetes / device-admin | permisos solicitados (solo Android) | contribuye al puntaje |
 | Indicadores de root/jailbreak | rutas `su`, build test-keys / rutas Cydia y escritura fuera de sandbox | `root-indicators` |
 | VPN activa / red medida | `NetworkCapabilities` / `NWPathMonitor` | visible en pestaña Red |
+| Carga en ascenso sostenido (v0.2.0) | serie de capturas del historial local | `load-rising` |
+| Dispositivos BLE persistentes cerca (v0.2.0) | escaneo manual opt-in `BluetoothLeScanner` (Android) | marca PERSISTENTE en pestaña Cercanía (no entra al export) |
 
 ## Amenaza por amenaza
 
@@ -27,7 +29,8 @@ procesos está prometiendo algo que el SO no le permite hacer.
 | **Malware con overlay (bankers)** | 🟡 Parcial | `SYSTEM_ALERT_WINDOW` solicitado suma +3 al puntaje. No detectamos el overlay en acto. |
 | **Droppers (instalan otros APK)** | 🟡 Parcial | `REQUEST_INSTALL_PACKAGES` suma +3; sideload suma +2. |
 | **Root/jailbreak malicioso o heredado** | 🟡 Indicio | Binarios `su`, test-keys, rutas de jailbreak. Un dispositivo rooteado a propósito da el mismo indicio: contexto humano necesario. |
-| **Cryptojacking** | 🔴 No directo | Sin acceso al CPU de otros procesos, el indicio visible es temperatura de batería sostenida (`battery-temp`) + degradación. Es correlación débil y así se declara. |
+| **Cryptojacking** | 🟡 Indirecto | Sin acceso al CPU de otros procesos, los indicios visibles son temperatura de batería sostenida (`battery-temp`) y, desde v0.2.0, la caída sostenida de recursos entre capturas (`load-rising`) con la auto-captura activada. Correlación indirecta y así se declara. |
+| **Rastreadores BLE ajenos (tipo AirTag)** | 🟡 Indicio (v0.2.0) | Un dispositivo BLE que reaparece en varios escaneos a lo largo de la sesión se marca PERSISTENTE. Las MAC aleatorizadas pueden fragmentar la detección y tus propios accesorios también persisten: indicio para revisar, no identificación. |
 | **Exfiltración de datos** | 🔴 No | Una app de usuario no puede inspeccionar tráfico ajeno sin ser VPN local. Fuera de alcance v0.1; el contador global de tráfico es contexto, no detección. |
 | **Ransomware móvil** | 🔴 No | Sin acceso al filesystem de otras apps no hay señal de cifrado masivo observable. |
 | **Phishing / smishing** | 🔴 No | Fuera de alcance: requiere leer SMS/notificaciones, contrario a la política de privacidad del producto. |

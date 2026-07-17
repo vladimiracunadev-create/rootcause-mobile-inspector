@@ -12,6 +12,24 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <!-- Cercanía Bluetooth LE (opt-in, escaneo manual). neverForLocation:
+         el escaneo NO se usa para inferir ubicación. Sigue sin INTERNET. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <!-- Android 8–11 exigen ubicación y los permisos Bluetooth clásicos
+         para escanear BLE; en Android 12+ no se piden (maxSdkVersion). -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+
     <application
         android:label="RootCause Mobile Inspector"
         android:name="${applicationName}"

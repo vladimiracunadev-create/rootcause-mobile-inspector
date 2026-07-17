@@ -3,7 +3,7 @@ library;
 
 class Meta {
   static const String productName = 'RootCause Mobile Inspector';
-  static const String version = '0.1.1';
+  static const String version = '0.2.0';
   static const String author = 'Vladimir Acuña';
   static const String repository =
       'https://github.com/vladimiracunadev-create/rootcause-mobile-inspector';

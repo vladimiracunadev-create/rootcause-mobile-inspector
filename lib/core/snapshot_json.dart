@@ -28,6 +28,15 @@ class SnapshotJson {
       'totalBytes': s.storage.totalBytes,
       'freeBytes': s.storage.freeBytes,
       'appCacheBytes': s.storage.appCacheBytes,
+      'volumes': [
+        for (final v in s.storage.volumes)
+          {
+            'label': v.label,
+            'totalBytes': v.totalBytes,
+            'freeBytes': v.freeBytes,
+            'removable': v.removable,
+          },
+      ],
     },
     'battery': {
       'levelPercent': s.battery.levelPercent,

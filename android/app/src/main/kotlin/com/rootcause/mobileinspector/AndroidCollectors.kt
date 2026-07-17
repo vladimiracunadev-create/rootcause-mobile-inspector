@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Environment
 import android.os.StatFs
 import android.os.SystemClock
+import android.os.storage.StorageManager
 import java.io.File
 
 /**
@@ -53,7 +54,38 @@ class AndroidCollectors(private val context: Context) {
             "totalBytes" to stat.totalBytes,
             "freeBytes" to stat.availableBytes,
             "appCacheBytes" to cacheBytes,
+            "volumes" to volumes(),
         )
+    }
+
+    /**
+     * Volúmenes adicionales (tarjeta SD, USB OTG). El volumen primario
+     * emulado se omite: es la misma partición que el volumen de datos ya
+     * reportado. Sin tarjeta la lista queda vacía — caso normal, no error.
+     */
+    private fun volumes(): List<Map<String, Any?>> {
+        val sm = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+        val result = mutableListOf<Map<String, Any?>>()
+        for (dir in context.getExternalFilesDirs(null).filterNotNull()) {
+            val volume = try {
+                sm.getStorageVolume(dir)
+            } catch (_: Exception) {
+                null
+            } ?: continue
+            if (volume.isPrimary && !volume.isRemovable) continue
+            val stat = try {
+                StatFs(dir.absolutePath)
+            } catch (_: Exception) {
+                continue
+            }
+            result += mapOf(
+                "label" to (volume.getDescription(context) ?: "SD"),
+                "totalBytes" to stat.totalBytes,
+                "freeBytes" to stat.availableBytes,
+                "removable" to volume.isRemovable,
+            )
+        }
+        return result
     }
 
     private fun directorySize(dir: File): Long {

@@ -1,7 +1,7 @@
 # Requisitos
 
 Requisitos para usar la app y para desarrollarla. Versión actual del
-producto: **v0.1.1** (fuente de verdad: `pubspec.yaml`). Licencia Apache 2.0.
+producto: **v0.2.0** (fuente de verdad: `pubspec.yaml`). Licencia Apache 2.0.
 
 ---
 
@@ -15,7 +15,7 @@ producto: **v0.1.1** (fuente de verdad: `pubspec.yaml`). Licencia Apache 2.0.
 | Espacio libre | ~30 MB para la app instalada (APK: ~16 MB arm64-v8a, ~45 MB universal) |
 | Conectividad | Ninguna — la app no declara el permiso INTERNET en release |
 | Cuenta / registro | Ninguno |
-| Permisos especiales | Ninguno que aprobar en tiempo de ejecución |
+| Permisos especiales | Solo si usas **Cercanía** (opt-in): permiso de dispositivos cercanos/Bluetooth en runtime; el resto de la app no pide nada |
 
 La instalación es por APK directo desde GitHub Releases (hay que autorizar
 "orígenes desconocidos" para el navegador o gestor de archivos). Qué APK

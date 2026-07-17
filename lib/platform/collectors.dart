@@ -42,4 +42,81 @@ class PlatformCollectors {
       return null;
     }
   }
+
+  /// Abre la pantalla del sistema donde el usuario SÍ puede intervenir
+  /// (liberar espacio, uso de batería, ficha de una app). Devuelve `false`
+  /// si la plataforma no tiene esa pantalla — la UI lo comunica, no finge.
+  Future<bool> openSystemScreen(String screen, {String? packageName}) async {
+    try {
+      final ok = await _channel.invokeMethod<bool>('openSystemScreen', {
+        'screen': screen,
+        'packageName': ?packageName,
+      });
+      return ok ?? false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  /// Borra la caché propia de RootCause. Devuelve los bytes liberados
+  /// (0 si no había nada o el nativo no está disponible).
+  Future<int> clearOwnCache() async {
+    try {
+      return await _channel.invokeMethod<int>('clearOwnCache') ?? 0;
+    } on PlatformException {
+      return 0;
+    } on MissingPluginException {
+      return 0;
+    }
+  }
+
+  /// Pide los permisos de escaneo Bluetooth en tiempo de ejecución.
+  /// Devuelve `true` si quedaron concedidos.
+  Future<bool> requestBlePermissions() async {
+    try {
+      return await _channel.invokeMethod<bool>('requestBlePermissions') ??
+          false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  /// Escaneo BLE manual de [seconds] segundos. Devuelve la lista cruda de
+  /// dispositivos (`address`, `name`, `rssi`) o `null` si la plataforma no
+  /// lo soporta o falta el permiso.
+  Future<List<Object?>?> bleScan({int seconds = 15}) async {
+    try {
+      return await _channel.invokeMethod<List<Object?>>('bleScan', {
+        'seconds': seconds,
+      });
+    } on PlatformException {
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
+  /// Programa (o cancela) la captura periódica en segundo plano. Android la
+  /// ejecuta con WorkManager (mínimo 15 minutos, impuesto por el SO);
+  /// devuelve `false` donde no está soportado (iOS, tests).
+  Future<bool> configureBackgroundCapture({
+    required bool enabled,
+    required bool chargingOnly,
+  }) async {
+    try {
+      final ok = await _channel.invokeMethod<bool>(
+        'configureBackgroundCapture',
+        {'enabled': enabled, 'chargingOnly': chargingOnly},
+      );
+      return ok ?? false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
 }

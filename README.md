@@ -11,7 +11,7 @@
 ║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
 ║                                                                                   ║
 ║                          M O B I L E   I N S P E C T O R                          ║
-║                  Sensor forense de diagnóstico · Flutter · v0.1.1                 ║
+║                  Sensor forense de diagnóstico · Flutter · v0.2.0                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -19,7 +19,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.1.1-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.2.0-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -95,11 +95,19 @@ flutter build apk --release
 
 ## 📸 Capturas
 
-La app corriendo en un dispositivo Android real (verificada también en el
-emulador AVD oficial — el APK universal incluye la ABI `x86_64`):
+v0.2.0 corriendo en el emulador AVD oficial (el APK universal incluye la
+ABI `x86_64`; verificada también en dispositivo Android real):
 
 <p align="center">
   <img src="docs/images/resumen.png" width="260" alt="Pestaña Resumen: semáforo verde, memoria, almacenamiento y batería" />
+  &nbsp;&nbsp;
+  <img src="docs/images/almacenamiento.png" width="260" alt="Pestaña Almacenamiento: volumen interno, tarjeta SD extraíble y caché propia" />
+  &nbsp;&nbsp;
+  <img src="docs/images/configuracion.png" width="260" alt="Pestaña Configuración: auto-captura, segundo plano y umbrales modificables" />
+</p>
+
+<p align="center">
+  <img src="docs/images/cercania.png" width="260" alt="Pestaña Cercanía: escaneo Bluetooth LE manual" />
   &nbsp;&nbsp;
   <img src="docs/images/dispositivo.png" width="260" alt="Pestaña Dispositivo: hardware, parche de seguridad e indicadores de root" />
   &nbsp;&nbsp;
@@ -112,12 +120,14 @@ emulador AVD oficial — el APK universal incluye la ABI `x86_64`):
 
 | Pestaña | Descripción |
 |---|---|
-| **Resumen** | Semáforo global + hallazgos del motor de reglas + memoria, almacenamiento y batería |
-| **Apps** | Auditoría de permisos peligrosos por app instalada, con puntaje y flags (overlay, sideload, device-admin) — Android |
+| **Resumen** | Semáforo global + hallazgos con evidencia, recomendación y **botón de intervención** (abre la pantalla del sistema donde tú sí puedes actuar) |
+| **Apps** | Auditoría de permisos peligrosos por app, con puntaje, flags (overlay, sideload, device-admin) y acceso a la ficha del sistema — Android |
 | **Red** | Transporte activo (WiFi/celular), VPN, red medida, ancho de banda estimado y tráfico acumulado |
-| **Almacenamiento** | Espacio libre/usado del volumen de datos + caché propia de la app |
+| **Almacenamiento** | Volumen interno **+ tarjeta SD/USB si existen** (detección dinámica) + caché propia con botón de limpieza |
 | **Dispositivo** | Hardware, versión de OS, parche de seguridad e indicadores de root/jailbreak |
-| **Historial** | Capturas persistidas localmente con severidad y deltas básicos |
+| **Cercanía** | Escaneo Bluetooth LE manual (opt-in) con marca de **persistencia** — sin usar internet |
+| **Historial** | Capturas persistidas localmente; con auto-captura alimenta la regla de **carga en ascenso** |
+| **Configuración** | Auto-captura (5 min por defecto, como la edición Windows), captura en segundo plano (solo-cargando opcional), umbrales modificables e idioma |
 | **Acerca** | Versión, autor, filosofía y política de privacidad local |
 
 Toda captura puede exportarse como **JSON forense** con ids de hallazgo neutrales
@@ -147,9 +157,12 @@ Dart puro (100 % testeable sin dispositivo):
 - Temperatura y salud de batería
 - Apps con puntaje de riesgo alto por superficie de permisos
 - Indicadores de root/jailbreak
+- **Carga en ascenso** (v0.2.0): caída sostenida de memoria/disco a lo
+  largo del historial — la distorsión que crece como indicio temprano
 
 Cada hallazgo lleva severidad, evidencia y recomendación. El veredicto global
-es el máximo de severidad + un puntaje acumulado.
+es el máximo de severidad + un puntaje acumulado. Los umbrales son
+**modificables** desde la pestaña Configuración (persisten localmente).
 
 > Mapa honesto de qué detecta y qué NO puede detectar un sensor móvil →
 > [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md)
@@ -164,13 +177,15 @@ rootcause-mobile-inspector/
 ├── lib/                  ← código compartido Dart
 │   ├── main.dart         ← entrada + UI Material 3 (tabs, semáforo, export)
 │   ├── core/
-│   │   ├── models.dart   ← Snapshot, Finding, Verdict, severidades
-│   │   ├── rule_engine.dart ← motor de reglas puro (testeable)
+│   │   ├── models.dart   ← Snapshot, Finding, Verdict, VolumeInfo
+│   │   ├── rule_engine.dart ← motor de reglas puro + regla de tendencia
+│   │   ├── config_store.dart ← configuración persistente (umbrales, intervalos)
+│   │   ├── nearby.dart   ← sesión BLE en memoria (persistencia de cercanía)
 │   │   ├── snapshot_json.dart ← export forense JSON
 │   │   └── history_store.dart ← historial local (JSON Lines)
 │   ├── platform/collectors.dart ← puente MethodChannel a nativo
 │   └── ui/               ← pantallas y tema
-├── android/              ← proyecto Android + colectores Kotlin (MethodChannel)
+├── android/              ← colectores Kotlin + Worker de captura en 2.º plano
 ├── ios/                  ← proyecto iOS + colectores Swift (MethodChannel)
 ├── test/                 ← tests Dart del motor de reglas y export
 ├── docs/                 ← arquitectura, manual, CI, releases, limitaciones
@@ -234,8 +249,11 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 
 - Código fuente completo (Dart compartido + Kotlin + Swift)
 - APK release firmado publicado en Releases con hash de integridad
-- Motor de reglas local con umbrales configurables y 6 familias de hallazgo
-- Auditoría de superficie de permisos por app (Android)
+- Motor de reglas local con **umbrales modificables por el usuario** y 7 familias de hallazgo (incluida la tendencia `load-rising`)
+- Auto-captura configurable (5 min por defecto) + **captura en segundo plano** con WorkManager (opción solo-cargando)
+- Auditoría de superficie de permisos por app (Android) con acceso a la ficha del sistema
+- Volúmenes de almacenamiento (tarjeta SD/USB) detectados dinámicamente
+- Escaneo Bluetooth LE opt-in (Cercanía) sin permiso INTERNET
 - Historial local de capturas + export JSON forense
 - Interfaz bilingüe (español por defecto, inglés a un toque) con tema claro/oscuro
 - CI multiplataforma y release automatizado por tag (actions pinneadas a SHA)

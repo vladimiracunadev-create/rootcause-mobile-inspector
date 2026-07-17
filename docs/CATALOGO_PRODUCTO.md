@@ -9,7 +9,7 @@ documento tiene prioridad.
 
 | | RootCause **Windows** Inspector | RootCause **Mobile** Inspector |
 |---|---|---|
-| Versión | v0.19.0 | v0.1.1 |
+| Versión | v0.19.0 | v0.2.0 |
 | Lenguaje | Rust (GUI egui + CLI) | Flutter (Dart + Kotlin + Swift) |
 | Plataforma | Windows 10/11 | Android 8.0+ (producción) · iOS 13+ (compila en CI, distribución en pausa) |
 | Qué es | Sensor forense de escritorio con señales de comportamiento (persistencia, servicios, red local, anomalías) — declaradamente **no** un antivirus ni un EDR: complementa, no reemplaza | Sensor forense de bolsillo: distorsiones de memoria, almacenamiento, batería y red + auditoría de superficie de permisos por app |
@@ -30,10 +30,14 @@ documento tiene prioridad.
 
 ### Edición Mobile (Flutter)
 
-- Semáforo global + motor de reglas local con 6 familias de hallazgo:
+- Semáforo global + motor de reglas local con 7 familias de hallazgo:
   memoria, almacenamiento, temperatura/salud de batería, superficie de
-  permisos por app (Android), root/jailbreak
-  (→ [HEURISTICAS.md](HEURISTICAS.md)).
+  permisos por app (Android), root/jailbreak y carga en ascenso
+  sostenido (→ [HEURISTICAS.md](HEURISTICAS.md)), con umbrales
+  modificables por el usuario.
+- Auto-captura configurable + captura en segundo plano (WorkManager,
+  opción solo-cargando); volúmenes SD/USB; escaneo BLE opt-in (Cercanía);
+  acciones que abren la pantalla del sistema donde el usuario interviene.
 - Historial local (JSON Lines, retención 500) y export JSON forense.
 - Límites del SO declarados, no disfrazados: iOS no permite listar apps
   ajenas y Android no expone CPU/RAM de otras apps

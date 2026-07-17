@@ -58,22 +58,58 @@ class MemoryInfo {
       totalBytes > 0 ? availableBytes / totalBytes : 0.0;
 }
 
+/// Volumen de almacenamiento adicional (tarjeta SD, USB OTG). El volumen
+/// interno de datos se reporta aparte en [StorageInfo]; esta lista puede
+/// estar vacía — un teléfono sin tarjeta es un caso normal, no un error.
+class VolumeInfo {
+  const VolumeInfo({
+    required this.label,
+    required this.totalBytes,
+    required this.freeBytes,
+    required this.removable,
+  });
+
+  factory VolumeInfo.fromMap(Map<Object?, Object?> map) => VolumeInfo(
+    label: _asString(map['label'], 'SD'),
+    totalBytes: _asInt(map['totalBytes']),
+    freeBytes: _asInt(map['freeBytes']),
+    removable: _asBool(map['removable']),
+  );
+
+  final String label;
+  final int totalBytes;
+  final int freeBytes;
+  final bool removable;
+
+  double get freeRatio => totalBytes > 0 ? freeBytes / totalBytes : 0.0;
+}
+
 class StorageInfo {
   const StorageInfo({
     required this.totalBytes,
     required this.freeBytes,
     required this.appCacheBytes,
+    this.volumes = const [],
   });
 
   factory StorageInfo.fromMap(Map<Object?, Object?> map) => StorageInfo(
     totalBytes: _asInt(map['totalBytes']),
     freeBytes: _asInt(map['freeBytes']),
     appCacheBytes: _asInt(map['appCacheBytes']),
+    volumes: map['volumes'] is List
+        ? (map['volumes']! as List)
+              .whereType<Map<Object?, Object?>>()
+              .map(VolumeInfo.fromMap)
+              .toList()
+        : const [],
   );
 
   final int totalBytes;
   final int freeBytes;
   final int appCacheBytes;
+
+  /// Volúmenes adicionales detectados (SD/USB); vacío si no hay.
+  final List<VolumeInfo> volumes;
 
   double get freeRatio => totalBytes > 0 ? freeBytes / totalBytes : 0.0;
 }

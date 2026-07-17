@@ -7,20 +7,22 @@ RootCause Mobile Inspector usa **Flutter** con una separación estricta en tres 
 ```mermaid
 flowchart TB
     subgraph UI["🖼 UI — lib/ui/ + lib/main.dart"]
-        TABS["7 pestañas Material 3"]
-        SEM["Semáforo + hallazgos"]
-        I18N["Bilingüe ES/EN"]
+        TABS["9 pestañas Material 3"]
+        SEM["Semáforo + hallazgos + acciones"]
+        I18N["Bilingüe ES/EN (ES por defecto)"]
     end
 
     subgraph CORE["🧠 Núcleo compartido — lib/core/ (Dart puro, sin Flutter)"]
-        MODELS["models.dart<br/>Snapshot · Finding · Verdict"]
-        ENGINE["rule_engine.dart<br/>6 familias de reglas"]
+        MODELS["models.dart<br/>Snapshot · Finding · Verdict · VolumeInfo"]
+        ENGINE["rule_engine.dart<br/>7 familias de reglas"]
         JSON["snapshot_json.dart<br/>export forense"]
         HIST["history_store.dart<br/>JSON Lines · retención 500"]
+        CFG["config_store.dart<br/>intervalos · umbrales · idioma"]
+        NEAR["nearby.dart<br/>sesión BLE en memoria"]
     end
 
     subgraph NATIVE["📟 Colectores nativos — MethodChannel 'rootcause/collectors'"]
-        KT["android/ · Kotlin<br/>MainActivity + AndroidCollectors"]
+        KT["android/ · Kotlin<br/>CollectorsChannel + AndroidCollectors<br/>+ BackgroundCaptureWorker"]
         SW["ios/ · Swift<br/>AppDelegate + IosCollectors"]
     end
 
@@ -39,18 +41,35 @@ flowchart TB
 
 ## El contrato del MethodChannel
 
-Canal: `rootcause/collectors`, con dos métodos:
+Canal: `rootcause/collectors`. Métodos:
 
 - `collect` → mapa completo de estado (abajo)
 - `documentsPath` → ruta del directorio de documentos del sandbox
   (historial y exports; evita depender del plugin `path_provider`)
+- `openSystemScreen(screen, packageName?)` → abre la pantalla del sistema
+  donde el usuario puede intervenir (`free-space`, `battery`,
+  `app-details`, `settings`); devuelve `false` si no existe en la
+  plataforma
+- `clearOwnCache` → borra la caché propia y devuelve los bytes liberados
+- `requestBlePermissions` / `bleScan(seconds)` → permiso y escaneo BLE
+  manual (lista `address`/`name`/`rssi`; `null` = no soportado)
+- `configureBackgroundCapture(enabled, chargingOnly)` → programa o cancela
+  la captura periódica con WorkManager (Android)
+
+En Android el canal se registra desde `CollectorsChannel` tanto en la
+Activity como en el engine **headless** del `BackgroundCaptureWorker`: la
+captura en segundo plano ejecuta el entrypoint Dart `backgroundCapture`
+de `lib/main.dart` — el mismo colector, los mismos umbrales configurados
+y el mismo historial que la app abierta, sin lógica duplicada.
 
 El método `collect` devuelve:
 
 ```jsonc
 {
   "memory":  { "totalBytes": 0, "availableBytes": 0, "lowMemory": false },
-  "storage": { "totalBytes": 0, "freeBytes": 0, "appCacheBytes": 0 },
+  "storage": { "totalBytes": 0, "freeBytes": 0, "appCacheBytes": 0,
+               "volumes": [ { "label": "SDCARD", "totalBytes": 0,
+                              "freeBytes": 0, "removable": true } ] },
   "battery": { "levelPercent": 0, "charging": false, "temperatureCelsius": 0.0,
                "voltageMillivolts": 0, "healthy": true, "healthLabel": "good" },
   "network": { "connected": true, "transport": "wifi", "vpnActive": false,
@@ -73,8 +92,8 @@ Reglas del contrato:
 - `appsAuditSupported=false` en iOS: la UI muestra "no disponible por diseño
   del SO" en vez de una lista vacía engañosa.
 - Los ids de hallazgo (`mem-pressure`, `storage-low`, `battery-temp`,
-  `battery-health`, `risky-apps`, `root-indicators`) son estables y neutrales
-  al idioma — mismos principios que la edición Windows.
+  `battery-health`, `risky-apps`, `root-indicators`, `load-rising`) son
+  estables y neutrales al idioma — mismos principios que la edición Windows.
 
 ## Ciclo de vida de una captura
 
@@ -112,13 +131,17 @@ Función pura `Snapshot → Verdict`:
 | `battery-health` | salud reportada ≠ good/unknown | — |
 | `risky-apps` | ≥ 1 app con score ≥ 8 | ≥ 5 apps con score ≥ 8 |
 | `root-indicators` | ≥ 1 indicador | — |
+| `load-rising` | caída sostenida (≥ 15 pts en ≤ 6 h) de memoria disponible o disco libre a lo largo del historial | — |
 
 Puntaje de riesgo por app (Android): +1 por permiso peligroso solicitado,
 +3 por `SYSTEM_ALERT_WINDOW` u `REQUEST_INSTALL_PACKAGES`, +2 por
 device-admin, +2 por sideload.
 
 Veredicto global = máxima severidad; puntaje = Σ (warning=3, critical=10).
-Umbrales centralizados en `RuleThresholds` (testeables y evolucionables).
+Umbrales centralizados en `RuleThresholds` — desde v0.2.0 el usuario los
+ajusta en la pestaña Configuración (`config_store.dart` los persiste como
+`rootcause-config.json`) y la regla de tendencia consume el historial
+reciente. Especificación exacta en [HEURISTICAS.md](HEURISTICAS.md).
 
 ## Persistencia e historial
 
@@ -169,6 +192,9 @@ en Rust, UI en Flutter) queda evaluado en el
 [ROADMAP](ROADMAP.md) como evolución posible si el peso o el consumo se
 vuelven críticos.
 
-En **consumo en ejecución** la app sigue la filosofía RootCause: captura
-puntual bajo demanda (sin daemon residente), sin red, y el trabajo pesado
-(enumerar apps) corre una sola vez por captura fuera del hilo de UI.
+En **consumo en ejecución** la app sigue la filosofía RootCause: sin red y
+con el trabajo pesado (enumerar apps) una sola vez por captura, fuera del
+hilo de UI. La captura es bajo demanda o con auto-captura configurable; la
+variante en segundo plano usa WorkManager (mínimo 15 minutos, opción
+solo-cargando) en vez de un daemon residente — el sensor no debe consumir
+lo que dice vigilar.

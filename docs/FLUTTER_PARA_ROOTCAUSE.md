@@ -34,6 +34,13 @@ El resultado se verifica en `pubspec.yaml`: la sección `dependencies` contiene
 únicamente el SDK de Flutter, y las `dev_dependencies` son `flutter_test`
 (parte del SDK) y `flutter_lints` (linter; no entra al APK).
 
+Precisión honesta: desde v0.2.0 la capa Android usa dos bibliotecas
+**oficiales de AndroidX** (`androidx.work` para la captura en segundo
+plano y `androidx.core` para permisos en runtime), declaradas en
+`android/app/build.gradle.kts`. La regla "cero paquetes pub de terceros"
+se mantiene intacta; estas son parte de la plataforma Android, no de la
+cadena pub.
+
 ```yaml
 dependencies:
   flutter:

@@ -14,8 +14,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('RootCause'), findsOneWidget);
-    // Con snapshot neutro el veredicto existe y las 7 pestañas están.
+    // Con snapshot neutro el veredicto existe y las 9 pestañas están.
     expect(find.byType(TabBar), findsOneWidget);
+    expect(find.byType(Tab), findsNWidgets(9));
   });
 
   testWidgets('arranca en español por defecto y el botón cambia a inglés', (

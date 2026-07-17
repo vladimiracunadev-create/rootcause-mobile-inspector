@@ -1,6 +1,30 @@
 # Roadmap
 
-## v0.1.1 — Landing + APKs por ABI (actual)
+## v0.2.0 — Control, tendencia y cercanía (actual)
+
+Nace del feedback de uso real: "no tengo control para optimizar", "el
+original se actualizaba cada 5 minutos", "mi tarjeta SD no se
+diferencia", "no puedo ver dispositivos cerca".
+
+- ✅ Pestaña **Configuración**: intervalo de auto-captura (5 min por
+  defecto, como el original de escritorio), umbrales de detección
+  modificables e idioma — todo persistido (`rootcause-config.json`)
+- ✅ **Captura en segundo plano** con WorkManager (mín. 15 min, lo impone
+  Android; opción "solo cargando") ejecutando el MISMO núcleo Dart vía
+  engine headless — cero lógica duplicada
+- ✅ Regla **`load-rising`**: caída sostenida de memoria/disco a lo largo
+  del historial — la distorsión que crece como indicio temprano
+- ✅ **Volúmenes de almacenamiento**: tarjeta SD / USB detectados y
+  reportados por separado; sin tarjeta, la sección no aparece
+- ✅ **Acciones de intervención**: cada hallazgo de disco/batería abre la
+  pantalla del sistema donde el usuario SÍ puede actuar; ficha de sistema
+  por app; limpiar caché propia
+- ✅ Pestaña **Cercanía**: escaneo BLE manual opt-in con marca de
+  persistencia (sin permiso INTERNET; `BLUETOOTH_SCAN` con
+  `neverForLocation`)
+- ✅ Español por defecto con toggle EN persistente
+
+## v0.1.1 — Landing + APKs por ABI
 
 - ✅ Landing page en GitHub Pages (mismo esquema que la edición Windows)
 - ✅ Release publica APKs divididos por ABI (arm64-v8a / armeabi-v7a,
@@ -19,7 +43,7 @@
 - ✅ UI Material 3 bilingüe ES/EN con semáforo y evidencia
 - ✅ CI multiplataforma (Android + iOS) y release Android automatizado
 
-## v0.2.x — Profundidad Android
+## v0.2.x — Profundidad Android (pendiente)
 
 - [ ] Regla de parche de seguridad antiguo (> N meses → warning)
 - [ ] Baseline de apps instaladas: detectar apps NUEVAS entre capturas

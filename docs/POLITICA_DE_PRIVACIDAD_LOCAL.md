@@ -12,6 +12,8 @@ privacidad se demuestra por diseño, no por promesa.**
 | Batería (nivel, temperatura, salud) | ✅ | En historial local | ❌ |
 | Estado de red (transporte, VPN, medida) | ✅ | En historial local | ❌ |
 | Lista de apps y permisos que SOLICITAN (Android) | ✅ | En historial local | ❌ |
+| Volúmenes de almacenamiento (tarjeta SD: libre/total) | ✅ | En historial local | ❌ |
+| Dispositivos Bluetooth LE cercanos (escaneo manual opt-in) | ✅ solo al pulsar Escanear | ❌ solo en memoria de la sesión | ❌ nunca (ni siquiera en el export) |
 | Contenido de tu tráfico de red | ❌ nunca | — | — |
 | SMS, contactos, fotos, archivos personales | ❌ nunca | — | — |
 | Identificadores de publicidad / cuentas | ❌ nunca | — | — |
@@ -28,6 +30,13 @@ privacidad se demuestra por diseño, no por promesa.**
    exportar. No hay sincronización, ni cuentas, ni "nube".
 4. **Sin analytics ni crash reporting**: cero SDKs de terceros
    (`pubspec.yaml` no tiene dependencias externas).
+5. **Bluetooth sin ubicación**: el permiso `BLUETOOTH_SCAN` se declara con
+   `neverForLocation` — Android garantiza que el escaneo no puede usarse
+   para inferir dónde estás. El resultado vive solo en memoria mientras la
+   app está abierta: no se guarda en el historial ni entra al export JSON.
+6. **La captura en segundo plano es local**: el Worker ejecuta el mismo
+   núcleo que la app abierta y escribe únicamente en el historial del
+   sandbox. Sin permiso INTERNET, tampoco en segundo plano sale nada.
 
 ## Lo que esto significa
 

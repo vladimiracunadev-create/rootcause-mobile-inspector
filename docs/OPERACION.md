@@ -14,9 +14,13 @@ leer el semáforo, acumular historial y archivar evidencia. Complementa al
 3. Revisa los hallazgos listados debajo: cada uno trae evidencia y recomendación.
 4. Cada captura queda guardada en el historial local — no hay que hacer nada extra.
 
-No hay captura en segundo plano: la app solo captura al abrirse o cuando pulsas
-**Actualizar** (icono ↻). Es deliberado: un sensor que corre solo consumiría los
-mismos recursos que dice vigilar.
+Desde v0.2.0 la captura también puede ser automática (pestaña
+**Configuración**): cada 5 minutos por defecto con la app abierta —igual
+que el RootCause de escritorio— y opcionalmente en segundo plano con la
+app cerrada (mínimo 15 minutos, lo impone Android), restringible a **solo
+cuando está cargando** para que el monitoreo continuo no gaste batería.
+El botón **Actualizar** (↻) sigue tomando capturas manuales cuando
+quieras.
 
 ---
 
@@ -100,7 +104,7 @@ las decisiones son tuyas.
 |---|---|---|
 | Historial (máx. 500 capturas) | `rootcause-history.jsonl` | Sandbox de la app |
 | Exports JSON | `rootcause-snapshot-<timestamp>.json` | Sandbox de la app |
-| Preferencia de idioma (ES/EN) | `rootcause-language` | Sandbox de la app |
+| Configuración (idioma, intervalos, umbrales) | `rootcause-config.json` | Sandbox de la app |
 
 El sandbox es el directorio privado de la app (en Android, el `filesDir` de
 `com.rootcause.mobileinspector`; en iOS, su carpeta Documents). Ninguna otra

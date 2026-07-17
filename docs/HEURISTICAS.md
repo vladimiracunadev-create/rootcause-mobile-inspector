@@ -16,7 +16,7 @@ y cubierto por tests en [`test/rule_engine_test.dart`](../test/rule_engine_test.
 4. **Ids estables** neutrales al idioma: la UI traduce; el export JSON
    conserva el id.
 
-## Las 6 familias
+## Las 7 familias
 
 ### 1 · `mem-pressure` — presión de memoria
 
@@ -102,6 +102,24 @@ prueba de escritura fuera del sandbox. **Honestidad**: WARNING y no
 CRITICAL a propósito — un equipo rooteado a propósito por su dueño
 produce el mismo indicio; hace falta contexto humano.
 
+### 7 · `load-rising` — carga en ascenso sostenido (v0.2.0)
+
+| Condición | Severidad |
+|---|---|
+| La memoria disponible **o** el disco libre caen de forma sostenida a lo largo de las capturas recientes | 🟡 WARNING |
+
+Parámetros exactos (constantes en `RuleEngine`): se necesitan ≥ 4 puntos
+(capturas previas + la actual) dentro de una ventana de 6 horas; ningún
+paso puede mejorar más de 2 puntos porcentuales (tolerancia a ruido) y la
+caída total debe ser ≥ 15 puntos. Memoria y disco se evalúan por separado
+y pueden generar dos hallazgos independientes.
+
+**Evidencia**: métrica afectada + porcentaje inicial y final de la serie.
+**Por qué**: es la razón de existir del sistema aplicada al tiempo — la
+distorsión que crece de forma sostenida es el indicio temprano, aunque
+ningún umbral absoluto haya disparado todavía. Requiere historial: con la
+auto-captura activada la serie se alimenta sola.
+
 ## Veredicto global
 
 ```text
@@ -112,10 +130,19 @@ puntaje_global   = Σ (WARNING = 3 · CRITICAL = 10)
 El puntaje permite comparar capturas entre sí en el historial (¿estoy
 peor que ayer?) sin releer cada hallazgo.
 
+## Umbrales modificables por el usuario (v0.2.0)
+
+Desde la pestaña **Configuración** el usuario puede ajustar los umbrales
+de memoria, disco y temperatura de batería (persisten en
+`rootcause-config.json`). Los valores de las tablas de arriba son los
+por defecto; el export JSON registra siempre la evidencia cruda, nunca el
+umbral, así que la evidencia sigue siendo comparable entre dispositivos
+con configuraciones distintas.
+
 ## Cómo evolucionan
 
-Cambiar un umbral significa tocar `RuleThresholds` y su test. Agregar una
-regla nueva significa: una función privada en el engine, un id nuevo
-documentado aquí, sus tests y sus strings ES/EN. El [ROADMAP](ROADMAP.md)
-lista las reglas previstas (parche de seguridad antiguo, baseline de apps
-entre capturas).
+Cambiar un umbral por defecto significa tocar `RuleThresholds` y su test.
+Agregar una regla nueva significa: una función privada en el engine, un id
+nuevo documentado aquí, sus tests y sus strings ES/EN. El
+[ROADMAP](ROADMAP.md) lista las reglas previstas (parche de seguridad
+antiguo, baseline de apps entre capturas).

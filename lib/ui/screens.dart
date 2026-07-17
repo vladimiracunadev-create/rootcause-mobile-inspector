@@ -4,8 +4,10 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../core/config_store.dart';
 import '../core/history_store.dart';
 import '../core/models.dart';
+import '../core/nearby.dart';
 import 'strings.dart';
 import 'theme.dart';
 
@@ -153,10 +155,21 @@ class VerdictBanner extends StatelessWidget {
 }
 
 class FindingCard extends StatelessWidget {
-  const FindingCard({super.key, required this.finding, required this.strings});
+  const FindingCard({
+    super.key,
+    required this.finding,
+    required this.strings,
+    this.actionLabel,
+    this.onAction,
+  });
 
   final Finding finding;
   final AppStrings strings;
+
+  /// Acción de intervención: abre la pantalla del sistema donde el usuario
+  /// SÍ puede actuar. Solo se muestra donde existe una pantalla directa.
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +205,15 @@ class FindingCard extends StatelessWidget {
                 ),
               ),
             ],
+            if (actionLabel != null && onAction != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: Text(actionLabel!),
+                  onPressed: onAction,
+                ),
+              ),
           ],
         ),
       ),
@@ -205,11 +227,21 @@ class SummaryScreen extends StatelessWidget {
     required this.snapshot,
     required this.verdict,
     required this.strings,
+    this.onOpenSystemScreen,
   });
 
   final Snapshot snapshot;
   final Verdict verdict;
   final AppStrings strings;
+  final void Function(String screen)? onOpenSystemScreen;
+
+  /// Pantalla del sistema que resuelve cada hallazgo, si existe una directa.
+  (String, String)? _actionFor(Finding f) => switch (f.id) {
+    'storage-low' => ('free-space', strings.actionFreeSpace),
+    'battery-temp' ||
+    'battery-health' => ('battery', strings.actionBatteryUsage),
+    _ => null,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -225,9 +257,17 @@ class SummaryScreen extends StatelessWidget {
             child: Text(strings.findingsNone),
           )
         else
-          ...verdict.findings.map(
-            (f) => FindingCard(finding: f, strings: strings),
-          ),
+          ...verdict.findings.map((f) {
+            final action = _actionFor(f);
+            return FindingCard(
+              finding: f,
+              strings: strings,
+              actionLabel: action?.$2,
+              onAction: action == null || onOpenSystemScreen == null
+                  ? null
+                  : () => onOpenSystemScreen!(action.$1),
+            );
+          }),
         SectionCard(
           title: strings.memTitle,
           children: [
@@ -305,11 +345,16 @@ class AppsScreen extends StatelessWidget {
     required this.apps,
     required this.auditSupported,
     required this.strings,
+    this.onOpenApp,
   });
 
   final List<AppRisk> apps;
   final bool auditSupported;
   final AppStrings strings;
+
+  /// Abre la ficha de sistema de la app (ahí se desinstala o se revocan
+  /// permisos — la intervención real que el SO sí permite).
+  final void Function(String packageName)? onOpenApp;
 
   @override
   Widget build(BuildContext context) {
@@ -375,6 +420,15 @@ class AppsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  if (onOpenApp != null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: Text(strings.actionAppDetails),
+                        onPressed: () => onOpenApp!(app.packageName),
                       ),
                     ),
                 ],
@@ -450,10 +504,12 @@ class StorageScreen extends StatelessWidget {
     super.key,
     required this.storage,
     required this.strings,
+    this.onClearCache,
   });
 
   final StorageInfo storage;
   final AppStrings strings;
+  final VoidCallback? onClearCache;
 
   @override
   Widget build(BuildContext context) {
@@ -461,7 +517,7 @@ class StorageScreen extends StatelessWidget {
     return ListView(
       children: [
         SectionCard(
-          title: strings.storageTitle,
+          title: '${strings.storageTitle} — ${strings.volumeInternal}',
           children: [
             LinearProgressIndicator(
               value: (1.0 - storage.freeRatio).clamp(0.0, 1.0),
@@ -481,6 +537,38 @@ class StorageScreen extends StatelessWidget {
             ),
           ],
         ),
+        // Volúmenes adicionales (SD/USB): solo si existen. Un teléfono sin
+        // tarjeta es el caso normal, no un estado de error.
+        if (storage.volumes.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              strings.volumesNone,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          )
+        else
+          ...storage.volumes.map(
+            (v) => SectionCard(
+              title: v.removable
+                  ? '${v.label} (${strings.volumeRemovable})'
+                  : v.label,
+              children: [
+                LinearProgressIndicator(
+                  value: (1.0 - v.freeRatio).clamp(0.0, 1.0),
+                ),
+                const SizedBox(height: 8),
+                InfoRow(
+                  label: strings.storageFree,
+                  value: formatBytes(v.freeBytes),
+                ),
+                InfoRow(
+                  label: strings.storageTotal,
+                  value: formatBytes(v.totalBytes),
+                ),
+              ],
+            ),
+          ),
         SectionCard(
           title: strings.cacheTitle,
           children: [
@@ -493,6 +581,15 @@ class StorageScreen extends StatelessWidget {
               strings.cacheNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            if (onClearCache != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.cleaning_services, size: 16),
+                  label: Text(strings.cacheClear),
+                  onPressed: onClearCache,
+                ),
+              ),
           ],
         ),
       ],
@@ -613,6 +710,345 @@ class HistoryScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Estado del escaneo BLE que la pantalla de Cercanía comunica sin fingir:
+/// denegado y no-soportado son estados visibles, no silencios.
+enum NearbyStatus { idle, scanning, denied, unsupported }
+
+class NearbyScreen extends StatelessWidget {
+  const NearbyScreen({
+    super.key,
+    required this.session,
+    required this.status,
+    required this.strings,
+    required this.onScan,
+  });
+
+  final NearbySession session;
+  final NearbyStatus status;
+  final AppStrings strings;
+  final VoidCallback onScan;
+
+  @override
+  Widget build(BuildContext context) {
+    final devices = session.devices;
+    final persistent = session.persistentCount;
+    return ListView(
+      children: [
+        SectionCard(
+          title: strings.nearbyTitle,
+          children: [
+            Text(strings.nearbyIntro),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                icon: status == NearbyStatus.scanning
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.bluetooth_searching, size: 18),
+                label: Text(
+                  status == NearbyStatus.scanning
+                      ? strings.nearbyScanning
+                      : strings.nearbyScan(15),
+                ),
+                onPressed: status == NearbyStatus.scanning ? null : onScan,
+              ),
+            ),
+            if (status == NearbyStatus.denied) ...[
+              const SizedBox(height: 8),
+              Text(strings.nearbyPermissionDenied),
+            ],
+            if (status == NearbyStatus.unsupported) ...[
+              const SizedBox(height: 8),
+              Text(strings.nearbyUnsupported),
+            ],
+          ],
+        ),
+        if (session.scanCount > 0) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              strings.nearbySummary(devices.length, session.scanCount),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          if (persistent > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text(
+                strings.nearbyPersistentNote(persistent),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ...devices.map(
+            (d) => Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  d.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              if (session.isPersistent(d)) ...[
+                                const SizedBox(width: 8),
+                                Text(
+                                  strings.nearbyPersistent,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            '${d.address} · ${strings.nearbySeen(d.seenScans)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text('${d.rssi} dBm'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              strings.nearbyHonestyNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({
+    super.key,
+    required this.config,
+    required this.strings,
+    required this.onChanged,
+  });
+
+  final AppConfig config;
+  final AppStrings strings;
+  final ValueChanged<AppConfig> onChanged;
+
+  /// Fila de umbral con paso de ±1 dentro de [min, max].
+  Widget _stepper(
+    BuildContext context, {
+    required String label,
+    required int value,
+    required String unit,
+    required int min,
+    required int max,
+    required ValueChanged<int> onValue,
+  }) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        Expanded(child: Text(label)),
+        IconButton(
+          icon: const Icon(Icons.remove_circle_outline),
+          onPressed: value > min ? () => onValue(value - 1) : null,
+        ),
+        SizedBox(
+          width: 56,
+          child: Text(
+            '$value $unit',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline),
+          onPressed: value < max ? () => onValue(value + 1) : null,
+        ),
+      ],
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final c = config;
+    return ListView(
+      children: [
+        SectionCard(
+          title: strings.settingsCaptureTitle,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(child: Text(strings.settingsInterval)),
+                DropdownButton<int>(
+                  value: c.autoRefreshMinutes,
+                  items: [
+                    DropdownMenuItem(
+                      value: 0,
+                      child: Text(strings.settingsIntervalOff),
+                    ),
+                    for (final m in const [1, 5, 15])
+                      DropdownMenuItem(
+                        value: m,
+                        child: Text(strings.settingsIntervalMinutes(m)),
+                      ),
+                  ],
+                  onChanged: (v) => v == null
+                      ? null
+                      : onChanged(c.copyWith(autoRefreshMinutes: v)),
+                ),
+              ],
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(strings.settingsBackground),
+              value: c.backgroundCapture,
+              onChanged: (v) => onChanged(c.copyWith(backgroundCapture: v)),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(strings.settingsChargingOnly),
+              value: c.backgroundChargingOnly,
+              onChanged: c.backgroundCapture
+                  ? (v) => onChanged(c.copyWith(backgroundChargingOnly: v))
+                  : null,
+            ),
+          ],
+        ),
+        SectionCard(
+          title: strings.settingsThresholdsTitle,
+          children: [
+            _stepper(
+              context,
+              label: strings.thresholdMemWarning,
+              value: c.memoryWarningPct,
+              unit: '%',
+              min: c.memoryCriticalPct + 1,
+              max: 50,
+              onValue: (v) => onChanged(c.copyWith(memoryWarningPct: v)),
+            ),
+            _stepper(
+              context,
+              label: strings.thresholdMemCritical,
+              value: c.memoryCriticalPct,
+              unit: '%',
+              min: 1,
+              max: c.memoryWarningPct - 1,
+              onValue: (v) => onChanged(c.copyWith(memoryCriticalPct: v)),
+            ),
+            _stepper(
+              context,
+              label: strings.thresholdStorageWarning,
+              value: c.storageWarningPct,
+              unit: '%',
+              min: c.storageCriticalPct + 1,
+              max: 50,
+              onValue: (v) => onChanged(c.copyWith(storageWarningPct: v)),
+            ),
+            _stepper(
+              context,
+              label: strings.thresholdStorageCritical,
+              value: c.storageCriticalPct,
+              unit: '%',
+              min: 1,
+              max: c.storageWarningPct - 1,
+              onValue: (v) => onChanged(c.copyWith(storageCriticalPct: v)),
+            ),
+            _stepper(
+              context,
+              label: strings.thresholdBatteryWarning,
+              value: c.batteryTempWarningCelsius,
+              unit: '°C',
+              min: 30,
+              max: c.batteryTempCriticalCelsius - 1,
+              onValue: (v) =>
+                  onChanged(c.copyWith(batteryTempWarningCelsius: v)),
+            ),
+            _stepper(
+              context,
+              label: strings.thresholdBatteryCritical,
+              value: c.batteryTempCriticalCelsius,
+              unit: '°C',
+              min: c.batteryTempWarningCelsius + 1,
+              max: 60,
+              onValue: (v) =>
+                  onChanged(c.copyWith(batteryTempCriticalCelsius: v)),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              strings.settingsThresholdsNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                icon: const Icon(Icons.restore, size: 16),
+                label: Text(strings.settingsRestoreDefaults),
+                onPressed: () => onChanged(
+                  AppConfig(
+                    spanish: c.spanish,
+                    autoRefreshMinutes: c.autoRefreshMinutes,
+                    backgroundCapture: c.backgroundCapture,
+                    backgroundChargingOnly: c.backgroundChargingOnly,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        SectionCard(
+          title: strings.settingsLanguageTitle,
+          children: [
+            Row(
+              children: [
+                for (final (label, spanish) in const [
+                  ('Español', true),
+                  ('English', false),
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(label),
+                      selected: c.spanish == spanish,
+                      onSelected: (_) =>
+                          onChanged(c.copyWith(spanish: spanish)),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ],
     );

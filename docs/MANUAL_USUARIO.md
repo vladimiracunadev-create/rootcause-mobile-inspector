@@ -53,9 +53,12 @@ arranque. RootCause no inspecciona tu tráfico: solo lee contadores del SO.
 
 ### Almacenamiento
 
-Espacio libre y usado del volumen de datos, y cuánto ocupa la caché propia
-de la app. Si el espacio libre baja del 15 % (advertencia) o 5 % (crítico),
-lo verás como hallazgo.
+Espacio libre y usado del volumen interno de datos **y de cada volumen
+adicional**: si tu teléfono tiene **tarjeta SD** (o un USB conectado),
+aparece como su propia tarjeta con libre/total y marcada como extraíble.
+Sin tarjeta, la sección simplemente no aparece — es el caso normal, no un
+error. También ves cuánto ocupa la caché propia de RootCause, con un botón
+para **limpiarla** (la única caché que una app puede limpiar es la suya).
 
 ### Dispositivo
 
@@ -64,15 +67,50 @@ tiempo encendido e **indicadores de root/jailbreak**. Un indicador es un
 indicio (un binario `su` presente, un build firmado con test-keys), no una
 prueba definitiva.
 
+### Cercanía (v0.2.0)
+
+Escaneo **manual** de dispositivos Bluetooth LE cercanos, con intensidad
+de señal. Si un dispositivo reaparece a lo largo de varios escaneos de la
+sesión se marca **PERSISTENTE** — así se comporta un rastreador ajeno,
+pero también tus propios audífonos: indicio, no prueba. Todo es local y
+bajo demanda; nada se guarda ni se exporta, y la app sigue sin usar
+internet. La primera vez Android pedirá el permiso de **dispositivos
+cercanos** (Bluetooth).
+
 ### Historial
 
 Cada captura queda guardada en el teléfono (últimas 500). Sirve para
 comparar: ¿la memoria disponible viene bajando? ¿apareció una app riesgosa
-que ayer no estaba?
+que ayer no estaba? Con la auto-captura activada, el historial se alimenta
+solo y la regla de **carga en ascenso** puede avisarte cuando algo consume
+recursos de forma sostenida.
+
+### Configuración (v0.2.0)
+
+Como en el RootCause de escritorio:
+
+- **Auto-captura con la app abierta**: cada 5 minutos por defecto
+  (1/5/15 min o apagada).
+- **Captura en segundo plano**: incluso con la app cerrada, mínimo cada
+  15 minutos (lo impone Android, no RootCause), con opción de hacerlo
+  **solo cuando el teléfono está cargando**.
+- **Umbrales de detección** modificables al instante.
+- **Idioma** español/inglés.
+
+Todo persiste entre sesiones.
 
 ### Acerca
 
 Versión, autor, licencia y la política de privacidad local.
+
+## Intervenir desde un hallazgo
+
+Los hallazgos de almacenamiento y batería traen un botón que abre la
+pantalla **del sistema** donde tú puedes actuar (liberar espacio, ver el
+uso de batería), y cada app de la auditoría tiene **"Ver en el sistema"**
+para desinstalarla o revocarle permisos ahí mismo. RootCause no puede
+hacer eso por ti — ninguna app puede, es diseño de Android — pero te deja
+a un toque del lugar donde sí se puede.
 
 ## Exportar evidencia
 

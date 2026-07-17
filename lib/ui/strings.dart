@@ -19,7 +19,9 @@ class AppStrings {
   String get tabNetwork => _t('Red', 'Network');
   String get tabStorage => _t('Almacenamiento', 'Storage');
   String get tabDevice => _t('Dispositivo', 'Device');
+  String get tabNearby => _t('Cercanía', 'Nearby');
   String get tabHistory => _t('Historial', 'History');
+  String get tabSettings => _t('Configuración', 'Settings');
   String get tabAbout => _t('Acerca', 'About');
 
   // Acciones
@@ -74,6 +76,15 @@ class AppStrings {
   String get cacheNote => _t(
     'Android e iOS no permiten leer la caché de otras apps; esta cifra es la caché propia de RootCause.',
     'Android and iOS do not allow reading other apps\' caches; this figure is RootCause\'s own cache.',
+  );
+  String get cacheClear => _t('Limpiar caché propia', 'Clear own cache');
+  String cacheCleared(String freed) =>
+      _t('Caché propia liberada: $freed', 'Own cache cleared: $freed');
+  String get volumeInternal => _t('Interno (datos)', 'Internal (data)');
+  String get volumeRemovable => _t('extraíble', 'removable');
+  String get volumesNone => _t(
+    'Sin volúmenes adicionales: este equipo no tiene tarjeta SD ni USB conectado (o el SO no los expone). No es un fallo — se muestran solo cuando existen.',
+    'No additional volumes: this device has no SD card or USB attached (or the OS does not expose them). Not a failure — they are listed only when present.',
   );
   String get batteryTitle => _t('Batería', 'Battery');
   String get batteryLevel => _t('Nivel', 'Level');
@@ -170,6 +181,92 @@ class AppStrings {
   String snapshotTaken(String when) =>
       _t('Captura tomada: $when', 'Snapshot taken: $when');
 
+  // Acciones de intervención (abren la pantalla del sistema)
+  String get actionFreeSpace => _t('Liberar espacio', 'Free up space');
+  String get actionBatteryUsage => _t('Ver batería', 'View battery');
+  String get actionAppDetails => _t('Ver en el sistema', 'View in system');
+  String get actionUnavailable => _t(
+    'Esa pantalla del sistema no está disponible en este equipo.',
+    'That system screen is not available on this device.',
+  );
+
+  // Configuración
+  String get settingsCaptureTitle => _t('Captura', 'Capture');
+  String get settingsInterval => _t(
+    'Auto-captura con la app abierta',
+    'Auto-capture while the app is open',
+  );
+  String get settingsIntervalOff => _t('Apagada', 'Off');
+  String settingsIntervalMinutes(int m) => _t('Cada $m min', 'Every $m min');
+  String get settingsBackground => _t(
+    'Captura en segundo plano (mín. 15 min, lo impone Android)',
+    'Background capture (min. 15 min, enforced by Android)',
+  );
+  String get settingsChargingOnly =>
+      _t('Solo cuando está cargando', 'Only while charging');
+  String get settingsBackgroundUnsupported =>
+      _t('No disponible en este SO.', 'Not available on this OS.');
+  String get settingsThresholdsTitle =>
+      _t('Umbrales de detección', 'Detection thresholds');
+  String get settingsThresholdsNote => _t(
+    'Los cambios aplican al instante y quedan guardados. El export JSON registra siempre la evidencia cruda, no el umbral.',
+    'Changes apply instantly and are saved. The JSON export always records raw evidence, not the threshold.',
+  );
+  String get thresholdMemWarning => _t(
+    'Memoria: advertencia si disponible <',
+    'Memory: warning if available <',
+  );
+  String get thresholdMemCritical =>
+      _t('Memoria: crítico si disponible <', 'Memory: critical if available <');
+  String get thresholdStorageWarning =>
+      _t('Disco: advertencia si libre <', 'Storage: warning if free <');
+  String get thresholdStorageCritical =>
+      _t('Disco: crítico si libre <', 'Storage: critical if free <');
+  String get thresholdBatteryWarning => _t(
+    'Batería: advertencia si temperatura ≥',
+    'Battery: warning if temperature ≥',
+  );
+  String get thresholdBatteryCritical => _t(
+    'Batería: crítico si temperatura ≥',
+    'Battery: critical if temperature ≥',
+  );
+  String get settingsRestoreDefaults =>
+      _t('Restaurar valores por defecto', 'Restore defaults');
+  String get settingsLanguageTitle => _t('Idioma', 'Language');
+
+  // Cercanía (BLE)
+  String get nearbyTitle => _t('Cercanía Bluetooth', 'Bluetooth nearby');
+  String get nearbyIntro => _t(
+    'Escaneo manual de dispositivos Bluetooth LE cercanos. 100 % local y bajo demanda: nada se guarda ni se exporta, y la app sigue sin usar internet.',
+    'Manual scan of nearby Bluetooth LE devices. 100% local and on demand: nothing is stored or exported, and the app still uses no internet.',
+  );
+  String nearbyScan(int seconds) =>
+      _t('Escanear ($seconds s)', 'Scan ($seconds s)');
+  String get nearbyScanning => _t('Escaneando…', 'Scanning…');
+  String get nearbyPermissionDenied => _t(
+    'Sin permiso de Bluetooth no hay escaneo. Concédelo e inténtalo de nuevo.',
+    'Without the Bluetooth permission there is no scan. Grant it and try again.',
+  );
+  String get nearbyUnsupported => _t(
+    'El escaneo BLE no está disponible en este equipo (sin Bluetooth o SO sin soporte).',
+    'BLE scanning is not available on this device (no Bluetooth or unsupported OS).',
+  );
+  String nearbySummary(int devices, int scans) => _t(
+    '$devices dispositivo(s) vistos en $scans escaneo(s) de esta sesión',
+    '$devices device(s) seen across $scans scan(s) this session',
+  );
+  String get nearbyPersistent => _t('PERSISTENTE', 'PERSISTENT');
+  String nearbyPersistentNote(int count) => _t(
+    '$count dispositivo(s) reaparecen a lo largo de la sesión. Un rastreador ajeno se comporta así — pero unos audífonos tuyos también: indicio, no prueba.',
+    '$count device(s) keep reappearing across the session. A foreign tracker behaves like this — but so do your own earbuds: a signal, not proof.',
+  );
+  String get nearbyHonestyNote => _t(
+    'Las direcciones BLE modernas rotan (MAC aleatorizada): un mismo aparato puede aparecer como varios. Los escaneos son solo de esta sesión.',
+    'Modern BLE addresses rotate (randomized MAC): one device may appear as several. Scans belong to this session only.',
+  );
+  String nearbySeen(int scans) =>
+      _t('visto en $scans escaneo(s)', 'seen in $scans scan(s)');
+
   // Hallazgos (ids estables → texto localizado)
   String findingTitle(Finding f) => switch (f.id) {
     'mem-pressure' => _t('Presión de memoria', 'Memory pressure'),
@@ -190,7 +287,14 @@ class AppStrings {
       'Indicadores de root/jailbreak',
       'Root/jailbreak indicators',
     ),
+    'load-rising' => _t('Carga en ascenso sostenido', 'Sustained rising load'),
     _ => f.id,
+  };
+
+  String _metricName(String key) => switch (key) {
+    'memory' => _t('memoria disponible', 'available memory'),
+    'storage' => _t('disco libre', 'free storage'),
+    _ => key,
   };
 
   String findingDetail(Finding f) {
@@ -221,6 +325,10 @@ class AppStrings {
         '$a0 indicador(es): $a1.',
         '$a0 indicator(s): $a1.',
       ),
+      'load-rising' => _t(
+        'La ${_metricName(a0)} cayó de $a1 % a ${f.args.length > 2 ? f.args[2] : '?'} % de forma sostenida en las últimas capturas.',
+        'The ${_metricName(a0)} fell steadily from $a1 % to ${f.args.length > 2 ? f.args[2] : '?'} % across recent snapshots.',
+      ),
       _ => f.args.join(', '),
     };
   }
@@ -249,6 +357,10 @@ class AppStrings {
     'root-indicators' => _t(
       'Si no rooteaste este equipo a propósito, investiga el origen del indicador.',
       'If you did not deliberately root this device, investigate the indicator\'s origin.',
+    ),
+    'load-rising' => _t(
+      'Algo consume el recurso de forma continua. Compara las capturas del Historial y revisa qué cambió (app nueva, sincronización, proceso atascado).',
+      'Something is steadily consuming the resource. Compare History snapshots and review what changed (new app, sync, stuck process).',
     ),
     _ => '',
   };

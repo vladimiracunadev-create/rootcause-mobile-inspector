@@ -35,6 +35,28 @@ import UIKit
           for: .documentDirectory, in: .userDomainMask
         ).first?.path
         result(docs)
+      case "openSystemScreen":
+        // iOS solo permite abrir los ajustes de la PROPIA app; cualquier
+        // otra pantalla se declara no disponible en vez de fingirse.
+        if let url = URL(string: UIApplication.openSettingsURLString),
+          UIApplication.shared.canOpenURL(url)
+        {
+          UIApplication.shared.open(url)
+          result(true)
+        } else {
+          result(false)
+        }
+      case "clearOwnCache":
+        DispatchQueue.global(qos: .utility).async {
+          let freed = IosCollectors.clearOwnCache()
+          DispatchQueue.main.async { result(freed) }
+        }
+      case "requestBlePermissions", "configureBackgroundCapture":
+        // Escaneo BLE y captura en segundo plano: fuera del alcance iOS
+        // actual (distribución en pausa). Se declara, no se simula.
+        result(false)
+      case "bleScan":
+        result(nil)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -87,6 +109,22 @@ enum IosCollectors {
       "freeBytes": free,
       "appCacheBytes": cacheSize(),
     ]
+  }
+
+  /// Borra la caché propia (directorio Caches del sandbox) y devuelve los
+  /// bytes liberados.
+  static func clearOwnCache() -> Int64 {
+    let before = cacheSize()
+    guard let cacheUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+    else { return 0 }
+    if let children = try? FileManager.default.contentsOfDirectory(
+      at: cacheUrl, includingPropertiesForKeys: nil
+    ) {
+      for child in children {
+        try? FileManager.default.removeItem(at: child)
+      }
+    }
+    return max(0, before - cacheSize())
   }
 
   private static func cacheSize() -> Int64 {

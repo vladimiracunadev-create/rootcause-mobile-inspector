@@ -1,6 +1,6 @@
 # Plan Maestro — RootCause Mobile Inspector
 
-**Versión base:** v0.1.1 · **Actualizado:** 2026-07-15
+**Versión base:** v0.2.0 · **Actualizado:** 2026-07-16
 **Propósito:** visión del producto y plan por fases. Este documento es la
 brújula; el detalle ítem por ítem vive en [ROADMAP.md](ROADMAP.md) y este plan
 nunca lo contradice.
@@ -25,15 +25,21 @@ RootCause Mobile   → sensor forense de bolsillo   (Flutter, Android + iOS)
 Ambos              → diagnóstico primero, intervención después
 ```
 
-## II. Fase actual — v0.1.x: sensor Android en producción
+## II. Fase actual — v0.2.x: sensor Android con control y tendencia
 
 Qué hay hoy, verificable en el código y en los releases:
 
 - Núcleo Dart compartido + colectores nativos Kotlin/Swift por MethodChannel.
-- Motor de reglas local con 6 familias de hallazgo
-  (→ [HEURISTICAS.md](HEURISTICAS.md)) y umbrales centralizados.
-- Auditoría de superficie de permisos por app (Android) e indicadores
-  honestos de root/jailbreak.
+- Motor de reglas local con 7 familias de hallazgo
+  (→ [HEURISTICAS.md](HEURISTICAS.md)), umbrales **modificables por el
+  usuario** y regla de tendencia `load-rising` sobre el historial.
+- Auto-captura configurable (5 min por defecto, como el original de
+  escritorio) + captura en segundo plano con WorkManager (opción
+  solo-cargando) ejecutando el mismo núcleo vía engine headless.
+- Auditoría de superficie de permisos por app (Android), indicadores
+  honestos de root/jailbreak y volúmenes de almacenamiento (SD/USB).
+- Acciones de intervención que abren la pantalla exacta del sistema, y
+  pestaña Cercanía (escaneo BLE opt-in, sin permiso INTERNET).
 - Historial local (JSON Lines, retención 500) + export JSON forense con ids
   neutrales al idioma, comparables con la edición Windows.
 - APK firmado publicado por CI (por ABI + universal) y landing en GitHub Pages.

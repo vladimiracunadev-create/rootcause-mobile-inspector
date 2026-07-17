@@ -5,6 +5,7 @@
 /// recomendación, sin pretender ser un antivirus.
 library;
 
+import 'history_store.dart';
 import 'models.dart';
 
 /// Umbrales centralizados: configurables y forzables desde tests.
@@ -35,13 +36,16 @@ class RuleEngine {
 
   final RuleThresholds thresholds;
 
-  Verdict evaluate(Snapshot snapshot) {
+  /// [history] son las capturas previas (la más reciente primero) para la
+  /// regla de tendencia; sin historial la regla simplemente se omite.
+  Verdict evaluate(Snapshot snapshot, {List<HistoryRow> history = const []}) {
     final findings = <Finding>[
       ..._memory(snapshot),
       ..._storage(snapshot),
       ..._battery(snapshot),
       ..._apps(snapshot),
       ..._rootIndicators(snapshot),
+      ..._trend(snapshot, history),
     ];
 
     var severity = Severity.normal;
@@ -148,6 +152,72 @@ class RuleEngine {
         args: [indicators.length.toString(), indicators.join(', ')],
       ),
     ];
+  }
+
+  /// Carga en ascenso: la razón de existir del sistema aplicada al tiempo.
+  /// Una caída sostenida de memoria disponible o disco libre a lo largo de
+  /// varias capturas es el indicio temprano, aunque ningún umbral absoluto
+  /// haya disparado todavía.
+  ///
+  /// Requiere al menos [trendMinPoints] puntos (capturas previas + la
+  /// actual) dentro de [trendWindow]; cada paso puede mejorar como máximo
+  /// [trendStepTolerancePct] (ruido) y la caída total debe superar
+  /// [trendDropPct] puntos porcentuales.
+  static const int trendMinPoints = 4;
+  static const Duration trendWindow = Duration(hours: 6);
+  static const int trendStepTolerancePct = 2;
+  static const int trendDropPct = 15;
+
+  List<Finding> _trend(Snapshot s, List<HistoryRow> history) {
+    if (history.length < trendMinPoints - 1) return const [];
+    final cutoff = s.timestampMillis - trendWindow.inMilliseconds;
+    final recent = history
+        .where((r) => r.timestampMillis >= cutoff)
+        .take(8)
+        .toList();
+    if (recent.length < trendMinPoints - 1) return const [];
+
+    final findings = <Finding>[];
+    final memSeries = [
+      ...recent.reversed.map((r) => r.memAvailablePct),
+      (s.memory.availableRatio * 100).round(),
+    ];
+    final memDrop = _sustainedDrop(memSeries);
+    if (memDrop != null) {
+      findings.add(
+        Finding(
+          id: 'load-rising',
+          severity: Severity.warning,
+          args: ['memory', '${memSeries.first}', '${memSeries.last}'],
+        ),
+      );
+    }
+    final storageSeries = [
+      ...recent.reversed.map((r) => r.storageFreePct),
+      (s.storage.freeRatio * 100).round(),
+    ];
+    final storageDrop = _sustainedDrop(storageSeries);
+    if (storageDrop != null) {
+      findings.add(
+        Finding(
+          id: 'load-rising',
+          severity: Severity.warning,
+          args: ['storage', '${storageSeries.first}', '${storageSeries.last}'],
+        ),
+      );
+    }
+    return findings;
+  }
+
+  /// Caída total (en puntos porcentuales) si la serie oldest→newest baja de
+  /// forma sostenida; `null` si no hay tendencia.
+  int? _sustainedDrop(List<int> series) {
+    if (series.length < trendMinPoints) return null;
+    for (var i = 1; i < series.length; i++) {
+      if (series[i] - series[i - 1] > trendStepTolerancePct) return null;
+    }
+    final drop = series.first - series.last;
+    return drop >= trendDropPct ? drop : null;
   }
 
   int _weight(Severity severity) => switch (severity) {

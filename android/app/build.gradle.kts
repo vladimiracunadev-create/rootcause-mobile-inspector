@@ -58,3 +58,10 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Permisos en runtime (ActivityCompat/ContextCompat) y captura
+    // periódica en segundo plano. Sin más dependencias que estas.
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+}

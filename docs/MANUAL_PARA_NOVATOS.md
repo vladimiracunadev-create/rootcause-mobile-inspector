@@ -51,8 +51,9 @@ No. Y no tienes que creernos: se puede **comprobar**.
    - 🔴 Rojo → hay un problema serio ahora mismo (por ejemplo, disco
      lleno); sigue la recomendación.
 4. Desliza las pestañas de arriba para ver más: **Apps** (cuáles piden
-   permisos delicados), **Red**, **Almacenamiento**, **Dispositivo**,
-   **Historial**.
+   permisos delicados), **Red**, **Almacenamiento** (con tu tarjeta SD si
+   tienes), **Dispositivo**, **Cercanía** (aparatos Bluetooth cerca),
+   **Historial** y **Configuración**.
 
 ## Preguntas típicas
 
@@ -62,13 +63,16 @@ No necesariamente. Significa que **pide muchos permisos delicados**
 normal. Si es un juego que instalaste ayer de un link raro… sospecha.
 
 **¿La app arregla los problemas?**
-No — te los **muestra con evidencia**. Borrar apps o liberar espacio lo
-decides y lo haces tú. Eso es a propósito: una app de diagnóstico no
-debería tocar tu teléfono sin que tú entiendas por qué.
+No — te los **muestra con evidencia** y te deja **a un toque** de la
+pantalla del sistema donde tú puedes arreglarlo (liberar espacio, ver la
+batería, desinstalar una app). Eso es a propósito: una app de diagnóstico
+no debería tocar tu teléfono sin que tú entiendas por qué.
 
 **¿Gasta batería?**
-No: solo trabaja cuando la abres y pulsas actualizar. No queda vigilando
-en segundo plano.
+Casi nada: con la app abierta toma una foto del estado cada 5 minutos
+(puedes cambiarlo o apagarlo en Configuración). Si activas la vigilancia
+con la app cerrada, puedes limitarla a **solo cuando está cargando** —
+así no gasta nada de tu batería.
 
 **¿Y si quiero desinstalarla?**
 Como cualquier app: mantén pulsado el icono → Desinstalar. No deja nada
