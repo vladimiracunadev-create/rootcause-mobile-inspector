@@ -1,16 +1,18 @@
 # RootCause Mobile Inspector
 
 ```text
-╔══════════════════════════════════════════════════════════════════════╗
-║   ██████╗  ██████╗  ██████╗ ████████╗ ██████╗ █████╗ ██╗   ██╗███████╗███████╗
-║   ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔════╝
-║   ██████╔╝██║   ██║██║   ██║   ██║   ██║     ███████║██║   ██║███████╗█████╗
-║   ██╔══██╗██║   ██║██║   ██║   ██║   ██║     ██╔══██║██║   ██║╚════██║██╔══╝
-║   ██║  ██║╚██████╔╝╚██████╔╝   ██║   ╚██████╗██║  ██║╚██████╔╝███████║███████╗
-║   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝    ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
-║                M O B I L E   I N S P E C T O R
-║        Sensor forense de diagnóstico · Flutter · v0.1.1
-╚══════════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                   ║
+║  ██████╗  ██████╗  ██████╗ ████████╗ ██████╗  █████╗ ██╗   ██╗███████╗███████╗    ║
+║  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝██╔════╝ ██╔══██╗██║   ██║██╔════╝██╔════╝    ║
+║  ██████╔╝██║   ██║██║   ██║   ██║   ██║      ███████║██║   ██║███████╗█████╗      ║
+║  ██╔══██╗██║   ██║██║   ██║   ██║   ██║      ██╔══██║██║   ██║╚════██║██╔══╝      ║
+║  ██║  ██║╚██████╔╝╚██████╔╝   ██║   ╚██████╗ ██║  ██║╚██████╔╝███████║███████╗    ║
+║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
+║                                                                                   ║
+║                          M O B I L E   I N S P E C T O R                          ║
+║                  Sensor forense de diagnóstico · Flutter · v0.1.1                 ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
 [![CI](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/ci.yml)
@@ -266,10 +268,11 @@ Detalle completo → [`docs/LIMITACIONES.md`](docs/LIMITACIONES.md)
 
 | Perfil | Documento |
 |---|---|
-| 🧑‍💻 Desarrollador | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/HEURISTICAS.md`](docs/HEURISTICAS.md) · [`docs/TESTING.md`](docs/TESTING.md) · [`docs/BUILD_MOVIL.md`](docs/BUILD_MOVIL.md) |
-| 👤 Usuario final | [`docs/MANUAL_PARA_NOVATOS.md`](docs/MANUAL_PARA_NOVATOS.md) · [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) · [`docs/EMULADOR.md`](docs/EMULADOR.md) · [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
-| 🛡️ Seguridad | [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md) · [`docs/POLITICA_DE_PRIVACIDAD_LOCAL.md`](docs/POLITICA_DE_PRIVACIDAD_LOCAL.md) · [`SECURITY.md`](SECURITY.md) |
-| 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
+| 🧑‍💻 Desarrollador | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/FLUTTER_PARA_ROOTCAUSE.md`](docs/FLUTTER_PARA_ROOTCAUSE.md) · [`docs/HEURISTICAS.md`](docs/HEURISTICAS.md) · [`docs/TESTING.md`](docs/TESTING.md) · [`docs/BUILD_MOVIL.md`](docs/BUILD_MOVIL.md) · [`docs/COMMANDS.md`](docs/COMMANDS.md) |
+| 👤 Usuario final | [`docs/MANUAL_PARA_NOVATOS.md`](docs/MANUAL_PARA_NOVATOS.md) · [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) · [`docs/OPERACION.md`](docs/OPERACION.md) · [`docs/EMULADOR.md`](docs/EMULADOR.md) · [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
+| 🛡️ Seguridad | [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md) · [`docs/COMPARATIVA_OSS.md`](docs/COMPARATIVA_OSS.md) · [`docs/POLITICA_DE_PRIVACIDAD_LOCAL.md`](docs/POLITICA_DE_PRIVACIDAD_LOCAL.md) · [`SECURITY.md`](SECURITY.md) |
+| 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) · [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
+| 🧭 Producto | [`docs/PLAN_MAESTRO.md`](docs/PLAN_MAESTRO.md) · [`docs/CATALOGO_PRODUCTO.md`](docs/CATALOGO_PRODUCTO.md) · [`docs/LICENCIA_Y_DECISION.md`](docs/LICENCIA_Y_DECISION.md) · [`docs/RECLUTADORES.md`](docs/RECLUTADORES.md) |
 | 📑 Todo | [`docs/INDEX.md`](docs/INDEX.md) |
 
 ---
