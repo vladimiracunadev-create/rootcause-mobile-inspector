@@ -95,7 +95,7 @@ flutter build apk --release
 
 ## 📸 Capturas
 
-v0.2.0 corriendo en el emulador AVD oficial (el APK universal incluye la
+La app corriendo en el emulador AVD oficial (el APK universal incluye la
 ABI `x86_64`; verificada también en dispositivo Android real):
 
 <p align="center">
@@ -269,7 +269,7 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 
 - `.ipa` de iOS distribuible (requiere cuenta Apple Developer; **en pausa**)
 - Publicación en Google Play / App Store
-- Inspección de tráfico de red por app (fuera de alcance v0.1)
+- Inspección de tráfico de red por app (renuncia deliberada: contradice la regla "cero red" — ver ROADMAP)
 - Cualquier promesa que Android/iOS no permitan cumplir a una app de usuario
 
 ---

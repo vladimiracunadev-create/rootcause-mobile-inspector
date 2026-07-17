@@ -1,4 +1,4 @@
-# Proceso de release
+﻿# Proceso de release
 
 ## Android (automatizado)
 
@@ -7,7 +7,7 @@
 `pubspec.yaml` es la fuente de verdad de la versión:
 
 ```yaml
-version: 0.1.0+1   # <semver>+<build number>
+version: 0.4.0+6   # <semver>+<build number>
 ```
 
 El tag DEBE coincidir con la parte semver (el workflow lo verifica).
@@ -15,8 +15,8 @@ El tag DEBE coincidir con la parte semver (el workflow lo verifica).
 ### 2. Publicar
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.4.0
+git push origin v0.4.0
 ```
 
 El workflow [`release-android.yml`](../.github/workflows/release-android.yml):
@@ -31,7 +31,7 @@ El workflow [`release-android.yml`](../.github/workflows/release-android.yml):
 ### 3. Verificar (obligatorio, no opcional)
 
 ```bash
-gh release view v0.1.0
+gh release view v0.4.0
 gh run list --workflow=release-android.yml --limit 1
 # El hash local debe coincidir con SHA256SUMS.txt
 ```

@@ -26,7 +26,7 @@ soporta cada plataforma (`appsAuditSupported`) y la UI lo comunica.
 | Widget de pantalla de inicio | ✅ | ❌ | Fuera del alcance iOS actual |
 | CPU/RAM de OTRAS apps | ❌ | ❌ | Restringido por el SO desde Android 8 / siempre en iOS (el tiempo en pantalla vía acceso de uso es lo máximo que el SO permite) |
 | Matar procesos ajenos | ❌ | ❌ | Restringido por el SO |
-| Inspección de tráfico por app | ❌ | ❌ | Requeriría actuar como VPN local (fuera de alcance v0.1) |
+| Inspección de tráfico por app | ❌ | ❌ | Requeriría actuar como VPN local — renuncia deliberada (regla "cero red") |
 
 ## Limitaciones generales
 

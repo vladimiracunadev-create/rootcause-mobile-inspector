@@ -14,7 +14,7 @@ flowchart TB
 
     subgraph CORE["🧠 Núcleo compartido — lib/core/ (Dart puro, sin Flutter)"]
         MODELS["models.dart<br/>Snapshot · Finding · Verdict · VolumeInfo"]
-        ENGINE["rule_engine.dart<br/>7 familias de reglas"]
+        ENGINE["rule_engine.dart<br/>9 familias de reglas"]
         JSON["snapshot_json.dart<br/>export forense"]
         HIST["history_store.dart<br/>JSON Lines · retención 500"]
         CFG["config_store.dart<br/>intervalos · umbrales · idioma"]
@@ -88,12 +88,13 @@ El método `collect` devuelve:
                "totalRxBytes": 0, "totalTxBytes": 0 },
   "apps":    [ { "packageName": "...", "label": "...", "versionName": "...",
                  "dangerousPermissions": [], "specialFlags": [],
-                 "sideloaded": false } ],
+                 "sideloaded": false,
+                 "foregroundMillis24h": -1 } ],  // -1 sin acceso de uso
   "device":  { "manufacturer": "...", "model": "...", "osVersion": "...",
                "sdkInt": 0, "securityPatch": "...", "cpuCores": 0,
                "uptimeMillis": 0, "rootIndicators": [],
                "appsAuditSupported": true,
-               "vendorSkin": "One UI 8.5" }
+               "vendorSkin": "One UI 8.5", "usageAccessGranted": false }
 }
 ```
 

@@ -95,7 +95,7 @@ diferencia", "no puedo ver dispositivos cerca".
   detectar rastreadores a lo largo de días
 - [ ] Refinamiento del widget (tamaños, tema del sistema)
 
-## v0.3.x — iOS de primera clase (EN PAUSA)
+## iOS de primera clase (EN PAUSA, sin versión asignada)
 
 > Decisión 2026-07-15: la distribución iOS queda en pausa por decisión del
 > autor. El build iOS se mantiene compilando en CI como vigilancia de
@@ -109,7 +109,7 @@ diferencia", "no puedo ver dispositivos cerca".
 
 | Idea | Por qué se pospone |
 |---|---|
-| VPN local para inspección de tráfico | Gran superficie de código y de confianza; contradice "cero red" v0.1 |
+| VPN local para inspección de tráfico | Gran superficie de código y de confianza; contradice la regla "cero red" del producto |
 | Análisis de APK (hashes contra listas) | Requiere red o bases locales grandes |
 | Modo empresa (MDM) | Primero validar el producto individual |
 | Núcleo Rust compartido vía FFI (colectores en Rust, UI Flutter) | Ganancia real solo si el peso/consumo se vuelven críticos; hoy el costo de complejidad no se justifica — ver trade-off en [ARCHITECTURE.md](ARCHITECTURE.md#trade-off-honesto-peso-del-apk-flutter-vs-rust) |
