@@ -1,6 +1,28 @@
 # Roadmap
 
-## v0.4.0 — Consumo real, parche antiguo y widget (actual)
+## v0.5.0 — Evidencia de verdad (actual)
+
+Robustez de producto: la evidencia se vuelve portable, íntegra y que
+avisa a tiempo.
+
+- ✅ **Cadena de integridad**: historial sellado con SHA-256 encadenado
+  (Dart puro, vectores FIPS); `verifyChain()` detecta manipulación y el
+  informe lo declara.
+- ✅ **Informe forense compartible** (Markdown por el share sheet) +
+  **backup/restauración/borrado** de toda la evidencia.
+- ✅ **Alerta de app espía**: notifica apps nuevas riesgosas/sideload
+  aunque el veredicto global no sea crítico.
+- ✅ **Baseline enriquecido** (nuevas/actualizadas/eliminadas),
+  **cercanía histórica** multi-día (opt-in), **registro local de errores**,
+  indicadores de **bootloader/verified boot** y **temperatura** en la
+  tendencia.
+- ✅ **Onboarding** de primera vez, **widget** con tema día/noche y
+  etiquetas de **accesibilidad**.
+- ✅ CHANGELOG, metadata de tiendas, política de privacidad pública y
+  guía de distribución (IzzyOnDroid/F-Droid) — ver
+  [DISTRIBUCION.md](DISTRIBUCION.md).
+
+## v0.4.0 — Consumo real, parche antiguo y widget
 
 - ✅ **Tiempo en pantalla por app** (opt-in REAL: el permiso especial de
   acceso de uso solo puede concederlo el usuario en Ajustes): cada app
@@ -91,9 +113,11 @@ diferencia", "no puedo ver dispositivos cerca".
 
 ## Pendiente
 
-- [ ] Cercanía: histórico de escaneos entre sesiones (opt-in) para
-  detectar rastreadores a lo largo de días
-- [ ] Refinamiento del widget (tamaños, tema del sistema)
+- [ ] Firma permanente y envío a IzzyOnDroid / F-Droid (requiere acción
+  del autor — ver [DISTRIBUCION.md](DISTRIBUCION.md))
+- [ ] Builds reproducibles verificables públicamente
+- [ ] Portugués (PT-BR) — la arquitectura de strings ES/EN es extensible
+- [ ] Refinamiento del widget (más tamaños)
 
 ## iOS de primera clase (EN PAUSA, sin versión asignada)
 

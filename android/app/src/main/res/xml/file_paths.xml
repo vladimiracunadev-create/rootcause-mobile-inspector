@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider: solo el directorio de documentos del sandbox (informes,
+     backups). Nada fuera de la app es compartible por esta vía. -->
+<paths>
+    <files-path name="rootcause_docs" path="." />
+</paths>

@@ -9,7 +9,7 @@ documento tiene prioridad.
 
 | | RootCause **Windows** Inspector | RootCause **Mobile** Inspector |
 |---|---|---|
-| Versión | v0.19.0 | v0.4.0 |
+| Versión | v0.19.0 | v0.5.0 |
 | Lenguaje | Rust (GUI egui + CLI) | Flutter (Dart + Kotlin + Swift) |
 | Plataforma | Windows 10/11 | Android 8.0+ (producción) · iOS 13+ (compila en CI, distribución en pausa) |
 | Qué es | Sensor forense de escritorio con señales de comportamiento (persistencia, servicios, red local, anomalías) — declaradamente **no** un antivirus ni un EDR: complementa, no reemplaza | Sensor forense de bolsillo: distorsiones de memoria, almacenamiento, batería y red + auditoría de superficie de permisos por app |
@@ -81,7 +81,7 @@ Flutter) está documentada con números en el trade-off de
   ambas son **sensores de apoyo a la decisión** que dejan evidencia.
 - No prometer en una edición lo que solo existe en la otra (p. ej.
   baselines de servicios/autoarranque/red local: solo Windows; el baseline
-  de apps instaladas existe en ambas desde móvil v0.4.0).
+  de apps instaladas existe en ambas desde móvil v0.5.0).
 - iOS se comunica siempre como "compila en CI, distribución en pausa" — nunca
   como plataforma soportada en producción.
 - Un botón de descarga no debe prometer un artefacto que el workflow no

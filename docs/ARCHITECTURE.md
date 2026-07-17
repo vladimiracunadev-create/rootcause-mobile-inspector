@@ -152,6 +152,26 @@ Puntaje de riesgo por app (Android): +1 por permiso peligroso solicitado,
 +3 por `SYSTEM_ALERT_WINDOW` u `REQUEST_INSTALL_PACKAGES`, +2 por
 device-admin, +2 por sideload.
 
+### Política de `schemaVersion` del export
+
+El export forense declara `schemaVersion` (hoy `1`). Regla de evolución:
+**agregar** campos nuevos NO sube la versión — los lectores ignoran lo
+que no conocen, y así una v0.4 puede leer un JSON de v0.5. El número solo
+sube si un cambio **rompe** la lectura de campos existentes (renombrar o
+cambiar el tipo de uno ya publicado). Los campos añadidos en v0.5.0
+(`prevHash`/`hash` de la cadena de integridad, `baselineChanges`,
+`foregroundMillis24h`, `usageAccessGranted`) son aditivos: mantienen
+`schemaVersion: 1`.
+
+### Cadena de integridad del historial (v0.5.0)
+
+Cada línea del historial se sella: `hash = SHA-256(contenido + prevHash)`,
+donde `prevHash` es el hash de la captura anterior. Alterar una captura
+rompe su propio hash y el encadenado de todas las siguientes —
+`HistoryStore.verifyChain()` lo detecta y el informe forense lo declara.
+El SHA-256 es Dart puro (`lib/core/sha256.dart`), verificado contra los
+vectores FIPS 180-4; sin dependencias ni viajes al canal nativo.
+
 Veredicto global = máxima severidad; puntaje = Σ (warning=3, critical=10).
 Umbrales centralizados en `RuleThresholds` — desde v0.2.0 el usuario los
 ajusta en la pestaña Configuración (`config_store.dart` los persiste como

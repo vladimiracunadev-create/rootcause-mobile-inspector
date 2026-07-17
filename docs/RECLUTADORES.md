@@ -7,7 +7,7 @@
 
 ## 1. Resumen ejecutivo
 
-**RootCause Mobile Inspector** (v0.4.0) es un sensor forense de diagnóstico
+**RootCause Mobile Inspector** (v0.5.0) es un sensor forense de diagnóstico
 para **Android e iOS**, construido con **Flutter 3.44.6 / Dart 3.12**. Es el
 hermano móvil de
 [rootcause-windows-inspector](https://github.com/vladimiracunadev-create/rootcause-windows-inspector)

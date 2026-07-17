@@ -1,0 +1,34 @@
+RootCause Mobile Inspector is a forensic diagnostic sensor for Android: it
+watches anomalous distortions of your phone's resources —memory, storage,
+battery, network and the permission surface of your apps— and explains
+with evidence when something behaves differently. Diagnosis first,
+intervention second.
+
+It is not an antivirus or a "cleaner": it does not remove malware or kill
+apps (Android forbids that for a user app). It shows you signals with
+their evidence and takes you to the system screen where you decide.
+
+PRIVACY BY DESIGN
+• No INTERNET permission: the app cannot send anything, even if it wanted
+  to. Verifiable in the code.
+• Zero telemetry, zero accounts, zero ads.
+• Your evidence only leaves the phone if you share it.
+
+WHAT IT OBSERVES
+• Global traffic-light verdict with a local rule engine (memory, storage,
+  battery temperature/health, risky apps, newly installed apps, outdated
+  security patch, sustained rising load, root/jailbreak).
+• Per-app permission surface audit and screen time (with the optional
+  usage access).
+• Storage volumes (SD card / USB).
+• Bluetooth LE scan of nearby devices (opt-in).
+• Local history with a trend chart and snapshot comparison.
+
+REAL EVIDENCE
+• Every snapshot is sealed with a SHA-256 hash chain: evidence is
+  verifiable, not tamperable.
+• Shareable forensic report and full backup/restore of your evidence.
+• Background watch with a local notification if something turns critical
+  or a spyware-like app is installed.
+
+Free software (Apache 2.0). Mobile sibling of rootcause-windows-inspector.

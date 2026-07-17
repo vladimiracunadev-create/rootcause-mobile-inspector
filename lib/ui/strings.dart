@@ -249,6 +249,74 @@ class AppStrings {
   String get settingsRestoreDefaults =>
       _t('Restaurar valores por defecto', 'Restore defaults');
   String get settingsLanguageTitle => _t('Idioma', 'Language');
+  String get settingsNearbyHistory => _t(
+    'Histórico de Cercanía entre sesiones (detecta rastreadores multi-día)',
+    'Cross-session Nearby history (detects multi-day trackers)',
+  );
+
+  // Evidencia (backup / restaurar / borrar / informe)
+  String get evidenceTitle => _t('Evidencia', 'Evidence');
+  String get evidenceNote => _t(
+    'Tu evidencia es tuya: respáldala para que sobreviva a desinstalar o cambiar de teléfono, o bórrala cuando quieras. Nada sale del dispositivo salvo que tú lo compartas.',
+    'Your evidence is yours: back it up so it survives uninstalling or switching phones, or wipe it whenever you want. Nothing leaves the device unless you share it.',
+  );
+  String get evidenceBackup => _t('Exportar backup', 'Export backup');
+  String get evidenceRestore => _t('Restaurar backup', 'Restore backup');
+  String get evidenceWipe => _t('Borrar evidencia', 'Wipe evidence');
+  String get evidenceReport =>
+      _t('Generar informe forense', 'Generate forensic report');
+  String backupDone(String path) =>
+      _t('Backup guardado en $path', 'Backup saved to $path');
+  String get restoreOk =>
+      _t('Backup restaurado. Actualizando…', 'Backup restored. Refreshing…');
+  String get restoreFail => _t(
+    'El archivo no es un backup válido de RootCause.',
+    'The file is not a valid RootCause backup.',
+  );
+  String get wipeConfirmTitle =>
+      _t('¿Borrar toda la evidencia?', 'Wipe all evidence?');
+  String get wipeConfirmBody => _t(
+    'Se eliminarán historial, baseline, cercanía y exports de este dispositivo. La configuración se conserva. No se puede deshacer.',
+    'History, baseline, nearby and exports will be deleted from this device. Settings are kept. This cannot be undone.',
+  );
+  String get wipeDone => _t('Evidencia borrada.', 'Evidence wiped.');
+  String get cancel => _t('Cancelar', 'Cancel');
+  String get confirm => _t('Borrar', 'Wipe');
+  String get reportShareTitle =>
+      _t('Informe forense RootCause', 'RootCause forensic report');
+  String get shareFailed => _t(
+    'No se pudo compartir en este equipo.',
+    'Could not share on this device.',
+  );
+
+  // Diagnóstico (registro de errores)
+  String get diagTitle => _t('Diagnóstico', 'Diagnostics');
+  String get diagNone => _t('Sin errores registrados.', 'No errors recorded.');
+  String get diagShare => _t('Compartir registro', 'Share log');
+  String get diagClear => _t('Borrar registro', 'Clear log');
+  String get diagNote => _t(
+    'Si la app falla, el error queda aquí (local, nunca se envía). Compártelo para reportar el problema.',
+    'If the app fails, the error stays here (local, never sent). Share it to report the problem.',
+  );
+
+  // Onboarding
+  String get onboardTitle1 => _t('Diagnóstico primero', 'Diagnosis first');
+  String get onboardBody1 => _t(
+    'RootCause vigila memoria, almacenamiento, batería, red y apps de tu teléfono, y explica con evidencia si algo se comporta distinto.',
+    'RootCause watches your phone\'s memory, storage, battery, network and apps, and explains with evidence when something behaves differently.',
+  );
+  String get onboardTitle2 => _t('Lo que NO hace', 'What it does NOT do');
+  String get onboardBody2 => _t(
+    'No es antivirus ni "limpiador": no elimina malware ni mata apps (Android no lo permite). Te muestra indicios y te lleva a la pantalla del sistema donde tú decides.',
+    'It is not an antivirus or "cleaner": it does not remove malware or kill apps (Android forbids it). It shows you signals and takes you to the system screen where you decide.',
+  );
+  String get onboardTitle3 => _t('Todo local', 'All local');
+  String get onboardBody3 => _t(
+    'Sin internet, sin cuentas, sin telemetría: la app ni siquiera declara el permiso de red. Tu evidencia solo sale si tú la compartes.',
+    'No internet, no accounts, no telemetry: the app does not even declare the network permission. Your evidence only leaves if you share it.',
+  );
+  String get onboardNext => _t('Siguiente', 'Next');
+  String get onboardStart => _t('Empezar', 'Get started');
 
   // Cercanía (BLE)
   String get nearbyTitle => _t('Cercanía Bluetooth', 'Bluetooth nearby');
@@ -290,12 +358,22 @@ class AppStrings {
     'La última captura en segundo plano detectó una distorsión seria. Abre la app para ver la evidencia.',
     'The latest background snapshot detected a serious distortion. Open the app to see the evidence.',
   );
+  String get alertNewAppTitle => _t(
+    'RootCause: app nueva con superficie riesgosa',
+    'RootCause: new app with risky surface',
+  );
+  String alertNewAppBody(String names) => _t(
+    'Se instaló $names con permisos peligrosos o por sideload mientras RootCause vigilaba. Revísala en la pestaña Apps.',
+    '$names was installed with dangerous permissions or via sideload while RootCause was watching. Review it in the Apps tab.',
+  );
 
   // Historial: tendencia y comparación
   String get trendTitle =>
       _t('Tendencia de las últimas capturas', 'Trend across recent snapshots');
   String get trendMemLegend => _t('RAM disponible %', 'Available RAM %');
   String get trendStorageLegend => _t('Disco libre %', 'Free storage %');
+  String get trendTempLegend =>
+      _t('Temp. batería (0–60 °C)', 'Battery temp (0–60 °C)');
   String get compareHint => _t(
     'Toca dos capturas para compararlas (A → B).',
     'Tap two snapshots to compare them (A → B).',

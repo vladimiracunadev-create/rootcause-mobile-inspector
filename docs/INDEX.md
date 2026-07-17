@@ -25,6 +25,7 @@
 | [`CI_GITHUB.md`](CI_GITHUB.md) | Workflows de CI/CD, pinneo a SHA y réplica local (con diagrama) |
 | [`RELEASE_MOVIL.md`](RELEASE_MOVIL.md) | Proceso de release: firma Android, secretos, camino a iOS |
 | [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) | Checklist de release: cada paso con su comando de verificación |
+| [`DISTRIBUCION.md`](DISTRIBUCION.md) | Firma permanente y envío a IzzyOnDroid / F-Droid |
 
 ## Seguridad y producto
 

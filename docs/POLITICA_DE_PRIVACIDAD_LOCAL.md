@@ -16,6 +16,8 @@ privacidad se demuestra por diseño, no por promesa.**
 | Dispositivos Bluetooth LE cercanos (escaneo manual opt-in) | ✅ solo al pulsar Escanear | ❌ solo en memoria de la sesión | ❌ nunca (ni siquiera en el export) |
 | Baseline de apps vistas (para detectar instalaciones nuevas) | ✅ | En el sandbox (`rootcause-apps-baseline.json`) | ❌ |
 | Tiempo en pantalla por app (solo si TÚ concedes el acceso de uso en Ajustes) | ✅ opt-in | En historial local | ❌ (solo si exportas) |
+| Cercanía histórica (días en que se vio cada BLE, opt-in) | ✅ opt-in | `rootcause-nearby.json` (sandbox) | ❌ |
+| Registro local de errores (para diagnóstico) | ✅ | `rootcause-crashlog.txt` (sandbox) | ❌ (solo si lo compartes) |
 | Contenido de tu tráfico de red | ❌ nunca | — | — |
 | SMS, contactos, fotos, archivos personales | ❌ nunca | — | — |
 | Identificadores de publicidad / cuentas | ❌ nunca | — | — |
@@ -43,6 +45,12 @@ privacidad se demuestra por diseño, no por promesa.**
    `POST_NOTIFICATIONS`, opt-out en Configuración): el dispositivo se
    avisa a sí mismo. No existe infraestructura de push — no puede
    existir sin INTERNET.
+8. **El informe, el backup y el registro de errores se comparten por el
+   share sheet del SISTEMA** (FileProvider): es la app que tú elijas la
+   que envía, no RootCause. La app nunca toca la red.
+9. **La cadena de hashes SHA-256 del historial** deja la evidencia
+   verificable ante terceros sin exponer nada: el sello se calcula
+   localmente sobre datos que ya son tuyos.
 
 ## Lo que esto significa
 

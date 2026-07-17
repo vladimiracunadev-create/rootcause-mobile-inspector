@@ -18,12 +18,12 @@ void main() {
 
   test('la primera captura inicializa el baseline EN SILENCIO', () async {
     final store = BaselineStore(tmp.path);
-    final newApps = await store.diffAndUpdate(
+    final diff = await store.diffAndUpdate(
       [buildAppRisk(packageName: 'com.a'), buildAppRisk(packageName: 'com.b')],
       nowMillis: 1000,
       auditSupported: true,
     );
-    expect(newApps, isEmpty, reason: 'lo ya instalado no es "nuevo"');
+    expect(diff.isEmpty, isTrue, reason: 'lo ya instalado no es "nuevo"');
   });
 
   test('una app instalada después aparece como nueva UNA vez', () async {
@@ -42,7 +42,7 @@ void main() {
       nowMillis: 2000,
       auditSupported: true,
     );
-    expect(second.map((a) => a.packageName), ['com.nueva']);
+    expect(second.newApps.map((a) => a.packageName), ['com.nueva']);
 
     // La siguiente captura ya la absorbió el baseline.
     final third = await store.diffAndUpdate(
@@ -53,7 +53,40 @@ void main() {
       nowMillis: 3000,
       auditSupported: true,
     );
-    expect(third, isEmpty);
+    expect(third.isEmpty, isTrue);
+  });
+
+  test('cambio de versión → ACTUALIZADA; ausencia → ELIMINADA', () async {
+    final store = BaselineStore(tmp.path);
+    await store.diffAndUpdate(
+      [
+        buildAppRisk(packageName: 'com.a', versionName: '1.0'),
+        buildAppRisk(packageName: 'com.b', versionName: '2.0'),
+      ],
+      nowMillis: 1000,
+      auditSupported: true,
+    );
+    final diff = await store.diffAndUpdate(
+      [buildAppRisk(packageName: 'com.a', versionName: '1.1')],
+      nowMillis: 2000,
+      auditSupported: true,
+    );
+    expect(diff.updatedApps.map((a) => a.packageName), ['com.a']);
+    expect(diff.removedPackages, ['com.b']);
+    expect(diff.newApps, isEmpty);
+  });
+
+  test('baseline v0.3/v0.4 (solo firstSeen) migra sin acusar', () async {
+    await File('${tmp.path}/rootcause-apps-baseline.json').writeAsString(
+      '{"packages":{"com.a":1000}}', // formato antiguo: int directo
+    );
+    final store = BaselineStore(tmp.path);
+    final diff = await store.diffAndUpdate(
+      [buildAppRisk(packageName: 'com.a', versionName: '3.0')],
+      nowMillis: 2000,
+      auditSupported: true,
+    );
+    expect(diff.isEmpty, isTrue, reason: 'sin versión previa no hay acusación');
   });
 
   test('desinstalar y reinstalar vuelve a contar como evento', () async {
@@ -71,7 +104,7 @@ void main() {
       nowMillis: 3000,
       auditSupported: true,
     );
-    expect(again, hasLength(1));
+    expect(again.newApps, hasLength(1));
   });
 
   test('en iOS (sin auditoría) no se crea baseline ni se acusa', () async {
@@ -81,7 +114,7 @@ void main() {
       nowMillis: 1000,
       auditSupported: false,
     );
-    expect(result, isEmpty);
+    expect(result.isEmpty, isTrue);
     expect(
       File('${tmp.path}/rootcause-apps-baseline.json').existsSync(),
       isFalse,
@@ -98,6 +131,10 @@ void main() {
       nowMillis: 1000,
       auditSupported: true,
     );
-    expect(result, isEmpty, reason: 'reconstrucción = primera vez silenciosa');
+    expect(
+      result.isEmpty,
+      isTrue,
+      reason: 'reconstrucción = primera vez silenciosa',
+    );
   });
 }

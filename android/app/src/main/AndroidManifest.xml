@@ -82,6 +82,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Compartir informes y backups por el share sheet del sistema.
+             Comparte el SISTEMA, no la app: sigue sin permiso INTERNET. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Widget de pantalla de inicio: el semáforo sin abrir la app. -->
         <receiver
             android:name=".RootCauseWidgetProvider"

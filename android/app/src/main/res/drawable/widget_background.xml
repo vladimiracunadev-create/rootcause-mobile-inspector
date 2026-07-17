@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- El color se resuelve por tema (values / values-night): el widget se
+     ve bien en pantallas de inicio claras y oscuras. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#E6203A43" />
+    <solid android:color="@color/widget_bg" />
     <corners android:radius="16dp" />
 </shape>

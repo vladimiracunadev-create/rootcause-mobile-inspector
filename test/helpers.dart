@@ -68,13 +68,14 @@ Snapshot buildSnapshot({
 AppRisk buildAppRisk({
   String packageName = 'com.example.app',
   String label = 'Example',
+  String versionName = '1.0',
   List<String> dangerousPermissions = const [],
   List<String> specialFlags = const [],
   bool sideloaded = false,
 }) => AppRisk.fromMap({
   'packageName': packageName,
   'label': label,
-  'versionName': '1.0',
+  'versionName': versionName,
   'dangerousPermissions': dangerousPermissions,
   'specialFlags': specialFlags,
   'sideloaded': sideloaded,

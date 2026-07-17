@@ -17,6 +17,8 @@ class AppConfig {
     this.backgroundCapture = false,
     this.backgroundChargingOnly = true,
     this.notifyCritical = true,
+    this.nearbyHistory = false,
+    this.onboardingSeen = false,
     this.memoryWarningPct = 20,
     this.memoryCriticalPct = 10,
     this.storageWarningPct = 15,
@@ -41,6 +43,8 @@ class AppConfig {
         d.backgroundChargingOnly,
       ),
       notifyCritical: asBool(map['notifyCritical'], d.notifyCritical),
+      nearbyHistory: asBool(map['nearbyHistory'], d.nearbyHistory),
+      onboardingSeen: asBool(map['onboardingSeen'], d.onboardingSeen),
       memoryWarningPct: asInt(map['memoryWarningPct'], d.memoryWarningPct),
       memoryCriticalPct: asInt(map['memoryCriticalPct'], d.memoryCriticalPct),
       storageWarningPct: asInt(map['storageWarningPct'], d.storageWarningPct),
@@ -69,6 +73,13 @@ class AppConfig {
   /// Notificación local cuando una captura en segundo plano pasa a
   /// CRÍTICO. Local de verdad: sin permiso INTERNET no hay push posible.
   final bool notifyCritical;
+
+  /// Histórico de Cercanía entre sesiones (opt-in): registra en qué DÍAS
+  /// se vio cada dirección BLE para detectar rastreadores multi-día.
+  final bool nearbyHistory;
+
+  /// La introducción de primera vez ya se mostró.
+  final bool onboardingSeen;
   final int memoryWarningPct;
   final int memoryCriticalPct;
   final int storageWarningPct;
@@ -91,6 +102,8 @@ class AppConfig {
     bool? backgroundCapture,
     bool? backgroundChargingOnly,
     bool? notifyCritical,
+    bool? nearbyHistory,
+    bool? onboardingSeen,
     int? memoryWarningPct,
     int? memoryCriticalPct,
     int? storageWarningPct,
@@ -104,6 +117,8 @@ class AppConfig {
     backgroundChargingOnly:
         backgroundChargingOnly ?? this.backgroundChargingOnly,
     notifyCritical: notifyCritical ?? this.notifyCritical,
+    nearbyHistory: nearbyHistory ?? this.nearbyHistory,
+    onboardingSeen: onboardingSeen ?? this.onboardingSeen,
     memoryWarningPct: memoryWarningPct ?? this.memoryWarningPct,
     memoryCriticalPct: memoryCriticalPct ?? this.memoryCriticalPct,
     storageWarningPct: storageWarningPct ?? this.storageWarningPct,
@@ -120,6 +135,8 @@ class AppConfig {
     'backgroundCapture': backgroundCapture,
     'backgroundChargingOnly': backgroundChargingOnly,
     'notifyCritical': notifyCritical,
+    'nearbyHistory': nearbyHistory,
+    'onboardingSeen': onboardingSeen,
     'memoryWarningPct': memoryWarningPct,
     'memoryCriticalPct': memoryCriticalPct,
     'storageWarningPct': storageWarningPct,

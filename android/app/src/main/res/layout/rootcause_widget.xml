@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="RootCause"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/widget_text"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
             android:id="@+id/widget_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#CCFFFFFF"
+            android:textColor="@color/widget_text_dim"
             android:textSize="12sp" />
     </LinearLayout>
 
@@ -43,6 +43,6 @@
         android:id="@+id/widget_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#99FFFFFF"
+        android:textColor="@color/widget_text_dim"
         android:textSize="12sp" />
 </LinearLayout>

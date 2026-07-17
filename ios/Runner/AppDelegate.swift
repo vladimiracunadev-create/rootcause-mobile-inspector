@@ -52,12 +52,12 @@ import UIKit
           DispatchQueue.main.async { result(freed) }
         }
       case "requestBlePermissions", "configureBackgroundCapture",
-        "requestNotificationPermissions", "notifyCritical":
+        "requestNotificationPermissions", "notifyCritical", "shareFile":
         // Escaneo BLE, captura en segundo plano y notificaciones locales:
         // fuera del alcance iOS actual (distribución en pausa). Se
         // declara, no se simula.
         result(false)
-      case "bleScan":
+      case "bleScan", "pickAndReadFile":
         result(nil)
       default:
         result(FlutterMethodNotImplemented)

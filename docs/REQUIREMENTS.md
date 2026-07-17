@@ -1,7 +1,7 @@
 ﻿# Requisitos
 
 Requisitos para usar la app y para desarrollarla. Versión actual del
-producto: **v0.4.0** (fuente de verdad: `pubspec.yaml`). Licencia Apache 2.0.
+producto: **v0.5.0** (fuente de verdad: `pubspec.yaml`). Licencia Apache 2.0.
 
 ---
 

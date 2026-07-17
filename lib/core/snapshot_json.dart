@@ -6,12 +6,21 @@ library;
 
 import 'dart:convert';
 
+import 'baseline_store.dart';
 import 'models.dart';
 
 class SnapshotJson {
+  /// Política de esquema: campos NUEVOS se agregan sin subir la versión
+  /// (los lectores ignoran lo desconocido); solo un cambio que rompa la
+  /// lectura de campos existentes sube este número. Documentado en
+  /// docs/ARCHITECTURE.md.
   static const int schemaVersion = 1;
 
-  static Map<String, Object?> toMap(Snapshot s, Verdict v) => {
+  static Map<String, Object?> toMap(
+    Snapshot s,
+    Verdict v, {
+    BaselineDiff? diff,
+  }) => {
     'schemaVersion': schemaVersion,
     'timestampMillis': s.timestampMillis,
     'verdict': {'severity': v.severity.name, 'score': v.score},
@@ -84,11 +93,17 @@ class SnapshotJson {
       'vendorSkin': s.device.vendorSkin,
       'usageAccessGranted': s.device.usageAccessGranted,
     },
+    if (diff != null && !diff.isEmpty)
+      'baselineChanges': {
+        'new': [for (final a in diff.newApps) a.packageName],
+        'updated': [for (final a in diff.updatedApps) a.packageName],
+        'removed': diff.removedPackages,
+      },
   };
 
-  static String toJson(Snapshot s, Verdict v) =>
-      const JsonEncoder.withIndent('  ').convert(toMap(s, v));
+  static String toJson(Snapshot s, Verdict v, {BaselineDiff? diff}) =>
+      const JsonEncoder.withIndent('  ').convert(toMap(s, v, diff: diff));
 
-  /// Una línea compacta para el historial JSON Lines.
+  /// Una línea compacta (sin sellar); el sellado lo hace HistoryStore.
   static String toJsonLine(Snapshot s, Verdict v) => jsonEncode(toMap(s, v));
 }

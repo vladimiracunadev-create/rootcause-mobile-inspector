@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Política de privacidad de RootCause Mobile Inspector: cero telemetría, sin permiso de INTERNET, evidencia solo local. Verificable en el código." />
+  <title>Privacidad — RootCause Mobile Inspector</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <span class="nav-logo">RootCause Mobile</span>
+      <nav class="nav-links">
+        <a href="index.html">Inicio</a>
+        <a href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section" style="max-width: 760px; margin: 0 auto;">
+    <h1>Política de privacidad</h1>
+    <p><strong>RootCause Mobile Inspector no recopila, transmite ni comparte
+      ningún dato personal. Punto.</strong> Esta política describe cómo, y
+      por qué es verificable en el código y no una simple promesa.</p>
+
+    <h2>Sin red, por diseño</h2>
+    <p>La aplicación <strong>no declara el permiso <code>INTERNET</code></strong>
+      en su versión de release. Técnicamente no puede abrir conexiones
+      salientes: no hay servidores, no hay analítica, no hay nube. Puedes
+      comprobarlo en
+      <code>android/app/src/main/AndroidManifest.xml</code> del código
+      fuente abierto.</p>
+
+    <h2>Qué se lee y dónde se queda</h2>
+    <ul>
+      <li>Métricas del dispositivo (memoria, almacenamiento, batería, red),
+        lista de apps instaladas y sus permisos, y estado de integridad:
+        se leen para el diagnóstico y se guardan <strong>solo en el
+        almacenamiento privado de la app</strong> (sandbox).</li>
+      <li>El historial, el baseline de apps y la configuración viven en ese
+        sandbox y se eliminan al desinstalar la app o al pulsar «Borrar
+        evidencia».</li>
+      <li><strong>Nada sale del dispositivo</strong> salvo que tú lo
+        compartas explícitamente (informe o backup, vía el selector del
+        sistema).</li>
+    </ul>
+
+    <h2>Permisos y por qué</h2>
+    <ul>
+      <li><strong>Ver todas las apps</strong>: para auditar la superficie
+        de permisos. No se lee su contenido ni sus datos.</li>
+      <li><strong>Bluetooth (opcional)</strong>: solo si usas «Cercanía».
+        Declarado con <code>neverForLocation</code>: no se usa para
+        ubicarte.</li>
+      <li><strong>Notificaciones (opcional)</strong>: para avisarte de un
+        veredicto crítico. Son notificaciones locales del dispositivo.</li>
+      <li><strong>Acceso de uso (opcional)</strong>: solo si activas el
+        tiempo en pantalla por app. Lo concedes tú en Ajustes.</li>
+    </ul>
+    <p>Todos son opcionales salvo la lectura de apps; ninguno envía datos a
+      ninguna parte.</p>
+
+    <h2>Sin cuentas, sin rastreadores, sin anuncios</h2>
+    <p>No hay registro ni inicio de sesión. No se incluye ningún SDK de
+      terceros: el proyecto no tiene dependencias externas de pub.dev.</p>
+
+    <h2>Contacto</h2>
+    <p>Código, incidencias y verificación:
+      <a href="https://github.com/vladimiracunadev-create/rootcause-mobile-inspector">github.com/vladimiracunadev-create/rootcause-mobile-inspector</a>.
+      Licencia Apache 2.0.</p>
+  </main>
+</body>
+
+</html>

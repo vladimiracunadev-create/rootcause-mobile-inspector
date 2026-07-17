@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fondo del widget en tema claro. -->
+    <color name="widget_bg">#E6203A43</color>
+    <color name="widget_text">#FFFFFFFF</color>
+    <color name="widget_text_dim">#CCFFFFFF</color>
+</resources>

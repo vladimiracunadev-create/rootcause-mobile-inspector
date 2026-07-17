@@ -1,0 +1,34 @@
+RootCause Mobile Inspector es un sensor forense de diagnóstico para
+Android: vigila las distorsiones anómalas de los recursos de tu teléfono
+—memoria, almacenamiento, batería, red y superficie de permisos de las
+apps— y explica con evidencia si algo se comporta distinto. Diagnóstico
+primero, intervención después.
+
+No es un antivirus ni un "limpiador": no elimina malware ni mata apps
+(Android no lo permite a una app de usuario). Te muestra indicios con su
+evidencia y te lleva a la pantalla del sistema donde tú decides.
+
+PRIVACIDAD POR DISEÑO
+• Sin permiso de INTERNET: la app no puede enviar nada, ni aunque
+  quisiera. Verificable en el código.
+• Cero telemetría, cero cuentas, cero anuncios.
+• Tu evidencia solo sale del teléfono si tú la compartes.
+
+QUÉ OBSERVA
+• Semáforo global con motor de reglas local (memoria, almacenamiento,
+  temperatura/salud de batería, apps riesgosas, apps recién instaladas,
+  parche de seguridad antiguo, carga en ascenso sostenido, root/jailbreak).
+• Auditoría de superficie de permisos por app y tiempo en pantalla
+  (con el acceso de uso opcional).
+• Volúmenes de almacenamiento (tarjeta SD / USB).
+• Escaneo Bluetooth LE de dispositivos cercanos (opt-in).
+• Historial local con gráfico de tendencia y comparación entre capturas.
+
+EVIDENCIA DE VERDAD
+• Cada captura se sella con una cadena de hashes SHA-256: la evidencia es
+  verificable, no manipulable.
+• Informe forense compartible y backup/restauración de toda tu evidencia.
+• Vigilancia en segundo plano con notificación local si algo pasa a
+  crítico o se instala una app espía.
+
+Software libre (Apache 2.0). Hermano móvil de rootcause-windows-inspector.

@@ -1,6 +1,6 @@
 ﻿# Plan Maestro — RootCause Mobile Inspector
 
-**Versión base:** v0.4.0 · **Actualizado:** 2026-07-16
+**Versión base:** v0.5.0 · **Actualizado:** 2026-07-16
 **Propósito:** visión del producto y plan por fases. Este documento es la
 brújula; el detalle ítem por ítem vive en [ROADMAP.md](ROADMAP.md) y este plan
 nunca lo contradice.
@@ -25,7 +25,7 @@ RootCause Mobile   → sensor forense de bolsillo   (Flutter, Android + iOS)
 Ambos              → diagnóstico primero, intervención después
 ```
 
-## II. Fase actual — v0.4.x: el sensor que vigila, avisa y responde
+## II. Fase actual — v0.5.x: evidencia de verdad
 
 Qué hay hoy, verificable en el código y en los releases:
 
@@ -34,17 +34,23 @@ Qué hay hoy, verificable en el código y en los releases:
   (→ [HEURISTICAS.md](HEURISTICAS.md)), umbrales **modificables por el
   usuario**, tendencia `load-rising`, baseline de apps `new-apps`
   (el `persistence-change` móvil) y parche antiguo `patch-old`.
+- **Evidencia íntegra y portable**: historial sellado con cadena de
+  hashes SHA-256 verificable, informe forense compartible y
+  backup/restauración/borrado de toda la evidencia.
 - Auto-captura configurable + captura en segundo plano con WorkManager
   (opción solo-cargando) con **notificación local de veredicto crítico**
-  (solo transición) — todo por el mismo núcleo vía engine headless.
+  y de **app espía** recién instalada — todo por el mismo núcleo vía
+  engine headless.
 - Tiempo en pantalla por app con el permiso de acceso de uso (opt-in
-  real) y **widget de pantalla de inicio** con el semáforo.
+  real) y **widget de pantalla de inicio** con el semáforo (día/noche).
 - Auditoría de superficie de permisos por app (Android), indicadores
-  honestos de root/jailbreak y volúmenes de almacenamiento (SD/USB).
+  honestos de root/jailbreak (incl. bootloader/verified boot) y
+  volúmenes de almacenamiento (SD/USB).
 - Acciones de intervención que abren la pantalla exacta del sistema, y
-  pestaña Cercanía (escaneo BLE opt-in, sin permiso INTERNET).
-- Historial local (JSON Lines, retención 500) con tendencia visible y
-  comparación A→B + export JSON forense con ids neutrales al idioma.
+  pestaña Cercanía (escaneo BLE opt-in, con histórico multi-día).
+- Historial local (JSON Lines, retención 500) con tendencia visible
+  (memoria, disco y temperatura) y comparación A→B + export JSON forense.
+- Onboarding de primera vez, accesibilidad y registro local de errores.
 - APK firmado publicado por CI (por ABI + universal) y landing en GitHub Pages.
 
 **iOS: en pausa.** Decisión del autor (2026-07-15): la distribución iOS queda
@@ -54,14 +60,15 @@ plataforma.
 
 ## III. Fases siguientes
 
-### Fase 1 — profundidad Android (lo que queda)
+### Fase 1 — distribución y confianza (lo que queda)
 
-La prioridad sigue siendo profundizar donde ya hay producción. Ítems
-(detalle en [ROADMAP.md](ROADMAP.md)):
+El producto ya es robusto; el freno ahora es la adopción. Ítems (detalle
+en [DISTRIBUCION.md](DISTRIBUCION.md) y [ROADMAP.md](ROADMAP.md)):
 
-- Cercanía con histórico entre sesiones (opt-in) para rastreadores a lo
-  largo de días.
-- Refinamiento del widget (tamaños, tema del sistema).
+- Firma permanente (secretos del keystore) — requiere acción del autor.
+- Envío a IzzyOnDroid y F-Droid con la metadata ya preparada.
+- Builds reproducibles verificables públicamente.
+- Portugués (PT-BR) y refinamiento del widget.
 
 ### Fase 2 — iOS de primera clase (EN PAUSA)
 

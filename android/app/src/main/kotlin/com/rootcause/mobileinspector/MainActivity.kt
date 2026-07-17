@@ -1,6 +1,7 @@
 package com.rootcause.mobileinspector
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -16,6 +17,12 @@ class MainActivity : FlutterActivity() {
 
     private var pendingBleResult: MethodChannel.Result? = null
     private var pendingNotifResult: MethodChannel.Result? = null
+    private var pendingPickResult: MethodChannel.Result? = null
+
+    private companion object {
+        const val PICK_FILE_REQUEST = 7404
+        const val PICK_MAX_BYTES = 20L * 1024 * 1024
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -42,7 +49,46 @@ class MainActivity : FlutterActivity() {
                     )
                 }
             },
+            onPickFile = { result ->
+                pendingPickResult?.success(null)
+                pendingPickResult = result
+                try {
+                    startActivityForResult(
+                        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "*/*"
+                        },
+                        PICK_FILE_REQUEST,
+                    )
+                } catch (_: Throwable) {
+                    pendingPickResult?.success(null)
+                    pendingPickResult = null
+                }
+            },
         )
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != PICK_FILE_REQUEST) return
+        val result = pendingPickResult ?: return
+        pendingPickResult = null
+        val uri = data?.data
+        if (resultCode != RESULT_OK || uri == null) {
+            result.success(null)
+            return
+        }
+        Thread {
+            val content = try {
+                contentResolver.openInputStream(uri)?.use { stream ->
+                    val bytes = stream.readBytes()
+                    if (bytes.size > PICK_MAX_BYTES) null else String(bytes, Charsets.UTF_8)
+                }
+            } catch (_: Throwable) {
+                null
+            }
+            runOnUiThread { result.success(content) }
+        }.start()
     }
 
     override fun onRequestPermissionsResult(

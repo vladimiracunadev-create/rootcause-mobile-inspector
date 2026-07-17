@@ -39,6 +39,7 @@ object CollectorsChannel {
         activity: Activity? = null,
         onRequestBlePermissions: ((MethodChannel.Result) -> Unit)? = null,
         onRequestNotificationPermissions: ((MethodChannel.Result) -> Unit)? = null,
+        onPickFile: ((MethodChannel.Result) -> Unit)? = null,
     ) {
         val mainHandler = Handler(Looper.getMainLooper())
         MethodChannel(messenger, NAME).setMethodCallHandler { call, result ->
@@ -105,6 +106,20 @@ object CollectorsChannel {
                     result.success(null)
                 }
 
+                "shareFile" -> result.success(
+                    shareFile(
+                        activity ?: context,
+                        call.argument<String>("path") ?: "",
+                        call.argument<String>("mimeType") ?: "text/plain",
+                        call.argument<String>("title") ?: "RootCause",
+                    ),
+                )
+
+                "pickAndReadFile" -> when {
+                    onPickFile != null -> onPickFile(result)
+                    else -> result.success(null)
+                }
+
                 "configureBackgroundCapture" -> {
                     BackgroundCapture.configure(
                         context,
@@ -148,6 +163,41 @@ object CollectorsChannel {
             context.startActivity(intent)
             true
         } catch (_: ActivityNotFoundException) {
+            false
+        }
+    }
+
+    /**
+     * Comparte un archivo del sandbox por el share sheet del sistema
+     * (FileProvider). Quien envía después es la app que el usuario elija;
+     * RootCause sigue sin poder tocar la red.
+     */
+    private fun shareFile(
+        context: Context,
+        path: String,
+        mimeType: String,
+        title: String,
+    ): Boolean {
+        if (path.isEmpty()) return false
+        return try {
+            val file = File(path)
+            if (!file.exists()) return false
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file,
+            )
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = mimeType
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_TITLE, title)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            val chooser = Intent.createChooser(send, title)
+            if (context !is Activity) chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+            true
+        } catch (_: Throwable) {
             false
         }
     }

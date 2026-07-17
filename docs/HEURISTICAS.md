@@ -97,9 +97,11 @@ revisión humana, no un veredicto de malicia.
 | ≥ 1 indicador | 🟡 WARNING |
 
 **Indicadores Android**: binario `su` en 7 rutas conocidas; build firmado
-con `test-keys`. **iOS**: rutas de Cydia/Sileo/MobileSubstrate, `apt`, y
-prueba de escritura fuera del sandbox. **Honestidad**: WARNING y no
-CRITICAL a propósito — un equipo rooteado a propósito por su dueño
+con `test-keys`; desde v0.5.0 también **bootloader desbloqueado**
+(`ro.boot.flash.locked=0`) y **verified boot no-verde**
+(`ro.boot.verifiedbootstate`). **iOS**: rutas de Cydia/Sileo/MobileSubstrate,
+`apt`, y prueba de escritura fuera del sandbox. **Honestidad**: WARNING y
+no CRITICAL a propósito — un equipo rooteado a propósito por su dueño
 produce el mismo indicio; hace falta contexto humano.
 
 ### 7 · `load-rising` — carga en ascenso sostenido (v0.2.0)

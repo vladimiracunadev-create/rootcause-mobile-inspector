@@ -11,7 +11,7 @@
 ║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
 ║                                                                                   ║
 ║                          M O B I L E   I N S P E C T O R                          ║
-║                  Sensor forense de diagnóstico · Flutter · v0.4.0                 ║
+║                  Sensor forense de diagnóstico · Flutter · v0.5.0                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -19,7 +19,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.4.0-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.5.0-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -255,6 +255,7 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 - APK release firmado publicado en Releases con hash de integridad
 - Motor de reglas local con **umbrales modificables por el usuario** y 9 familias de hallazgo (incluidas la tendencia `load-rising`, el baseline `new-apps` y el parche antiguo `patch-old`)
 - **Tiempo en pantalla por app** con el acceso de uso (opt-in real del usuario) y **widget de pantalla de inicio** con el semáforo
+- **Evidencia de verdad** (v0.5.0): historial sellado con **cadena de hashes SHA-256** verificable, **informe forense compartible**, **backup/restauración/borrado**, alerta de app espía y registro local de errores
 - Auto-captura configurable (5 min por defecto) + **captura en segundo plano** con WorkManager (opción solo-cargando) y **notificación local de veredicto crítico**
 - **Historial con gráfico de tendencia y comparación A→B** (deltas de memoria, disco, puntaje y apps riesgosas)
 - Auditoría de superficie de permisos por app (Android) con acceso a la ficha del sistema
@@ -295,7 +296,7 @@ Detalle completo → [`docs/LIMITACIONES.md`](docs/LIMITACIONES.md)
 | 🧑‍💻 Desarrollador | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/FLUTTER_PARA_ROOTCAUSE.md`](docs/FLUTTER_PARA_ROOTCAUSE.md) · [`docs/HEURISTICAS.md`](docs/HEURISTICAS.md) · [`docs/TESTING.md`](docs/TESTING.md) · [`docs/BUILD_MOVIL.md`](docs/BUILD_MOVIL.md) · [`docs/COMMANDS.md`](docs/COMMANDS.md) |
 | 👤 Usuario final | [`docs/MANUAL_PARA_NOVATOS.md`](docs/MANUAL_PARA_NOVATOS.md) · [`docs/MANUAL_USUARIO.md`](docs/MANUAL_USUARIO.md) · [`docs/OPERACION.md`](docs/OPERACION.md) · [`docs/EMULADOR.md`](docs/EMULADOR.md) · [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
 | 🛡️ Seguridad | [`docs/DETECCION_AMENAZAS.md`](docs/DETECCION_AMENAZAS.md) · [`docs/COMPARATIVA_OSS.md`](docs/COMPARATIVA_OSS.md) · [`docs/POLITICA_DE_PRIVACIDAD_LOCAL.md`](docs/POLITICA_DE_PRIVACIDAD_LOCAL.md) · [`SECURITY.md`](SECURITY.md) |
-| 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) · [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
+| 📋 Release | [`docs/RELEASE_MOVIL.md`](docs/RELEASE_MOVIL.md) · [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) · [`docs/DISTRIBUCION.md`](docs/DISTRIBUCION.md) · [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md) · [`CHANGELOG.md`](CHANGELOG.md) · [`docs/ROADMAP.md`](docs/ROADMAP.md) |
 | 🧭 Producto | [`docs/PLAN_MAESTRO.md`](docs/PLAN_MAESTRO.md) · [`docs/CATALOGO_PRODUCTO.md`](docs/CATALOGO_PRODUCTO.md) · [`docs/LICENCIA_Y_DECISION.md`](docs/LICENCIA_Y_DECISION.md) · [`docs/RECLUTADORES.md`](docs/RECLUTADORES.md) |
 | 📑 Todo | [`docs/INDEX.md`](docs/INDEX.md) |
 

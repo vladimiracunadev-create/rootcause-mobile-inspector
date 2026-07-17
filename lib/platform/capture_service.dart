@@ -20,6 +20,7 @@ class CaptureOutcome {
     required this.verdict,
     required this.history,
     required this.wentCritical,
+    this.baselineDiff = const BaselineDiff(),
   });
 
   final Snapshot snapshot;
@@ -29,6 +30,16 @@ class CaptureOutcome {
   /// `true` solo en la TRANSICIÓN a crítico (la captura anterior no lo
   /// era): así la alerta avisa una vez, no cada 15 minutos.
   final bool wentCritical;
+
+  /// Ciclo de vida de apps desde la captura anterior (nuevas /
+  /// actualizadas / eliminadas).
+  final BaselineDiff baselineDiff;
+
+  /// Apps nuevas con superficie riesgosa o sideload — el caso que
+  /// merece notificación aunque el veredicto global no sea crítico.
+  List<AppRisk> get riskyNewApps => baselineDiff.newApps
+      .where((a) => a.severity != Severity.normal || a.sideloaded)
+      .toList();
 }
 
 class CaptureService {
@@ -43,13 +54,13 @@ class CaptureService {
     final snapshot = await collectors.collect();
 
     var prior = const <HistoryRow>[];
-    var newApps = const <AppRisk>[];
+    var diff = const BaselineDiff();
     HistoryStore? store;
     if (directoryPath != null) {
       store = HistoryStore(directoryPath);
       try {
         prior = await store.recent();
-        newApps = await BaselineStore(directoryPath).diffAndUpdate(
+        diff = await BaselineStore(directoryPath).diffAndUpdate(
           snapshot.apps,
           nowMillis: snapshot.timestampMillis,
           auditSupported: snapshot.device.appsAuditSupported,
@@ -61,7 +72,7 @@ class CaptureService {
 
     final verdict = RuleEngine(
       thresholds: config.thresholds,
-    ).evaluate(snapshot, history: prior, newApps: newApps);
+    ).evaluate(snapshot, history: prior, newApps: diff.newApps);
 
     final wentCritical =
         verdict.severity == Severity.critical &&
@@ -70,7 +81,9 @@ class CaptureService {
     var history = prior;
     if (store != null) {
       try {
-        await store.append(SnapshotJson.toJsonLine(snapshot, verdict));
+        // La captura se sella al anexarse (cadena de hashes) — ver
+        // HistoryStore.append.
+        await store.append(SnapshotJson.toMap(snapshot, verdict, diff: diff));
         history = await store.recent();
       } on FileSystemException {
         history = prior;
@@ -82,6 +95,7 @@ class CaptureService {
       verdict: verdict,
       history: history,
       wentCritical: wentCritical,
+      baselineDiff: diff,
     );
   }
 }

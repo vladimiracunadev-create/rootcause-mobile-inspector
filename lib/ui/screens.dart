@@ -124,30 +124,33 @@ class VerdictBanner extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(12),
       color: severityColor(verdict.severity).withValues(alpha: 0.18),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            SeverityDot(severity: verdict.severity, size: 18),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+      child: Semantics(
+        label: label,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              SeverityDot(severity: verdict.severity, size: 18),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    strings.verdictScore(verdict.score),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+                    Text(
+                      strings.verdictScore(verdict.score),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -699,15 +702,21 @@ class _TrendPainter extends CustomPainter {
   const _TrendPainter({
     required this.memSeries,
     required this.storageSeries,
+    required this.tempSeries,
     required this.memColor,
     required this.storageColor,
+    required this.tempColor,
     required this.gridColor,
   });
 
   final List<int> memSeries;
   final List<int> storageSeries;
+
+  /// Temperatura escalada a 0-100 (0-60 °C); vacía si no hay datos.
+  final List<int> tempSeries;
   final Color memColor;
   final Color storageColor;
+  final Color tempColor;
   final Color gridColor;
 
   @override
@@ -721,6 +730,7 @@ class _TrendPainter extends CustomPainter {
     }
     _polyline(canvas, size, memSeries, memColor);
     _polyline(canvas, size, storageSeries, storageColor);
+    _polyline(canvas, size, tempSeries, tempColor);
   }
 
   void _polyline(Canvas canvas, Size size, List<int> series, Color color) {
@@ -847,26 +857,44 @@ class _HistoryScreenState extends State<HistoryScreen> {
               SizedBox(
                 height: 110,
                 width: double.infinity,
-                child: CustomPaint(
-                  painter: _TrendPainter(
-                    memSeries: [
-                      for (final r in chronological) r.memAvailablePct,
-                    ],
-                    storageSeries: [
-                      for (final r in chronological) r.storageFreePct,
-                    ],
-                    memColor: memColor,
-                    storageColor: storageColor,
-                    gridColor: theme.dividerColor.withValues(alpha: 0.4),
+                child: Semantics(
+                  label: strings.trendTitle,
+                  child: CustomPaint(
+                    painter: _TrendPainter(
+                      memSeries: [
+                        for (final r in chronological) r.memAvailablePct,
+                      ],
+                      storageSeries: [
+                        for (final r in chronological) r.storageFreePct,
+                      ],
+                      // 0-60 °C escalados al eje 0-100 del gráfico; la
+                      // leyenda lo declara. Sin datos (iOS), sin línea.
+                      tempSeries: chronological.any((r) => r.batteryTempC >= 0)
+                          ? [
+                              for (final r in chronological)
+                                (r.batteryTempC.clamp(0, 60) * 100 ~/ 60),
+                            ]
+                          : const [],
+                      memColor: memColor,
+                      storageColor: storageColor,
+                      tempColor: theme.colorScheme.error,
+                      gridColor: theme.dividerColor.withValues(alpha: 0.4),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 16,
+                runSpacing: 4,
                 children: [
                   _legendDot(memColor, strings.trendMemLegend),
-                  const SizedBox(width: 16),
                   _legendDot(storageColor, strings.trendStorageLegend),
+                  if (chronological.any((r) => r.batteryTempC >= 0))
+                    _legendDot(
+                      theme.colorScheme.error,
+                      strings.trendTempLegend,
+                    ),
                 ],
               ),
             ],
@@ -979,6 +1007,117 @@ class _HistoryScreenState extends State<HistoryScreen> {
           );
         }),
       ],
+    );
+  }
+}
+
+/// Introducción de primera vez: 3 pasos honestos (qué es, qué NO es,
+/// privacidad). Se muestra una vez; el flag vive en la config.
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({
+    super.key,
+    required this.strings,
+    required this.onDone,
+  });
+
+  final AppStrings strings;
+  final VoidCallback onDone;
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final _controller = PageController();
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.strings;
+    final pages = [
+      (Icons.radar, s.onboardTitle1, s.onboardBody1),
+      (Icons.block, s.onboardTitle2, s.onboardBody2),
+      (Icons.lock_outline, s.onboardTitle3, s.onboardBody3),
+    ];
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: pages.length,
+                onPageChanged: (p) => setState(() => _page = p),
+                itemBuilder: (context, i) {
+                  final (icon, title, body) = pages[i];
+                  return Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(icon, size: 72, color: theme.colorScheme.primary),
+                        const SizedBox(height: 24),
+                        Text(
+                          title,
+                          style: theme.textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(body, textAlign: TextAlign.center),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var i = 0; i < pages.length; i++)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i == _page
+                          ? theme.colorScheme.primary
+                          : theme.disabledColor,
+                    ),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () {
+                    if (_page < pages.length - 1) {
+                      _controller.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOut,
+                      );
+                    } else {
+                      widget.onDone();
+                    }
+                  },
+                  child: Text(
+                    _page < pages.length - 1 ? s.onboardNext : s.onboardStart,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1127,11 +1266,19 @@ class SettingsScreen extends StatelessWidget {
     required this.config,
     required this.strings,
     required this.onChanged,
+    this.onBackup,
+    this.onRestore,
+    this.onWipe,
+    this.onReport,
   });
 
   final AppConfig config;
   final AppStrings strings;
   final ValueChanged<AppConfig> onChanged;
+  final VoidCallback? onBackup;
+  final VoidCallback? onRestore;
+  final VoidCallback? onWipe;
+  final VoidCallback? onReport;
 
   /// Fila de umbral con paso de ±1 dentro de [min, max].
   Widget _stepper(
@@ -1295,12 +1442,62 @@ class SettingsScreen extends StatelessWidget {
                     autoRefreshMinutes: c.autoRefreshMinutes,
                     backgroundCapture: c.backgroundCapture,
                     backgroundChargingOnly: c.backgroundChargingOnly,
+                    notifyCritical: c.notifyCritical,
+                    nearbyHistory: c.nearbyHistory,
+                    onboardingSeen: c.onboardingSeen,
                   ),
                 ),
               ),
             ),
           ],
         ),
+        SectionCard(
+          title: strings.tabNearby,
+          children: [
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(strings.settingsNearbyHistory),
+              value: c.nearbyHistory,
+              onChanged: (v) => onChanged(c.copyWith(nearbyHistory: v)),
+            ),
+          ],
+        ),
+        if (onBackup != null || onWipe != null)
+          SectionCard(
+            title: strings.evidenceTitle,
+            children: [
+              Text(
+                strings.evidenceNote,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 4),
+              if (onReport != null)
+                _evidenceButton(
+                  Icons.description_outlined,
+                  strings.evidenceReport,
+                  onReport,
+                ),
+              if (onBackup != null)
+                _evidenceButton(
+                  Icons.archive_outlined,
+                  strings.evidenceBackup,
+                  onBackup,
+                ),
+              if (onRestore != null)
+                _evidenceButton(
+                  Icons.unarchive_outlined,
+                  strings.evidenceRestore,
+                  onRestore,
+                ),
+              if (onWipe != null)
+                _evidenceButton(
+                  Icons.delete_outline,
+                  strings.evidenceWipe,
+                  onWipe,
+                  danger: true,
+                ),
+            ],
+          ),
         SectionCard(
           title: strings.settingsLanguageTitle,
           children: [
@@ -1326,6 +1523,25 @@ class SettingsScreen extends StatelessWidget {
       ],
     );
   }
+
+  Widget _evidenceButton(
+    IconData icon,
+    String label,
+    VoidCallback? onPressed, {
+    bool danger = false,
+  }) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton.icon(
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: danger
+          ? TextButton.styleFrom(
+              foregroundColor: severityColor(Severity.critical),
+            )
+          : null,
+      onPressed: onPressed,
+    ),
+  );
 }
 
 class AboutScreen extends StatelessWidget {
@@ -1337,6 +1553,9 @@ class AboutScreen extends StatelessWidget {
     required this.author,
     required this.license,
     required this.repository,
+    this.crashLog,
+    this.onShareCrashLog,
+    this.onClearCrashLog,
   });
 
   final AppStrings strings;
@@ -1345,6 +1564,11 @@ class AboutScreen extends StatelessWidget {
   final String author;
   final String license;
   final String repository;
+
+  /// Contenido del registro local de errores (null si no hay).
+  final String? crashLog;
+  final VoidCallback? onShareCrashLog;
+  final VoidCallback? onClearCrashLog;
 
   @override
   Widget build(BuildContext context) => ListView(
@@ -1366,6 +1590,40 @@ class AboutScreen extends StatelessWidget {
       SectionCard(
         title: strings.aboutPrivacyTitle,
         children: [Text(strings.aboutPrivacyBody)],
+      ),
+      SectionCard(
+        title: strings.diagTitle,
+        children: [
+          Text(strings.diagNote, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 6),
+          if (crashLog == null)
+            Text(strings.diagNone)
+          else ...[
+            Text(
+              crashLog!.length > 600
+                  ? '${crashLog!.substring(0, 600)}…'
+                  : crashLog!,
+              style: const TextStyle(fontSize: 11, fontFamily: 'monospace'),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (onShareCrashLog != null)
+                  TextButton.icon(
+                    icon: const Icon(Icons.share, size: 16),
+                    label: Text(strings.diagShare),
+                    onPressed: onShareCrashLog,
+                  ),
+                if (onClearCrashLog != null)
+                  TextButton.icon(
+                    icon: const Icon(Icons.delete_outline, size: 16),
+                    label: Text(strings.diagClear),
+                    onPressed: onClearCrashLog,
+                  ),
+              ],
+            ),
+          ],
+        ],
       ),
     ],
   );

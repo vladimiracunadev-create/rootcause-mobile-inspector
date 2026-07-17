@@ -11,20 +11,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'core/config_store.dart';
+import 'core/crash_log.dart';
 import 'core/history_store.dart';
 import 'core/models.dart';
 import 'core/nearby.dart';
+import 'core/nearby_store.dart';
 import 'core/rule_engine.dart';
 import 'core/snapshot_json.dart';
 import 'meta.dart';
 import 'platform/capture_service.dart';
 import 'platform/collectors.dart';
+import 'platform/evidence_service.dart';
+import 'ui/report.dart';
 import 'ui/screens.dart';
 import 'ui/strings.dart';
 import 'ui/theme.dart';
 
 void main() {
-  runApp(const RootCauseApp());
+  // Registro LOCAL de errores no capturados: convierte "se cerró con un
+  // error" en un diagnóstico exportable (nunca se envía — sin INTERNET).
+  final previousOnError = FlutterError.onError;
+  FlutterError.onError = (details) {
+    _recordCrash(details.exception, details.stack ?? StackTrace.current);
+    previousOnError?.call(details);
+  };
+  runZonedGuarded(
+    () => runApp(const RootCauseApp()),
+    (error, stack) => _recordCrash(error, stack),
+  );
+}
+
+Future<void> _recordCrash(Object error, StackTrace stack) async {
+  try {
+    final dir = await const PlatformCollectors().documentsPath();
+    if (dir != null) {
+      await CrashLog(dir).record(error, stack, where: 'ui');
+    }
+  } on Object {
+    // El registro del error jamás debe generar otro error visible.
+  }
 }
 
 /// Entrada de la captura en segundo plano: la invoca el Worker de Android
@@ -45,12 +70,26 @@ Future<void> backgroundCapture() async {
       ).capture(config: config, directoryPath: dir);
       // La alerta avisa solo en la TRANSICIÓN a crítico, en el idioma
       // configurado. Local de verdad: sin INTERNET no hay push posible.
-      if (config.notifyCritical && outcome.wentCritical) {
+      if (config.notifyCritical) {
         final strings = AppStrings(config.spanish);
-        await collectors.notifyCritical(
-          title: strings.alertCriticalTitle,
-          body: strings.alertCriticalBody,
-        );
+        if (outcome.wentCritical) {
+          await collectors.notifyCritical(
+            title: strings.alertCriticalTitle,
+            body: strings.alertCriticalBody,
+          );
+        }
+        // El caso estrella: una app con superficie de espía instalada
+        // mientras el teléfono vigilaba solo. Avisa aunque el veredicto
+        // global no sea crítico.
+        final risky = outcome.riskyNewApps;
+        if (risky.isNotEmpty) {
+          await collectors.notifyCritical(
+            title: strings.alertNewAppTitle,
+            body: strings.alertNewAppBody(
+              risky.take(3).map((a) => a.label).join(', '),
+            ),
+          );
+        }
       }
       // El widget del launcher se actualiza también desde el Worker.
       await collectors.refreshWidget();
@@ -103,6 +142,7 @@ class _InspectorHomeState extends State<InspectorHome> {
 
   final NearbySession _nearby = NearbySession();
   NearbyStatus _nearbyStatus = NearbyStatus.idle;
+  String? _crashLog;
 
   @override
   void initState() {
@@ -123,7 +163,13 @@ class _InspectorHomeState extends State<InspectorHome> {
         _dataDir = dir;
         _configStore = ConfigStore(dir);
         final config = await _configStore!.load();
-        if (mounted) setState(() => _config = config);
+        final crash = await CrashLog(dir).read();
+        if (mounted) {
+          setState(() {
+            _config = config;
+            _crashLog = crash;
+          });
+        }
       }
     } on FileSystemException {
       // Sin disco se opera con la configuración por defecto, en memoria.
@@ -252,6 +298,88 @@ class _InspectorHomeState extends State<InspectorHome> {
     await _refresh();
   }
 
+  Future<void> _generateReport(AppStrings strings) async {
+    final snapshot = _snapshot;
+    final verdict = _verdict;
+    final dir = _dataDir;
+    if (snapshot == null || verdict == null || dir == null) return;
+    final chain = await HistoryStore(dir).verifyChain();
+    final report = buildForensicReport(
+      strings: strings,
+      snapshot: snapshot,
+      verdict: verdict,
+      history: _history,
+      chain: chain,
+    );
+    final file = File('$dir/rootcause-informe-${snapshot.timestampMillis}.md');
+    await file.writeAsString(report, flush: true);
+    final ok = await _collectors.shareFile(
+      path: file.path,
+      mimeType: 'text/markdown',
+      title: strings.reportShareTitle,
+    );
+    if (!ok && mounted) _showSnack(strings.shareFailed);
+  }
+
+  Future<void> _backup(AppStrings strings) async {
+    final dir = _dataDir;
+    if (dir == null) return;
+    final path = await EvidenceService(
+      dir,
+    ).writeBackup(nowMillis: DateTime.now().millisecondsSinceEpoch);
+    final ok = await _collectors.shareFile(
+      path: path,
+      mimeType: 'application/json',
+      title: strings.evidenceBackup,
+    );
+    if (!ok && mounted) _showSnack(strings.backupDone(path));
+  }
+
+  Future<void> _restore(AppStrings strings) async {
+    final dir = _dataDir;
+    if (dir == null) return;
+    final content = await _collectors.pickAndReadFile();
+    if (content == null) return;
+    final ok = await EvidenceService(dir).restoreBackup(content);
+    if (!mounted) return;
+    if (!ok) {
+      _showSnack(strings.restoreFail);
+      return;
+    }
+    _showSnack(strings.restoreOk);
+    final config = await _configStore?.load();
+    if (config != null && mounted) setState(() => _config = config);
+    _applyAutoRefresh();
+    await _refresh();
+  }
+
+  Future<void> _wipe(AppStrings strings) async {
+    final dir = _dataDir;
+    if (dir == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(strings.wipeConfirmTitle),
+        content: Text(strings.wipeConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(strings.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(strings.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await EvidenceService(dir).wipeEvidence();
+    if (!mounted) return;
+    _showSnack(strings.wipeDone);
+    await _refresh();
+  }
+
   Future<void> _nearbyScan() async {
     setState(() => _nearbyStatus = NearbyStatus.scanning);
     final granted = await _collectors.requestBlePermissions();
@@ -272,6 +400,12 @@ class _InspectorHomeState extends State<InspectorHome> {
       );
       _nearbyStatus = NearbyStatus.idle;
     });
+    // Con el histórico activado, el escaneo también se persiste por días.
+    if (_config.nearbyHistory && _dataDir != null) {
+      await NearbyStore(
+        _dataDir!,
+      ).recordScan(results, nowMillis: DateTime.now().millisecondsSinceEpoch);
+    }
   }
 
   void _showSnack(String message) {
@@ -280,11 +414,40 @@ class _InspectorHomeState extends State<InspectorHome> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _finishOnboarding() async {
+    await _updateConfig(_config.copyWith(onboardingSeen: true));
+  }
+
+  Future<void> _shareCrashLog(AppStrings strings) async {
+    final dir = _dataDir;
+    if (dir == null) return;
+    final file = File('$dir/rootcause-crashlog.txt');
+    if (!await file.exists()) return;
+    final ok = await _collectors.shareFile(
+      path: file.path,
+      mimeType: 'text/plain',
+      title: strings.diagShare,
+    );
+    if (!ok && mounted) _showSnack(strings.shareFailed);
+  }
+
+  Future<void> _clearCrashLog() async {
+    final dir = _dataDir;
+    if (dir == null) return;
+    await CrashLog(dir).clear();
+    if (mounted) setState(() => _crashLog = null);
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings(_config.spanish);
     final snapshot = _snapshot;
     final verdict = _verdict;
+
+    // Introducción de primera vez: se muestra una sola vez, antes que nada.
+    if (!_loading && !_config.onboardingSeen) {
+      return OnboardingScreen(strings: strings, onDone: _finishOnboarding);
+    }
 
     return DefaultTabController(
       length: 9,
@@ -375,6 +538,10 @@ class _InspectorHomeState extends State<InspectorHome> {
                     config: _config,
                     strings: strings,
                     onChanged: _updateConfig,
+                    onReport: () => _generateReport(strings),
+                    onBackup: () => _backup(strings),
+                    onRestore: () => _restore(strings),
+                    onWipe: () => _wipe(strings),
                   ),
                   AboutScreen(
                     strings: strings,
@@ -383,6 +550,13 @@ class _InspectorHomeState extends State<InspectorHome> {
                     author: Meta.author,
                     license: Meta.license,
                     repository: Meta.repository,
+                    crashLog: _crashLog,
+                    onShareCrashLog: _crashLog == null
+                        ? null
+                        : () => _shareCrashLog(strings),
+                    onClearCrashLog: _crashLog == null
+                        ? null
+                        : () => _clearCrashLog(),
                   ),
                 ],
               ),

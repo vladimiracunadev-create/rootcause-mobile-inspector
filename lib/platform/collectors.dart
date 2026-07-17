@@ -135,6 +135,41 @@ class PlatformCollectors {
     }
   }
 
+  /// Comparte un archivo del sandbox por el share sheet del sistema.
+  /// Quien envía es la app que el usuario elija — RootCause sigue sin
+  /// tocar la red. `false` si la plataforma no lo soporta.
+  Future<bool> shareFile({
+    required String path,
+    required String mimeType,
+    required String title,
+  }) async {
+    try {
+      return await _channel.invokeMethod<bool>('shareFile', {
+            'path': path,
+            'mimeType': mimeType,
+            'title': title,
+          }) ??
+          false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  /// Abre el selector de documentos del sistema y devuelve el contenido
+  /// del archivo elegido (UTF-8, máx. 20 MB). `null` si se cancela o no
+  /// está soportado.
+  Future<String?> pickAndReadFile() async {
+    try {
+      return await _channel.invokeMethod<String>('pickAndReadFile');
+    } on PlatformException {
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
   /// Refresca el widget de pantalla de inicio con la última captura del
   /// historial. Silencioso donde no hay widget (iOS, tests).
   Future<void> refreshWidget() async {

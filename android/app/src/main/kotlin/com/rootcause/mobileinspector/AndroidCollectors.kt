@@ -355,6 +355,15 @@ class AndroidCollectors(private val context: Context) {
         if (Build.TAGS?.contains("test-keys") == true) {
             indicators += "build:test-keys"
         }
+        // Integridad de arranque (v0.5.0): un bootloader desbloqueado o un
+        // verified boot no-verde son indicios de que el sistema pudo ser
+        // modificado — complementan (no reemplazan) los binarios su.
+        sysProp("ro.boot.verifiedbootstate")?.let { state ->
+            if (state.lowercase() != "green") indicators += "verifiedboot:$state"
+        }
+        if (sysProp("ro.boot.flash.locked") == "0") {
+            indicators += "bootloader-unlocked"
+        }
         return indicators
     }
 

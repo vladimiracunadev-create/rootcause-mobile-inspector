@@ -8,7 +8,7 @@ publish_to: "none"
 
 # Fuente de verdad de la versión del producto: <semver>+<build number>.
 # El workflow de release verifica que el tag coincida con la parte semver.
-version: 0.4.0+6
+version: 0.5.0+7
 
 environment:
   sdk: ^3.12.0
@@ -19,6 +19,11 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  # Test de integración en dispositivo/emulador (parte del SDK de Flutter,
+  # no de pub.dev: mantiene la regla "cero dependencias externas"). No lo
+  # corre `flutter test` — se ejecuta con `flutter test integration_test`.
+  integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
