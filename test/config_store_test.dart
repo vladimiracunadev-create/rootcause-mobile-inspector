@@ -16,7 +16,8 @@ void main() {
 
   test('sin archivo devuelve los valores por defecto', () async {
     final config = await ConfigStore(tmp.path).load();
-    expect(config.spanish, isTrue);
+    // '' = idioma automático (se resuelve al del equipo en la UI).
+    expect(config.languageCode, '');
     expect(config.autoRefreshMinutes, 5);
     expect(config.backgroundCapture, isFalse);
     expect(config.backgroundChargingOnly, isTrue);
@@ -27,7 +28,7 @@ void main() {
   test('save + load hace round-trip completo', () async {
     final store = ConfigStore(tmp.path);
     const changed = AppConfig(
-      spanish: false,
+      languageCode: 'en',
       autoRefreshMinutes: 15,
       backgroundCapture: true,
       backgroundChargingOnly: false,
@@ -55,12 +56,21 @@ void main() {
     await File('${tmp.path}/rootcause-language').writeAsString('en');
     final store = ConfigStore(tmp.path);
     final config = await store.load();
-    expect(config.spanish, isFalse);
+    expect(config.languageCode, 'en');
 
     // Al guardar, el archivo heredado desaparece y manda el config nuevo.
     await store.save(config);
     expect(File('${tmp.path}/rootcause-language').existsSync(), isFalse);
-    expect((await store.load()).spanish, isFalse);
+    expect((await store.load()).languageCode, 'en');
+  });
+
+  test('migra el booleano `spanish` de configs anteriores', () async {
+    // Config de v0.5.x que guardaba `spanish: false` en vez de languageCode.
+    await File(
+      '${tmp.path}/rootcause-config.json',
+    ).writeAsString('{"spanish": false, "autoRefreshMinutes": 5}');
+    final config = await ConfigStore(tmp.path).load();
+    expect(config.languageCode, 'en');
   });
 
   test('los umbrales del config alimentan el motor de reglas', () {

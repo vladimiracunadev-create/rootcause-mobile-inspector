@@ -14,26 +14,41 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('RootCause'), findsOneWidget);
-    // Con snapshot neutro el veredicto existe y las 9 pestañas están.
+    // Con snapshot neutro el veredicto existe y las 10 pestañas están.
     expect(find.byType(TabBar), findsOneWidget);
-    expect(find.byType(Tab), findsNWidgets(9));
+    expect(find.byType(Tab), findsNWidgets(10));
   });
 
-  testWidgets('arranca en español por defecto y el botón cambia a inglés', (
+  testWidgets('autodetecta el idioma del equipo y el menú permite cambiarlo', (
     tester,
   ) async {
     await tester.pumpWidget(const RootCauseApp());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Español por defecto aunque el entorno de test corre con locale en_US.
-    expect(find.text('Resumen'), findsOneWidget);
-    expect(find.text('Summary'), findsNothing);
-
-    await tester.tap(find.byIcon(Icons.translate));
-    await tester.pump();
-
+    // Idioma automático: el entorno de test corre en en_US, así que arranca
+    // en inglés (no en español).
     expect(find.text('Summary'), findsOneWidget);
     expect(find.text('Resumen'), findsNothing);
+
+    // El menú de idioma permite forzar español. Se usan pumps acotados en
+    // vez de pumpAndSettle: el checkmark del menú anima de forma continua y
+    // haría que pumpAndSettle nunca "asiente".
+    await tester.tap(find.byIcon(Icons.translate));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    // El texto del ítem va alineado a la derecha; se pulsa el ítem completo.
+    await tester.tap(
+      find.ancestor(
+        of: find.text('Español').last,
+        matching: find.byType(InkWell),
+      ).first,
+      warnIfMissed: false,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Resumen'), findsOneWidget);
+    expect(find.text('Summary'), findsNothing);
   });
 }

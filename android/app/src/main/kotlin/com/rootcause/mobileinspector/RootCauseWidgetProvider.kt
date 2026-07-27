@@ -42,14 +42,11 @@ class RootCauseWidgetProvider : AppWidgetProvider() {
 
                 val views = RemoteViews(context.packageName, R.layout.rootcause_widget)
                 val last = lastCapture(context)
-                val spanish = spanishConfigured(context)
+                val lang = widgetLang(context)
                 if (last == null) {
                     views.setTextViewText(R.id.widget_dot, "●")
                     views.setTextColor(R.id.widget_dot, Color.GRAY)
-                    views.setTextViewText(
-                        R.id.widget_status,
-                        if (spanish) "Sin capturas" else "No snapshots",
-                    )
+                    views.setTextViewText(R.id.widget_status, noSnapshots(lang))
                     views.setTextViewText(R.id.widget_time, "—")
                 } else {
                     val severity = last.optJSONObject("verdict")
@@ -66,10 +63,7 @@ class RootCauseWidgetProvider : AppWidgetProvider() {
                             else -> Color.rgb(0x43, 0xA0, 0x47)
                         },
                     )
-                    views.setTextViewText(
-                        R.id.widget_status,
-                        if (spanish) "Puntaje $score" else "Score $score",
-                    )
+                    views.setTextViewText(R.id.widget_status, scoreLabel(lang, score))
                     views.setTextViewText(R.id.widget_time, time)
                 }
                 views.setOnClickPendingIntent(
@@ -101,11 +95,49 @@ class RootCauseWidgetProvider : AppWidgetProvider() {
             null
         }
 
-        private fun spanishConfigured(context: Context): Boolean = try {
-            val file = File(context.filesDir, "rootcause-config.json")
-            !file.exists() || JSONObject(file.readText()).optBoolean("spanish", true)
-        } catch (_: Throwable) {
-            true
+        /**
+         * Idioma efectivo del widget: código entre es/en/pt/it/fr. Lee
+         * `languageCode` del config (con fallback al viejo booleano `spanish`);
+         * si está en "automático" (vacío) usa el idioma del equipo. Refleja la
+         * misma resolución que la UI Flutter ([resolveLanguage]).
+         */
+        private fun widgetLang(context: Context): String {
+            val known = setOf("es", "en", "pt", "it", "fr")
+            fun deviceLang(): String {
+                val code = Locale.getDefault().language.lowercase()
+                return if (code in known) code else "en"
+            }
+            return try {
+                val file = File(context.filesDir, "rootcause-config.json")
+                if (!file.exists()) return deviceLang()
+                val json = JSONObject(file.readText())
+                when {
+                    json.has("languageCode") -> {
+                        val code = json.optString("languageCode", "").lowercase()
+                        if (code in known) code else deviceLang()
+                    }
+                    json.has("spanish") -> if (json.optBoolean("spanish", true)) "es" else "en"
+                    else -> deviceLang()
+                }
+            } catch (_: Throwable) {
+                deviceLang()
+            }
+        }
+
+        private fun noSnapshots(lang: String): String = when (lang) {
+            "es" -> "Sin capturas"
+            "pt" -> "Sem capturas"
+            "it" -> "Nessuna acquisizione"
+            "fr" -> "Aucune capture"
+            else -> "No snapshots"
+        }
+
+        private fun scoreLabel(lang: String, score: Int): String = when (lang) {
+            "es" -> "Puntaje $score"
+            "pt" -> "Pontuação $score"
+            "it" -> "Punteggio $score"
+            "fr" -> "Score $score"
+            else -> "Score $score"
         }
     }
 }

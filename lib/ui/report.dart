@@ -1,4 +1,5 @@
-/// Informe forense compartible — Markdown legible por humanos.
+/// Informe forense compartible — PDF legible por humanos, generado en Dart
+/// puro (sin dependencias de pub.dev; ver [PdfDocument]).
 ///
 /// El equivalente móvil de los reportes de la edición Windows: veredicto,
 /// hallazgos con evidencia, métricas, tendencia y estado de la cadena de
@@ -6,55 +7,50 @@
 /// sin permiso INTERNET).
 library;
 
+import 'dart:typed_data';
+
 import '../core/history_store.dart';
 import '../core/models.dart';
 import '../meta.dart';
+import 'pdf.dart';
 import 'screens.dart' show formatBytes, formatTimestamp;
 import 'strings.dart';
 
-String buildForensicReport({
+/// Construye el informe forense como bytes de un PDF listo para compartir.
+Uint8List buildForensicReportPdf({
   required AppStrings strings,
   required Snapshot snapshot,
   required Verdict verdict,
   required List<HistoryRow> history,
   ChainReport? chain,
 }) {
-  final b = StringBuffer();
-  final es = strings.spanish;
-  String t(String a, String bTxt) => es ? a : bTxt;
+  final doc = PdfDocument();
 
-  b.writeln('# ${t('Informe forense', 'Forensic report')} — RootCause');
-  b.writeln();
-  b.writeln(
-    '- ${t('Generado', 'Generated')}: '
-    '${formatTimestamp(snapshot.timestampMillis)}',
+  doc.title('${strings.reportTitle} — RootCause');
+  doc.paragraph(
+    '${strings.reportGenerated}: ${formatTimestamp(snapshot.timestampMillis)}',
   );
-  b.writeln(
-    '- ${t('Equipo', 'Device')}: ${snapshot.device.manufacturer} '
+  doc.paragraph(
+    '${strings.reportDevice}: ${snapshot.device.manufacturer} '
     '${snapshot.device.model} · ${snapshot.device.osVersion}'
     '${snapshot.device.vendorSkin.isNotEmpty ? ' · ${snapshot.device.vendorSkin}' : ''}',
   );
-  b.writeln(
-    '- ${t('Parche de seguridad', 'Security patch')}: '
-    '${snapshot.device.securityPatch}',
+  doc.paragraph(
+    '${strings.devicePatch}: ${snapshot.device.securityPatch}',
   );
-  b.writeln('- RootCause Mobile Inspector v${Meta.version}');
-  b.writeln();
+  doc.paragraph('RootCause Mobile Inspector v${Meta.version}');
 
   final verdictLabel = switch (verdict.severity) {
     Severity.normal => strings.verdictNormal,
     Severity.warning => strings.verdictWarning,
     Severity.critical => strings.verdictCritical,
   };
-  b.writeln('## ${t('Veredicto', 'Verdict')}');
-  b.writeln();
-  b.writeln('**$verdictLabel** · ${strings.verdictScore(verdict.score)}');
-  b.writeln();
+  doc.heading(strings.reportVerdict);
+  doc.paragraph('$verdictLabel · ${strings.verdictScore(verdict.score)}', bold: true);
 
-  b.writeln('## ${t('Hallazgos', 'Findings')}');
-  b.writeln();
+  doc.heading(strings.reportFindings);
   if (verdict.findings.isEmpty) {
-    b.writeln(strings.findingsNone);
+    doc.paragraph(strings.findingsNone);
   } else {
     for (final f in verdict.findings) {
       final severity = switch (f.severity) {
@@ -62,91 +58,74 @@ String buildForensicReport({
         Severity.warning => strings.severityWarning,
         Severity.critical => strings.severityCritical,
       };
-      b.writeln(
-        '- **${strings.findingTitle(f)}** [$severity] — '
-        '${strings.findingDetail(f)} (`${f.id}`)',
+      doc.bullet(
+        '${strings.findingTitle(f)} [$severity] — ${strings.findingDetail(f)}',
       );
+      final reco = strings.findingReco(f);
+      if (reco.isNotEmpty) doc.paragraph('   ${strings.recommendation(reco)}');
     }
   }
-  b.writeln();
 
-  b.writeln('## ${t('Métricas', 'Metrics')}');
-  b.writeln();
-  b.writeln(
-    '- ${strings.memTitle}: '
-    '${formatBytes(snapshot.memory.availableBytes)} '
-    '${t('disponibles de', 'available of')} '
-    '${formatBytes(snapshot.memory.totalBytes)}',
+  doc.heading(strings.reportMetrics);
+  doc.bullet(
+    '${strings.memTitle}: ${formatBytes(snapshot.memory.availableBytes)} '
+    '${strings.reportAvailableOf(formatBytes(snapshot.memory.totalBytes))}',
   );
-  b.writeln(
-    '- ${strings.storageTitle}: '
-    '${formatBytes(snapshot.storage.freeBytes)} '
-    '${t('libres de', 'free of')} '
-    '${formatBytes(snapshot.storage.totalBytes)}',
+  doc.bullet(
+    '${strings.storageTitle}: ${formatBytes(snapshot.storage.freeBytes)} '
+    '${strings.reportFreeOf(formatBytes(snapshot.storage.totalBytes))}',
   );
   for (final v in snapshot.storage.volumes) {
-    b.writeln(
-      '- ${v.label}: ${formatBytes(v.freeBytes)} / '
-      '${formatBytes(v.totalBytes)}'
+    doc.bullet(
+      '${v.label}: ${formatBytes(v.freeBytes)} / ${formatBytes(v.totalBytes)}'
       '${v.removable ? ' (${strings.volumeRemovable})' : ''}',
     );
   }
-  b.writeln(
-    '- ${strings.batteryTitle}: ${snapshot.battery.levelPercent} % · '
+  doc.bullet(
+    '${strings.batteryTitle}: ${snapshot.battery.levelPercent} % · '
     '${snapshot.battery.temperatureAvailable ? '${snapshot.battery.temperatureCelsius.toStringAsFixed(1)} °C' : strings.notAvailableOnPlatform}',
   );
   if (snapshot.device.appsAuditSupported) {
     final risky = snapshot.apps
         .where((a) => a.severity != Severity.normal)
         .length;
-    b.writeln(
-      '- ${strings.appsTitle}: ${snapshot.apps.length} '
-      '${t('apps de usuario', 'user apps')}, $risky '
-      '${t('con superficie riesgosa', 'with risky surface')}',
+    doc.bullet(
+      '${strings.appsTitle}: ${strings.reportAppsLine(snapshot.apps.length, risky)}',
     );
   }
-  b.writeln();
 
   if (history.length >= 2) {
-    b.writeln('## ${strings.trendTitle}');
-    b.writeln();
-    b.writeln(
-      '| ${t('Captura', 'Snapshot')} | RAM % | '
-      '${t('Disco', 'Storage')} % | ${t('Puntaje', 'Score')} |',
+    doc.heading(strings.trendTitle);
+    doc.table(
+      [
+        strings.reportColSnapshot,
+        'RAM %',
+        '${strings.reportColStorage} %',
+        strings.reportColScore,
+      ],
+      [
+        for (final row in history.take(10))
+          [
+            formatTimestamp(row.timestampMillis),
+            '${row.memAvailablePct}',
+            '${row.storageFreePct}',
+            '${row.score}',
+          ],
+      ],
     );
-    b.writeln('|---|---|---|---|');
-    for (final row in history.take(10)) {
-      b.writeln(
-        '| ${formatTimestamp(row.timestampMillis)} | '
-        '${row.memAvailablePct} | ${row.storageFreePct} | ${row.score} |',
-      );
-    }
-    b.writeln();
   }
 
   if (chain != null) {
-    b.writeln('## ${t('Integridad de la evidencia', 'Evidence integrity')}');
-    b.writeln();
-    b.writeln(
+    doc.heading(strings.reportIntegrityTitle);
+    doc.paragraph(
       chain.intact
-          ? t(
-              'Cadena de hashes VERIFICADA: ${chain.sealed} de ${chain.total} capturas selladas (SHA-256 encadenado).',
-              'Hash chain VERIFIED: ${chain.sealed} of ${chain.total} snapshots sealed (chained SHA-256).',
-            )
-          : t(
-              'ATENCIÓN: la cadena de hashes NO verifica — el historial pudo ser alterado.',
-              'WARNING: the hash chain does NOT verify — the history may have been tampered with.',
-            ),
+          ? strings.reportChainOk(chain.sealed, chain.total)
+          : strings.reportChainTampered,
     );
-    b.writeln();
   }
 
-  b.writeln('---');
-  b.writeln(
-    t(
-      'Generado localmente por RootCause Mobile Inspector (sin permiso INTERNET: nada salió del dispositivo hasta que su dueño compartió este archivo). ${Meta.repository}',
-      'Generated locally by RootCause Mobile Inspector (no INTERNET permission: nothing left the device until its owner shared this file). ${Meta.repository}',
-    ),
-  );
-  return b.toString();
+  doc.rule();
+  doc.paragraph('${strings.reportFooter} ${Meta.repository}');
+
+  return doc.build();
 }

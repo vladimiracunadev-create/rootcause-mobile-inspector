@@ -7,7 +7,7 @@ RootCause Mobile Inspector usa **Flutter** con una separación estricta en tres 
 ```mermaid
 flowchart TB
     subgraph UI["🖼 UI — lib/ui/ + lib/main.dart"]
-        TABS["9 pestañas Material 3"]
+        TABS["10 pestañas Material 3"]
         SEM["Semáforo + hallazgos + acciones"]
         I18N["Bilingüe ES/EN (ES por defecto)"]
     end

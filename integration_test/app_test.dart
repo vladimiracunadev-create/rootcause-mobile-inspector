@@ -12,24 +12,21 @@ import 'package:rootcause_mobile_inspector/ui/screens.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('arranca, captura y muestra las 9 pestañas', (tester) async {
+  testWidgets('arranca, captura y muestra las 10 pestañas', (tester) async {
     await tester.pumpWidget(const RootCauseApp());
     await tester.pumpAndSettle(const Duration(seconds: 5));
 
-    // Si aparece el onboarding (primera vez), completarlo.
-    final start = find.text('Empezar');
-    if (start.evaluate().isNotEmpty) {
-      final next = find.text('Siguiente');
-      while (next.evaluate().isNotEmpty) {
-        await tester.tap(next);
-        await tester.pumpAndSettle();
-      }
-      await tester.tap(find.text('Empezar'));
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+    // Si aparece el onboarding (primera vez), completarlo. El idioma ahora se
+    // autodetecta, así que se avanza por el botón (FilledButton), no por texto.
+    var guard = 0;
+    while (find.byType(OnboardingScreen).evaluate().isNotEmpty && guard < 5) {
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+      guard++;
     }
 
     expect(find.byType(TabBar), findsOneWidget);
-    expect(find.byType(Tab), findsNWidgets(9));
+    expect(find.byType(Tab), findsNWidgets(10));
     // La captura real produjo un veredicto en el semáforo.
     expect(find.byType(VerdictBanner), findsOneWidget);
   });
