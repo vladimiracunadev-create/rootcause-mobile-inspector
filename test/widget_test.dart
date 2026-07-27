@@ -39,10 +39,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     // El texto del ítem va alineado a la derecha; se pulsa el ítem completo.
     await tester.tap(
-      find.ancestor(
-        of: find.text('Español').last,
-        matching: find.byType(InkWell),
-      ).first,
+      find
+          .ancestor(
+            of: find.text('Español').last,
+            matching: find.byType(InkWell),
+          )
+          .first,
       warnIfMissed: false,
     );
     await tester.pump();

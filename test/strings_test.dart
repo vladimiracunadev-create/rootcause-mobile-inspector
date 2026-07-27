@@ -4,10 +4,7 @@ import 'package:rootcause_mobile_inspector/ui/strings.dart';
 void main() {
   group('resolveLanguage', () {
     test('código explícito conocido manda sobre el idioma del equipo', () {
-      expect(
-        resolveLanguage('pt', deviceLanguageCode: 'en'),
-        AppLang.pt,
-      );
+      expect(resolveLanguage('pt', deviceLanguageCode: 'en'), AppLang.pt);
     });
 
     test('vacío ("automático") toma el idioma del equipo', () {

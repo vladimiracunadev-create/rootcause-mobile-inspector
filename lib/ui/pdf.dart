@@ -53,7 +53,12 @@ class PdfDocument {
     for (var i = 0; i < wrapped.length; i++) {
       final prefix = i == 0 ? '• ' : '   ';
       _lines.add(
-        _Line([_Seg('$prefix${wrapped[i]}', margin)], 11, false, i == 0 ? 3 : 1),
+        _Line(
+          [_Seg('$prefix${wrapped[i]}', margin)],
+          11,
+          false,
+          i == 0 ? 3 : 1,
+        ),
       );
     }
   }

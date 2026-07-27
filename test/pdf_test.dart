@@ -53,10 +53,13 @@ void main() {
       ..title('RootCause')
       ..heading('Sección')
       ..paragraph('Cuerpo del informe con una tabla.')
-      ..table(['A', 'B'], [
-        ['1', '2'],
-        ['3', '4'],
-      ]);
+      ..table(
+        ['A', 'B'],
+        [
+          ['1', '2'],
+          ['3', '4'],
+        ],
+      );
     final bytes = doc.build();
     final text = _latin1(bytes);
 
@@ -67,7 +70,9 @@ void main() {
     expect(text.substring(xrefPos, xrefPos + 4), 'xref');
 
     // Cabecera de la subsección: "0 <count>".
-    final header = RegExp(r'xref\s+0 (\d+)').firstMatch(text.substring(xrefPos));
+    final header = RegExp(
+      r'xref\s+0 (\d+)',
+    ).firstMatch(text.substring(xrefPos));
     expect(header, isNotNull);
     final count = int.parse(header!.group(1)!);
     expect(count, greaterThan(4)); // catálogo, pages, 2 fuentes, +página(s)

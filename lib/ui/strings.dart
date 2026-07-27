@@ -63,7 +63,8 @@ class AppStrings {
       };
 
   // Tabs
-  String get tabSummary => _pick('Resumen', 'Summary', 'Resumo', 'Riepilogo', 'Résumé');
+  String get tabSummary =>
+      _pick('Resumen', 'Summary', 'Resumo', 'Riepilogo', 'Résumé');
   String get tabApps => _pick('Apps', 'Apps', 'Apps', 'App', 'Apps');
   String get tabFlagged =>
       _pick('Señaladas', 'Flagged', 'Sinalizadas', 'Segnalate', 'Signalées');
@@ -88,8 +89,7 @@ class AppStrings {
     'Impostazioni',
     'Réglages',
   );
-  String get tabAbout =>
-      _pick('Acerca', 'About', 'Sobre', 'Info', 'À propos');
+  String get tabAbout => _pick('Acerca', 'About', 'Sobre', 'Info', 'À propos');
 
   // Acciones
   String get actionLanguage =>
@@ -168,13 +168,8 @@ class AppStrings {
   );
   String get severityNormal =>
       _pick('Normal', 'Normal', 'Normal', 'Normale', 'Normal');
-  String get severityWarning => _pick(
-    'Advertencia',
-    'Warning',
-    'Aviso',
-    'Avviso',
-    'Avertissement',
-  );
+  String get severityWarning =>
+      _pick('Advertencia', 'Warning', 'Aviso', 'Avviso', 'Avertissement');
   String get severityCritical =>
       _pick('Crítico', 'Critical', 'Crítico', 'Critico', 'Critique');
   String recommendation(String text) => _pick(
@@ -188,8 +183,7 @@ class AppStrings {
   // Memoria / almacenamiento / batería
   String get memTitle =>
       _pick('Memoria', 'Memory', 'Memória', 'Memoria', 'Mémoire');
-  String get memUsed =>
-      _pick('Usada', 'Used', 'Usada', 'Usata', 'Utilisée');
+  String get memUsed => _pick('Usada', 'Used', 'Usada', 'Usata', 'Utilisée');
   String get memAvailable => _pick(
     'Disponible',
     'Available',
@@ -205,10 +199,8 @@ class AppStrings {
     'Archiviazione',
     'Stockage',
   );
-  String get storageFree =>
-      _pick('Libre', 'Free', 'Livre', 'Libero', 'Libre');
-  String get storageUsed =>
-      _pick('Usado', 'Used', 'Usado', 'Usato', 'Utilisé');
+  String get storageFree => _pick('Libre', 'Free', 'Livre', 'Libero', 'Libre');
+  String get storageUsed => _pick('Usado', 'Used', 'Usado', 'Usato', 'Utilisé');
   String get storageTotal =>
       _pick('Total', 'Total', 'Total', 'Totale', 'Total');
   String get cacheTitle => _pick(
@@ -248,13 +240,8 @@ class AppStrings {
     'Interno (dati)',
     'Interne (données)',
   );
-  String get volumeRemovable => _pick(
-    'extraíble',
-    'removable',
-    'removível',
-    'rimovibile',
-    'amovible',
-  );
+  String get volumeRemovable =>
+      _pick('extraíble', 'removable', 'removível', 'rimovibile', 'amovible');
   String get volumesNone => _pick(
     'Sin volúmenes adicionales: este equipo no tiene tarjeta SD ni USB conectado (o el SO no los expone). No es un fallo — se muestran solo cuando existen.',
     'No additional volumes: this device has no SD card or USB attached (or the OS does not expose them). Not a failure — they are listed only when present.',
@@ -268,13 +255,8 @@ class AppStrings {
       _pick('Nivel', 'Level', 'Nível', 'Livello', 'Niveau');
   String get batteryState =>
       _pick('Estado', 'State', 'Estado', 'Stato', 'État');
-  String get batteryCharging => _pick(
-    'Cargando',
-    'Charging',
-    'Carregando',
-    'In carica',
-    'En charge',
-  );
+  String get batteryCharging =>
+      _pick('Cargando', 'Charging', 'Carregando', 'In carica', 'En charge');
   String get batteryDischarging => _pick(
     'Descargando',
     'Discharging',
@@ -307,20 +289,10 @@ class AppStrings {
     'Stato della rete',
     'État du réseau',
   );
-  String get netConnected => _pick(
-    'Conectado',
-    'Connected',
-    'Conectado',
-    'Connesso',
-    'Connecté',
-  );
-  String get netTransport => _pick(
-    'Transporte',
-    'Transport',
-    'Transporte',
-    'Trasporto',
-    'Transport',
-  );
+  String get netConnected =>
+      _pick('Conectado', 'Connected', 'Conectado', 'Connesso', 'Connecté');
+  String get netTransport =>
+      _pick('Transporte', 'Transport', 'Transporte', 'Trasporto', 'Transport');
   String get netVpn => _pick(
     'VPN activa',
     'VPN active',
@@ -356,15 +328,9 @@ class AppStrings {
     'Traffico accumulato (dall’avvio)',
     'Trafic cumulé (depuis le démarrage)',
   );
-  String get netRx => _pick(
-    'Recibido',
-    'Received',
-    'Recebido',
-    'Ricevuto',
-    'Reçu',
-  );
-  String get netTx =>
-      _pick('Enviado', 'Sent', 'Enviado', 'Inviato', 'Envoyé');
+  String get netRx =>
+      _pick('Recibido', 'Received', 'Recebido', 'Ricevuto', 'Reçu');
+  String get netTx => _pick('Enviado', 'Sent', 'Enviado', 'Inviato', 'Envoyé');
   String get netTrafficNote => _pick(
     'Contadores globales del SO. RootCause no inspecciona el contenido de tu tráfico.',
     'OS-wide counters. RootCause does not inspect your traffic contents.',
@@ -453,9 +419,13 @@ class AppStrings {
     'Permessi richiesti da questa app',
     'Permissions demandées par cette app',
   );
-  String appFlags(String flags) =>
-      _pick('Señales: $flags', 'Flags: $flags', 'Sinais: $flags',
-          'Segnali: $flags', 'Signaux : $flags');
+  String appFlags(String flags) => _pick(
+    'Señales: $flags',
+    'Flags: $flags',
+    'Sinais: $flags',
+    'Segnali: $flags',
+    'Signaux : $flags',
+  );
 
   // Pestaña "Señaladas" (apps riesgosas)
   String get flaggedTitle => _pick(
@@ -488,13 +458,8 @@ class AppStrings {
   );
 
   // Dispositivo
-  String get deviceTitle => _pick(
-    'Dispositivo',
-    'Device',
-    'Dispositivo',
-    'Dispositivo',
-    'Appareil',
-  );
+  String get deviceTitle =>
+      _pick('Dispositivo', 'Device', 'Dispositivo', 'Dispositivo', 'Appareil');
   String get deviceManufacturer => _pick(
     'Fabricante',
     'Manufacturer',
@@ -591,13 +556,8 @@ class AppStrings {
       _pick('Autor', 'Author', 'Autor', 'Autore', 'Auteur');
   String get aboutLicense =>
       _pick('Licencia', 'License', 'Licença', 'Licenza', 'Licence');
-  String get aboutPhilosophyTitle => _pick(
-    'Filosofía',
-    'Philosophy',
-    'Filosofia',
-    'Filosofia',
-    'Philosophie',
-  );
+  String get aboutPhilosophyTitle =>
+      _pick('Filosofía', 'Philosophy', 'Filosofia', 'Filosofia', 'Philosophie');
   String get aboutPhilosophyBody => _pick(
     'Cualquier distorsión anómala de los recursos del dispositivo puede ser el primer indicio de que algo está ocurriendo. RootCause vigila esas distorsiones, las correlaciona y explica la causa con evidencia. Diagnóstico primero, intervención después.',
     'Any anomalous distortion of device resources can be the first sign that something is happening. RootCause watches those distortions, correlates them and explains the cause with evidence. Diagnosis first, intervention second.',
@@ -674,13 +634,8 @@ class AppStrings {
     'Acquisizione automatica con l’app aperta',
     'Capture auto quand l’app est ouverte',
   );
-  String get settingsIntervalOff => _pick(
-    'Apagada',
-    'Off',
-    'Desligada',
-    'Spenta',
-    'Désactivée',
-  );
+  String get settingsIntervalOff =>
+      _pick('Apagada', 'Off', 'Desligada', 'Spenta', 'Désactivée');
   String settingsIntervalMinutes(int m) => _pick(
     'Cada $m min',
     'Every $m min',
@@ -977,13 +932,8 @@ class AppStrings {
   );
   String get onboardNext =>
       _pick('Siguiente', 'Next', 'Próximo', 'Avanti', 'Suivant');
-  String get onboardStart => _pick(
-    'Empezar',
-    'Get started',
-    'Começar',
-    'Inizia',
-    'Commencer',
-  );
+  String get onboardStart =>
+      _pick('Empezar', 'Get started', 'Começar', 'Inizia', 'Commencer');
 
   // Cercanía (BLE)
   String get nearbyTitle => _pick(
@@ -1158,13 +1108,8 @@ class AppStrings {
     'Disco libero',
     'Disque libre',
   );
-  String get compareScore => _pick(
-    'Puntaje',
-    'Score',
-    'Pontuação',
-    'Punteggio',
-    'Score',
-  );
+  String get compareScore =>
+      _pick('Puntaje', 'Score', 'Pontuação', 'Punteggio', 'Score');
   String get compareRisky => _pick(
     'Apps riesgosas',
     'Risky apps',
@@ -1181,13 +1126,8 @@ class AppStrings {
     'Rapporto forense',
     'Rapport forensique',
   );
-  String get reportGenerated => _pick(
-    'Generado',
-    'Generated',
-    'Gerado',
-    'Generato',
-    'Généré',
-  );
+  String get reportGenerated =>
+      _pick('Generado', 'Generated', 'Gerado', 'Generato', 'Généré');
   String get reportDevice =>
       _pick('Equipo', 'Device', 'Aparelho', 'Dispositivo', 'Appareil');
   String get reportVerdict =>

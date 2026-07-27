@@ -35,9 +35,7 @@ Uint8List buildForensicReportPdf({
     '${snapshot.device.model} · ${snapshot.device.osVersion}'
     '${snapshot.device.vendorSkin.isNotEmpty ? ' · ${snapshot.device.vendorSkin}' : ''}',
   );
-  doc.paragraph(
-    '${strings.devicePatch}: ${snapshot.device.securityPatch}',
-  );
+  doc.paragraph('${strings.devicePatch}: ${snapshot.device.securityPatch}');
   doc.paragraph('RootCause Mobile Inspector v${Meta.version}');
 
   final verdictLabel = switch (verdict.severity) {
@@ -46,7 +44,10 @@ Uint8List buildForensicReportPdf({
     Severity.critical => strings.verdictCritical,
   };
   doc.heading(strings.reportVerdict);
-  doc.paragraph('$verdictLabel · ${strings.verdictScore(verdict.score)}', bold: true);
+  doc.paragraph(
+    '$verdictLabel · ${strings.verdictScore(verdict.score)}',
+    bold: true,
+  );
 
   doc.heading(strings.reportFindings);
   if (verdict.findings.isEmpty) {

@@ -522,10 +522,7 @@ class AppCard extends StatelessWidget {
           children: [
             Text('•  ', style: TextStyle(fontSize: 13, color: color)),
             Expanded(
-              child: Text(
-                text,
-                style: TextStyle(fontSize: 13, color: color),
-              ),
+              child: Text(text, style: TextStyle(fontSize: 13, color: color)),
             ),
           ],
         ),
