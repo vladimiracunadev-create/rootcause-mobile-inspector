@@ -52,6 +52,17 @@ Future<void> _recordCrash(Object error, StackTrace stack) async {
   }
 }
 
+/// Resuelve los textos a partir de la config y del idioma del equipo. Con
+/// `languageCode` vacío ("automático") se usa el idioma del dispositivo. Sirve
+/// tanto en la UI como en el Worker de segundo plano (binding ya inicializado).
+AppStrings _resolveStrings(AppConfig config) => AppStrings(
+  resolveLanguage(
+    config.languageCode,
+    deviceLanguageCode:
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode,
+  ),
+);
+
 /// Entrada de la captura en segundo plano: la invoca el Worker de Android
 /// en un engine Flutter sin UI. Reusa exactamente el mismo núcleo (colector,
 /// umbrales configurados, motor de reglas, historial) que la app abierta —
@@ -71,7 +82,7 @@ Future<void> backgroundCapture() async {
       // La alerta avisa solo en la TRANSICIÓN a crítico, en el idioma
       // configurado. Local de verdad: sin INTERNET no hay push posible.
       if (config.notifyCritical) {
-        final strings = AppStrings(config.spanish);
+        final strings = _resolveStrings(config);
         if (outcome.wentCritical) {
           await collectors.notifyCritical(
             title: strings.alertCriticalTitle,
@@ -233,7 +244,7 @@ class _InspectorHomeState extends State<InspectorHome> {
         final reverted = next.copyWith(backgroundCapture: false);
         setState(() => _config = reverted);
         await _configStore?.save(reverted);
-        _showSnack(AppStrings(reverted.spanish).settingsBackgroundUnsupported);
+        _showSnack(_resolveStrings(reverted).settingsBackgroundUnsupported);
         return;
       }
     }
@@ -253,8 +264,8 @@ class _InspectorHomeState extends State<InspectorHome> {
     }
   }
 
-  Future<void> _toggleLanguage() =>
-      _updateConfig(_config.copyWith(spanish: !_config.spanish));
+  Future<void> _setLanguage(String code) =>
+      _updateConfig(_config.copyWith(languageCode: code));
 
   Future<void> _export(AppStrings strings) async {
     final snapshot = _snapshot;
@@ -287,7 +298,7 @@ class _InspectorHomeState extends State<InspectorHome> {
       packageName: packageName,
     );
     if (!ok && mounted) {
-      _showSnack(AppStrings(_config.spanish).actionUnavailable);
+      _showSnack(_resolveStrings(_config).actionUnavailable);
     }
   }
 
@@ -304,18 +315,18 @@ class _InspectorHomeState extends State<InspectorHome> {
     final dir = _dataDir;
     if (snapshot == null || verdict == null || dir == null) return;
     final chain = await HistoryStore(dir).verifyChain();
-    final report = buildForensicReport(
+    final report = buildForensicReportPdf(
       strings: strings,
       snapshot: snapshot,
       verdict: verdict,
       history: _history,
       chain: chain,
     );
-    final file = File('$dir/rootcause-informe-${snapshot.timestampMillis}.md');
-    await file.writeAsString(report, flush: true);
+    final file = File('$dir/rootcause-informe-${snapshot.timestampMillis}.pdf');
+    await file.writeAsBytes(report, flush: true);
     final ok = await _collectors.shareFile(
       path: file.path,
-      mimeType: 'text/markdown',
+      mimeType: 'application/pdf',
       title: strings.reportShareTitle,
     );
     if (!ok && mounted) _showSnack(strings.shareFailed);
@@ -440,7 +451,7 @@ class _InspectorHomeState extends State<InspectorHome> {
 
   @override
   Widget build(BuildContext context) {
-    final strings = AppStrings(_config.spanish);
+    final strings = _resolveStrings(_config);
     final snapshot = _snapshot;
     final verdict = _verdict;
 
@@ -450,15 +461,29 @@ class _InspectorHomeState extends State<InspectorHome> {
     }
 
     return DefaultTabController(
-      length: 9,
+      length: 10,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('RootCause'),
           actions: [
-            IconButton(
+            PopupMenuButton<String>(
               icon: const Icon(Icons.translate),
               tooltip: strings.actionLanguage,
-              onPressed: _toggleLanguage,
+              onSelected: _setLanguage,
+              itemBuilder: (context) => [
+                // '' = automático (seguir el idioma del equipo).
+                CheckedPopupMenuItem(
+                  value: '',
+                  checked: _config.languageCode.isEmpty,
+                  child: Text(strings.settingsLanguageAuto),
+                ),
+                for (final lang in AppLang.values)
+                  CheckedPopupMenuItem(
+                    value: languageCodeOf(lang),
+                    checked: _config.languageCode == languageCodeOf(lang),
+                    child: Text(languageNativeName(lang)),
+                  ),
+              ],
             ),
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -476,6 +501,7 @@ class _InspectorHomeState extends State<InspectorHome> {
             tabs: [
               Tab(icon: const Icon(Icons.speed), text: strings.tabSummary),
               Tab(icon: const Icon(Icons.apps), text: strings.tabApps),
+              Tab(icon: const Icon(Icons.flag), text: strings.tabFlagged),
               Tab(icon: const Icon(Icons.wifi), text: strings.tabNetwork),
               Tab(icon: const Icon(Icons.storage), text: strings.tabStorage),
               Tab(
@@ -519,6 +545,13 @@ class _InspectorHomeState extends State<InspectorHome> {
                     onOpenApp: (pkg) =>
                         _openSystemScreen('app-details', packageName: pkg),
                     onGrantUsageAccess: () => _openSystemScreen('usage-access'),
+                  ),
+                  FlaggedAppsScreen(
+                    apps: snapshot.apps,
+                    auditSupported: snapshot.device.appsAuditSupported,
+                    strings: strings,
+                    onOpenApp: (pkg) =>
+                        _openSystemScreen('app-details', packageName: pkg),
                   ),
                   NetworkScreen(network: snapshot.network, strings: strings),
                   StorageScreen(

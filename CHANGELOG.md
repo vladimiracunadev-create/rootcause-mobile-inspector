@@ -5,6 +5,33 @@ Todos los cambios notables de RootCause Mobile Inspector. El formato sigue
 [SemVer](https://semver.org/lang/es/). La versión actual es la fuente de
 verdad en `pubspec.yaml`.
 
+## [0.6.0] - 2026-07-27 — Cerca de quien la usa
+
+### Added
+
+- **Pestaña "Señaladas"**: lista dedicada y contador de las apps con
+  superficie de permisos riesgosa o instaladas fuera de la tienda,
+  ordenadas por riesgo. Reencuadra lo que la app ya detectaba en una vista
+  corta y accionable (sigue sin poder "bloquear": Android/iOS no lo
+  permiten).
+- **Cuatro idiomas nuevos y autodetección**: además de español e inglés,
+  ahora portugués, italiano y francés. El idioma por defecto se toma de la
+  configuración del equipo; se puede fijar a mano (o volver a
+  "Automático") desde el menú de idioma o Configuración.
+
+### Changed
+
+- **Permisos en lenguaje humano**: cada permiso peligroso se muestra con
+  una descripción clara (p. ej. "Ubicación precisa (GPS)", "Micrófono
+  (grabar audio)") en vez de la constante técnica de Android. Pensado para
+  personas sin formación técnica y de la tercera edad.
+- **Apps en orden alfabético**: sin el acceso de uso, la lista de apps se
+  ordena por nombre (con el acceso de uso se mantiene el orden por consumo).
+- **Informe forense en PDF**: el informe compartible pasa de Markdown a un
+  PDF generado en Dart puro (sin dependencias externas). Mismo contenido —
+  veredicto, hallazgos, métricas, tendencia e integridad — en un archivo
+  que cualquiera abre y lee.
+
 ## [0.5.0] - 2026-07-17 — Evidencia de verdad
 
 ### Added

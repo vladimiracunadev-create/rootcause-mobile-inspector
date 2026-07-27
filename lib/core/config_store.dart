@@ -12,7 +12,7 @@ import 'rule_engine.dart';
 
 class AppConfig {
   const AppConfig({
-    this.spanish = true,
+    this.languageCode = '',
     this.autoRefreshMinutes = 5,
     this.backgroundCapture = false,
     this.backgroundChargingOnly = true,
@@ -31,8 +31,18 @@ class AppConfig {
     int asInt(Object? v, int fallback) => v is num ? v.toInt() : fallback;
     bool asBool(Object? v, bool fallback) => v is bool ? v : fallback;
     const d = AppConfig();
+    // El idioma pasó de un booleano `spanish` a un código libre. Si viene un
+    // config viejo con `spanish`, se migra: true→'es', false→'en'.
+    final String languageCode;
+    if (map['languageCode'] is String) {
+      languageCode = map['languageCode'] as String;
+    } else if (map['spanish'] is bool) {
+      languageCode = (map['spanish'] as bool) ? 'es' : 'en';
+    } else {
+      languageCode = d.languageCode;
+    }
     return AppConfig(
-      spanish: asBool(map['spanish'], d.spanish),
+      languageCode: languageCode,
       autoRefreshMinutes: asInt(
         map['autoRefreshMinutes'],
         d.autoRefreshMinutes,
@@ -63,7 +73,10 @@ class AppConfig {
     );
   }
 
-  final bool spanish;
+  /// Código de idioma de la UI: `'es'`, `'en'`, `'pt'`, `'it'`, `'fr'`, o
+  /// `''` (cadena vacía) para "automático": tomar el idioma del equipo. La
+  /// resolución a un idioma concreto vive en la UI ([resolveLanguage]).
+  final String languageCode;
 
   /// 0 = auto-captura apagada; el original de escritorio usa 5 minutos.
   final int autoRefreshMinutes;
@@ -97,7 +110,7 @@ class AppConfig {
   );
 
   AppConfig copyWith({
-    bool? spanish,
+    String? languageCode,
     int? autoRefreshMinutes,
     bool? backgroundCapture,
     bool? backgroundChargingOnly,
@@ -111,7 +124,7 @@ class AppConfig {
     int? batteryTempWarningCelsius,
     int? batteryTempCriticalCelsius,
   }) => AppConfig(
-    spanish: spanish ?? this.spanish,
+    languageCode: languageCode ?? this.languageCode,
     autoRefreshMinutes: autoRefreshMinutes ?? this.autoRefreshMinutes,
     backgroundCapture: backgroundCapture ?? this.backgroundCapture,
     backgroundChargingOnly:
@@ -130,7 +143,7 @@ class AppConfig {
   );
 
   Map<String, Object?> toMap() => {
-    'spanish': spanish,
+    'languageCode': languageCode,
     'autoRefreshMinutes': autoRefreshMinutes,
     'backgroundCapture': backgroundCapture,
     'backgroundChargingOnly': backgroundChargingOnly,
@@ -167,7 +180,7 @@ class ConfigStore {
       final legacy = _legacyLanguageFile;
       if (await legacy.exists()) {
         final code = (await legacy.readAsString()).trim();
-        return AppConfig(spanish: code != 'en');
+        return AppConfig(languageCode: code == 'en' ? 'en' : 'es');
       }
     } on FileSystemException {
       // Sin acceso al disco se opera con los valores por defecto.

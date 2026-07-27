@@ -379,12 +379,15 @@ class AppsScreen extends StatelessWidget {
     }
     final risky = apps.where((a) => a.severity != Severity.normal).length;
     // Con acceso de uso, lo que más consume va primero: la respuesta a
-    // "¿qué app me está gastando el teléfono?" queda arriba.
+    // "¿qué app me está gastando el teléfono?" queda arriba. Sin él, orden
+    // alfabético: encontrar una app por su nombre no debería ser una búsqueda.
     final ordered = usageAccessGranted
         ? (apps.toList()..sort(
             (a, b) => b.foregroundMillis24h.compareTo(a.foregroundMillis24h),
           ))
-        : apps;
+        : (apps.toList()..sort(
+            (a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()),
+          ));
     return ListView(
       children: [
         SectionCard(
@@ -415,70 +418,177 @@ class AppsScreen extends StatelessWidget {
           ],
         ),
         ...ordered.map(
-          (app) => Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      SeverityDot(severity: app.severity),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          app.label,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        strings.appRiskScore(app.riskScore),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+          (app) => AppCard(app: app, strings: strings, onOpenApp: onOpenApp),
+        ),
+      ],
+    );
+  }
+}
+
+/// Tarjeta de una app auditada, reutilizada por [AppsScreen] y
+/// [FlaggedAppsScreen]. Muestra los permisos en lenguaje humano (no las
+/// constantes de Android) — pensado para que alguien sin formación técnica
+/// entienda qué está pidiendo cada app.
+class AppCard extends StatelessWidget {
+  const AppCard({
+    super.key,
+    required this.app,
+    required this.strings,
+    this.onOpenApp,
+  });
+
+  final AppRisk app;
+  final AppStrings strings;
+  final void Function(String packageName)? onOpenApp;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SeverityDot(severity: app.severity),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    app.label,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    app.packageName,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  if (app.foregroundMillis24h >= 0)
-                    Text(
-                      strings.appUsage(formatUptime(app.foregroundMillis24h)),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  if (app.dangerousPermissions.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      strings.appPerms(app.dangerousPermissions.join(', ')),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                  if (app.specialFlags.isNotEmpty)
-                    Text(
-                      strings.appFlags(app.specialFlags.join(', ')),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  if (onOpenApp != null)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.open_in_new, size: 16),
-                        label: Text(strings.actionAppDetails),
-                        onPressed: () => onOpenApp!(app.packageName),
-                      ),
-                    ),
-                ],
+                ),
+                Text(
+                  strings.appRiskScore(app.riskScore),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+            Text(app.packageName, style: theme.textTheme.bodySmall),
+            if (app.foregroundMillis24h >= 0)
+              Text(
+                strings.appUsage(formatUptime(app.foregroundMillis24h)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+            if (app.dangerousPermissions.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                strings.appPermsTitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              ...app.dangerousPermissions.map(
+                (p) => _bulletLine(context, strings.permissionLabel(p)),
+              ),
+            ],
+            if (app.specialFlags.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              ...app.specialFlags.map(
+                (f) => _bulletLine(
+                  context,
+                  strings.flagLabel(f),
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+            if (onOpenApp != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: Text(strings.actionAppDetails),
+                  onPressed: () => onOpenApp!(app.packageName),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bulletLine(BuildContext context, String text, {Color? color}) =>
+      Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('•  ', style: TextStyle(fontSize: 13, color: color)),
+            Expanded(
+              child: Text(text, style: TextStyle(fontSize: 13, color: color)),
+            ),
+          ],
+        ),
+      );
+}
+
+/// Pestaña "Señaladas": solo las apps con superficie riesgosa o instaladas
+/// fuera de la tienda, ordenadas por riesgo. Reencuadra lo que la app ya
+/// detecta en una lista corta y accionable — sin fingir que las "bloquea".
+class FlaggedAppsScreen extends StatelessWidget {
+  const FlaggedAppsScreen({
+    super.key,
+    required this.apps,
+    required this.auditSupported,
+    required this.strings,
+    this.onOpenApp,
+  });
+
+  final List<AppRisk> apps;
+  final bool auditSupported;
+  final AppStrings strings;
+  final void Function(String packageName)? onOpenApp;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!auditSupported) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(strings.appsUnsupported),
+      );
+    }
+    final flagged = apps.where((a) => a.severity != Severity.normal).toList()
+      ..sort((a, b) => b.riskScore.compareTo(a.riskScore));
+    return ListView(
+      children: [
+        SectionCard(
+          title: strings.flaggedTitle,
+          children: [
+            InfoRow(
+              label: strings.appsRiskyCount,
+              value: flagged.length.toString(),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              strings.flaggedNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+        if (flagged.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(strings.flaggedEmpty),
+          )
+        else ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              strings.flaggedCount(flagged.length),
+              style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
-        ),
+          ...flagged.map(
+            (app) => AppCard(app: app, strings: strings, onOpenApp: onOpenApp),
+          ),
+        ],
       ],
     );
   }
@@ -1438,7 +1548,7 @@ class SettingsScreen extends StatelessWidget {
                 label: Text(strings.settingsRestoreDefaults),
                 onPressed: () => onChanged(
                   AppConfig(
-                    spanish: c.spanish,
+                    languageCode: c.languageCode,
                     autoRefreshMinutes: c.autoRefreshMinutes,
                     backgroundCapture: c.backgroundCapture,
                     backgroundChargingOnly: c.backgroundChargingOnly,
@@ -1501,19 +1611,22 @@ class SettingsScreen extends StatelessWidget {
         SectionCard(
           title: strings.settingsLanguageTitle,
           children: [
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
               children: [
-                for (final (label, spanish) in const [
-                  ('Español', true),
-                  ('English', false),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(label),
-                      selected: c.spanish == spanish,
-                      onSelected: (_) =>
-                          onChanged(c.copyWith(spanish: spanish)),
+                // "Automático" = seguir el idioma del equipo (languageCode '').
+                ChoiceChip(
+                  label: Text(strings.settingsLanguageAuto),
+                  selected: c.languageCode.isEmpty,
+                  onSelected: (_) => onChanged(c.copyWith(languageCode: '')),
+                ),
+                for (final lang in AppLang.values)
+                  ChoiceChip(
+                    label: Text(languageNativeName(lang)),
+                    selected: c.languageCode == languageCodeOf(lang),
+                    onSelected: (_) => onChanged(
+                      c.copyWith(languageCode: languageCodeOf(lang)),
                     ),
                   ),
               ],
