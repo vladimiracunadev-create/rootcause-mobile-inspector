@@ -11,7 +11,7 @@
 ║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
 ║                                                                                   ║
 ║                          M O B I L E   I N S P E C T O R                          ║
-║                  Sensor forense de diagnóstico · Flutter · v0.6.0                 ║
+║                  Sensor forense de diagnóstico · Flutter · v0.7.0                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -19,7 +19,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.6.0-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.7.0-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -121,14 +121,14 @@ ABI `x86_64`; verificada también en dispositivo Android real):
 | Pestaña | Descripción |
 |---|---|
 | **Resumen** | Semáforo global + hallazgos con evidencia, recomendación y **botón de intervención** (abre la pantalla del sistema donde tú sí puedes actuar) |
-| **Apps** | Auditoría de permisos peligrosos por app **en lenguaje humano** (no la constante técnica), en **orden alfabético** — o por **tiempo en pantalla 24 h** con el acceso de uso (opt-in) — con acceso a la ficha del sistema — Android |
-| **Señaladas** | Solo las apps con superficie riesgosa o instaladas fuera de la tienda, con contador y ordenadas por riesgo — Android |
+| **Apps** | Auditoría por app **con ícono real**: permisos **en lenguaje humano** distinguiendo **concedidos vs. solo pedidos**, capacidades **activas** (accesibilidad / lector de notificaciones / admin) resaltadas, **datos y tiempo en pantalla 24 h** con el acceso de uso, en orden alfabético — Android |
+| **Señaladas** | Solo las apps con superficie riesgosa, capacidad de espionaje activa o instaladas fuera de la tienda, con contador y ordenadas por riesgo — Android |
 | **Red** | Transporte activo (WiFi/celular), VPN, red medida, ancho de banda estimado y tráfico acumulado |
 | **Almacenamiento** | Volumen interno **+ tarjeta SD/USB si existen** (detección dinámica) + caché propia con botón de limpieza |
 | **Dispositivo** | Hardware, versión de OS, parche de seguridad e indicadores de root/jailbreak |
 | **Cercanía** | Escaneo Bluetooth LE manual (opt-in) con marca de **persistencia** — sin usar internet |
 | **Historial** | Gráfico de **tendencia** (RAM/disco), **comparación A→B** con deltas, y la regla de carga en ascenso alimentada por la auto-captura |
-| **Configuración** | Auto-captura (5 min por defecto, como la edición Windows), captura en segundo plano (solo-cargando opcional) con **alerta local de crítico**, umbrales modificables e **idioma (5 idiomas + automático)** |
+| **Configuración** | **Modo de visualización** (Simple / Normal / Avanzado), auto-captura (5 min por defecto), captura en segundo plano (solo-cargando opcional) con **alerta local de crítico**, umbrales modificables e **idioma (5 idiomas + automático)** |
 | **Acerca** | Versión, autor, filosofía y política de privacidad local |
 
 Toda captura puede exportarse como **JSON forense** con ids de hallazgo neutrales
@@ -256,6 +256,7 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 - APK release firmado publicado en Releases con hash de integridad
 - Motor de reglas local con **umbrales modificables por el usuario** y 9 familias de hallazgo (incluidas la tendencia `load-rising`, el baseline `new-apps` y el parche antiguo `patch-old`)
 - **Tiempo en pantalla por app** con el acceso de uso (opt-in real del usuario) y **widget de pantalla de inicio** con el semáforo
+- **De superficie a capacidad real** (v0.7.0): permisos **concedidos vs. pedidos**, detección de **stalkerware activo** (accesibilidad / lector de notificaciones / admin), **escalada de permisos**, **consumo de datos** e **íconos** por app, **modos de visualización** (Simple/Normal/Avanzado) y **gráfico de tendencia** en el PDF
 - **Cerca de quien la usa** (v0.6.0): pestaña **Señaladas** (apps riesgosas), permisos **en lenguaje humano**, apps en **orden alfabético**, **5 idiomas con autodetección** e **informe forense en PDF**
 - **Evidencia de verdad** (v0.5.0): historial sellado con **cadena de hashes SHA-256** verificable, **informe forense compartible**, **backup/restauración/borrado**, alerta de app espía y registro local de errores
 - Auto-captura configurable (5 min por defecto) + **captura en segundo plano** con WorkManager (opción solo-cargando) y **notificación local de veredicto crítico**

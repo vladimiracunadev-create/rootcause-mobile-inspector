@@ -179,6 +179,14 @@ class NetworkStatus {
   final int totalTxBytes;
 }
 
+/// Señales especiales (flags) que elevan el riesgo de una app. Las tres
+/// "activas" (v0.7.0) son capacidades que el usuario CONCEDIÓ y están en uso
+/// ahora mismo — el vector clásico de stalkerware —, mucho más fuertes que el
+/// mero hecho de que la app las declare en el manifiesto.
+const _accessibilityActiveFlag = 'accessibility-service';
+const _notificationListenerFlag = 'notification-listener';
+const _deviceAdminActiveFlag = 'device-admin-active';
+
 class AppRisk {
   const AppRisk({
     required this.packageName,
@@ -190,6 +198,10 @@ class AppRisk {
     required this.riskScore,
     required this.severity,
     this.foregroundMillis24h = -1,
+    this.grantedPermissions = const [],
+    this.rxBytes24h = -1,
+    this.txBytes24h = -1,
+    this.iconBase64 = '',
   });
 
   /// El puntaje y la severidad se calculan aquí (Dart compartido) a partir
@@ -197,6 +209,7 @@ class AppRisk {
   /// una sola y testeable.
   factory AppRisk.fromMap(Map<Object?, Object?> map) {
     final dangerous = _asStringList(map['dangerousPermissions']);
+    final granted = _asStringList(map['grantedPermissions']);
     final flags = _asStringList(map['specialFlags']);
     final sideloaded = _asBool(map['sideloaded']);
 
@@ -205,6 +218,12 @@ class AppRisk {
     if (flags.contains('installs-packages')) score += 3;
     if (flags.contains('device-admin')) score += 2;
     if (sideloaded) score += 2;
+    // Capacidades CONCEDIDAS y activas: pesan más que la simple declaración.
+    // Un servicio de accesibilidad o un notification-listener activo puede
+    // leer tu pantalla y tus notificaciones — es el patrón del spyware.
+    if (flags.contains(_accessibilityActiveFlag)) score += 4;
+    if (flags.contains(_notificationListenerFlag)) score += 3;
+    if (flags.contains(_deviceAdminActiveFlag)) score += 4;
 
     final severity = score >= 12
         ? Severity.critical
@@ -212,11 +231,14 @@ class AppRisk {
         ? Severity.warning
         : Severity.normal;
 
+    int nonNegInt(Object? v) => v is num && v >= 0 ? v.toInt() : -1;
+
     return AppRisk(
       packageName: _asString(map['packageName']),
       label: _asString(map['label']),
       versionName: _asString(map['versionName']),
       dangerousPermissions: dangerous,
+      grantedPermissions: granted,
       specialFlags: sideloaded && !flags.contains('sideloaded')
           ? [...flags, 'sideloaded']
           : flags,
@@ -226,6 +248,9 @@ class AppRisk {
       foregroundMillis24h: map['foregroundMillis24h'] is num
           ? (map['foregroundMillis24h'] as num).toInt()
           : -1,
+      rxBytes24h: nonNegInt(map['rxBytes24h']),
+      txBytes24h: nonNegInt(map['txBytes24h']),
+      iconBase64: _asString(map['iconBase64'], ''),
     );
   }
 
@@ -233,6 +258,10 @@ class AppRisk {
   final String label;
   final String versionName;
   final List<String> dangerousPermissions;
+
+  /// Subconjunto de [dangerousPermissions] realmente CONCEDIDO ahora (no solo
+  /// solicitado). Vacío si la plataforma no lo expone.
+  final List<String> grantedPermissions;
   final List<String> specialFlags;
   final bool sideloaded;
   final int riskScore;
@@ -242,6 +271,30 @@ class AppRisk {
   /// Solo existe con el permiso especial de acceso de uso (opt-in del
   /// usuario en Ajustes); -1 = no disponible y la UI omite la fila.
   final int foregroundMillis24h;
+
+  /// Datos recibidos/enviados (bytes) en las últimas 24 h, medidos por el SO.
+  /// Requieren el mismo acceso de uso; -1 = no disponible.
+  final int rxBytes24h;
+  final int txBytes24h;
+
+  /// Ícono de la app como PNG en Base64 (sin prefijo data:), para reconocerla
+  /// de un vistazo. Cadena vacía si el nativo no lo entregó.
+  final String iconBase64;
+
+  /// Total de datos (bytes) en 24 h, o -1 si no está disponible.
+  int get dataBytes24h =>
+      rxBytes24h >= 0 && txBytes24h >= 0 ? rxBytes24h + txBytes24h : -1;
+
+  /// Capacidades concedidas y activas (accesibilidad, escucha de
+  /// notificaciones, administrador del dispositivo) presentes en esta app.
+  List<String> get activeCapabilities => [
+    for (final f in const [
+      _accessibilityActiveFlag,
+      _notificationListenerFlag,
+      _deviceAdminActiveFlag,
+    ])
+      if (specialFlags.contains(f)) f,
+  ];
 }
 
 class DeviceInfo {

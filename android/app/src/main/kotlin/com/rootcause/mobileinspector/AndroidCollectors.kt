@@ -2,6 +2,9 @@ package com.rootcause.mobileinspector
 
 import android.app.ActivityManager
 import android.app.AppOpsManager
+import android.app.admin.DevicePolicyManager
+import android.app.usage.NetworkStats
+import android.app.usage.NetworkStatsManager
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
@@ -9,6 +12,8 @@ import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.TrafficStats
@@ -18,6 +23,9 @@ import android.os.Environment
 import android.os.StatFs
 import android.os.SystemClock
 import android.os.storage.StorageManager
+import android.provider.Settings
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 /**
@@ -193,12 +201,35 @@ class AndroidCollectors(private val context: Context) {
     private fun apps(): List<Map<String, Any?>> {
         val pm = context.packageManager
         val usage = usageByPackage()
+        // Capacidades CONCEDIDAS y activas (el vector de stalkerware): se
+        // calculan una vez y se cruzan por paquete en cada app.
+        val accessibility = enabledComponentPackages(
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+        )
+        val notifListeners = enabledComponentPackages("enabled_notification_listeners")
+        val deviceAdmins = activeDeviceAdminPackages()
+        // Datos por app (24 h) solo si el usuario concedió el acceso de uso.
+        val end = System.currentTimeMillis()
+        val start = end - 24L * 60 * 60 * 1000
+        val nsm = if (usageAccessGranted()) networkStatsManager() else null
         return installedPackages(pm)
             .asSequence()
             .filter { it.applicationInfo != null }
             .filterNot { (it.applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0 }
             .filterNot { it.packageName == context.packageName }
-            .map { pkg -> appEntry(pm, pkg, usage) }
+            .map { pkg ->
+                appEntry(
+                    pm,
+                    pkg,
+                    usage,
+                    accessibility,
+                    notifListeners,
+                    deviceAdmins,
+                    nsm,
+                    start,
+                    end,
+                )
+            }
             .toList()
     }
 
@@ -235,31 +266,153 @@ class AndroidCollectors(private val context: Context) {
         pm: PackageManager,
         pkg: PackageInfo,
         usage: Map<String, Long>?,
+        accessibility: Set<String>,
+        notifListeners: Set<String>,
+        deviceAdmins: Set<String>,
+        nsm: NetworkStatsManager?,
+        start: Long,
+        end: Long,
     ): Map<String, Any?> {
         val requested = pkg.requestedPermissions?.toList() ?: emptyList()
+        val grantFlags = pkg.requestedPermissionsFlags
         val dangerous = requested
             .filter { it in DANGEROUS_PERMISSIONS }
             .map { it.removePrefix("android.permission.") }
+        // Permisos peligrosos CONCEDIDOS ahora mismo (no solo solicitados):
+        // el bit REQUESTED_PERMISSION_GRANTED del arreglo paralelo de flags.
+        val granted = requested.mapIndexedNotNull { i, perm ->
+            val isGranted = grantFlags != null && i < grantFlags.size &&
+                (grantFlags[i] and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
+            if (perm in DANGEROUS_PERMISSIONS && isGranted) {
+                perm.removePrefix("android.permission.")
+            } else {
+                null
+            }
+        }
         val flags = mutableListOf<String>()
         if ("android.permission.SYSTEM_ALERT_WINDOW" in requested) flags += "overlay"
         if ("android.permission.REQUEST_INSTALL_PACKAGES" in requested) {
             flags += "installs-packages"
         }
         if ("android.permission.BIND_DEVICE_ADMIN" in requested) flags += "device-admin"
+        // Capacidades activas: concedidas y en uso, no solo declaradas.
+        if (pkg.packageName in accessibility) flags += "accessibility-service"
+        if (pkg.packageName in notifListeners) flags += "notification-listener"
+        if (pkg.packageName in deviceAdmins) flags += "device-admin-active"
         val label = try {
             pkg.applicationInfo?.loadLabel(pm)?.toString() ?: pkg.packageName
         } catch (_: Exception) {
             pkg.packageName
+        }
+        val uid = pkg.applicationInfo?.uid ?: -1
+        val data = if (nsm != null && uid >= 0) {
+            dataUsageByUid(nsm, uid, start, end)
+        } else {
+            null
         }
         return mapOf(
             "packageName" to pkg.packageName,
             "label" to label,
             "versionName" to (pkg.versionName ?: "?"),
             "dangerousPermissions" to dangerous,
+            "grantedPermissions" to granted,
             "specialFlags" to flags,
             "sideloaded" to isSideloaded(pm, pkg.packageName),
             "foregroundMillis24h" to (usage?.get(pkg.packageName) ?: -1L),
+            "rxBytes24h" to (data?.first ?: -1L),
+            "txBytes24h" to (data?.second ?: -1L),
+            "iconBase64" to (iconBase64(pkg.applicationInfo, pm) ?: ""),
         )
+    }
+
+    /** Paquetes de los componentes habilitados en un setting `pkg/Clase:…`. */
+    private fun enabledComponentPackages(setting: String): Set<String> = try {
+        val raw = Settings.Secure.getString(context.contentResolver, setting)
+        if (raw.isNullOrBlank()) {
+            emptySet()
+        } else {
+            raw.split(':')
+                .mapNotNull { it.substringBefore('/').takeIf { p -> p.isNotBlank() } }
+                .toSet()
+        }
+    } catch (_: Throwable) {
+        emptySet()
+    }
+
+    /** Paquetes con un administrador de dispositivo ACTIVO. */
+    private fun activeDeviceAdminPackages(): Set<String> = try {
+        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE)
+            as DevicePolicyManager
+        dpm.activeAdmins?.map { it.packageName }?.toSet() ?: emptySet()
+    } catch (_: Throwable) {
+        emptySet()
+    }
+
+    private fun networkStatsManager(): NetworkStatsManager? = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            context.getSystemService(Context.NETWORK_STATS_SERVICE)
+                as NetworkStatsManager
+        } else {
+            null
+        }
+    } catch (_: Throwable) {
+        null
+    }
+
+    /**
+     * Datos (rx, tx) de un uid en la ventana [start, end] sumando WiFi y móvil.
+     * Requiere el acceso de uso (ya verificado por el llamador). Devuelve null
+     * si el SO no lo expone para este equipo/uid.
+     */
+    @Suppress("DEPRECATION")
+    private fun dataUsageByUid(
+        nsm: NetworkStatsManager,
+        uid: Int,
+        start: Long,
+        end: Long,
+    ): Pair<Long, Long>? {
+        var rx = 0L
+        var tx = 0L
+        var any = false
+        for (type in intArrayOf(ConnectivityManager.TYPE_WIFI, ConnectivityManager.TYPE_MOBILE)) {
+            try {
+                val stats: NetworkStats =
+                    nsm.queryDetailsForUid(type, null, start, end, uid) ?: continue
+                val bucket = NetworkStats.Bucket()
+                while (stats.hasNextBucket()) {
+                    stats.getNextBucket(bucket)
+                    rx += bucket.rxBytes
+                    tx += bucket.txBytes
+                }
+                stats.close()
+                any = true
+            } catch (_: Throwable) {
+                // Ese transporte no está disponible para este uid; se ignora.
+            }
+        }
+        return if (any) Pair(rx, tx) else null
+    }
+
+    /**
+     * Ícono de la app como PNG Base64 (48x48). Se reduce a un tamaño pequeño
+     * para no inflar el canal; null si falla la carga o el render.
+     */
+    private fun iconBase64(appInfo: ApplicationInfo?, pm: PackageManager): String? {
+        if (appInfo == null) return null
+        return try {
+            val drawable = appInfo.loadIcon(pm)
+            val size = 48
+            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, size, size)
+            drawable.draw(canvas)
+            val out = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            bitmap.recycle()
+            Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
+        } catch (_: Throwable) {
+            null
+        }
     }
 
     @Suppress("DEPRECATION")

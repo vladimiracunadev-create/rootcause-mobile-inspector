@@ -449,11 +449,106 @@ class _InspectorHomeState extends State<InspectorHome> {
     if (mounted) setState(() => _crashLog = null);
   }
 
+  /// Pestañas visibles según el modo de visualización (simple/normal/avanzado).
+  /// Simple deja solo lo esencial para alguien no técnico; avanzado muestra
+  /// todo, incluida la Cercanía Bluetooth.
+  List<_TabSpec> _visibleTabs(AppStrings strings) {
+    const simple = {'simple', 'normal', 'advanced'};
+    const notSimple = {'normal', 'advanced'};
+    const advancedOnly = {'advanced'};
+    final all = [
+      _TabSpec('summary', Icons.speed, strings.tabSummary, simple),
+      _TabSpec('apps', Icons.apps, strings.tabApps, notSimple),
+      _TabSpec('flagged', Icons.flag, strings.tabFlagged, simple),
+      _TabSpec('network', Icons.wifi, strings.tabNetwork, notSimple),
+      _TabSpec('storage', Icons.storage, strings.tabStorage, notSimple),
+      _TabSpec('device', Icons.phone_android, strings.tabDevice, notSimple),
+      _TabSpec(
+        'nearby',
+        Icons.bluetooth_searching,
+        strings.tabNearby,
+        advancedOnly,
+      ),
+      _TabSpec('history', Icons.history, strings.tabHistory, notSimple),
+      _TabSpec('settings', Icons.settings, strings.tabSettings, simple),
+      _TabSpec('about', Icons.info_outline, strings.tabAbout, notSimple),
+    ];
+    final mode =
+        const {'simple', 'normal', 'advanced'}.contains(_config.viewMode)
+        ? _config.viewMode
+        : 'normal';
+    return all.where((t) => t.modes.contains(mode)).toList();
+  }
+
+  Widget _tabView(
+    String id,
+    Snapshot snapshot,
+    Verdict verdict,
+    AppStrings strings,
+  ) => switch (id) {
+    'summary' => SummaryScreen(
+      snapshot: snapshot,
+      verdict: verdict,
+      strings: strings,
+      onOpenSystemScreen: _openSystemScreen,
+    ),
+    'apps' => AppsScreen(
+      apps: snapshot.apps,
+      auditSupported: snapshot.device.appsAuditSupported,
+      usageAccessGranted: snapshot.device.usageAccessGranted,
+      strings: strings,
+      onOpenApp: (pkg) => _openSystemScreen('app-details', packageName: pkg),
+      onGrantUsageAccess: () => _openSystemScreen('usage-access'),
+    ),
+    'flagged' => FlaggedAppsScreen(
+      apps: snapshot.apps,
+      auditSupported: snapshot.device.appsAuditSupported,
+      strings: strings,
+      onOpenApp: (pkg) => _openSystemScreen('app-details', packageName: pkg),
+    ),
+    'network' => NetworkScreen(network: snapshot.network, strings: strings),
+    'storage' => StorageScreen(
+      storage: snapshot.storage,
+      strings: strings,
+      onClearCache: () => _clearOwnCache(strings),
+    ),
+    'device' => DeviceScreen(device: snapshot.device, strings: strings),
+    'nearby' => NearbyScreen(
+      session: _nearby,
+      status: _nearbyStatus,
+      strings: strings,
+      onScan: _nearbyScan,
+    ),
+    'history' => HistoryScreen(history: _history, strings: strings),
+    'settings' => SettingsScreen(
+      config: _config,
+      strings: strings,
+      onChanged: _updateConfig,
+      onReport: () => _generateReport(strings),
+      onBackup: () => _backup(strings),
+      onRestore: () => _restore(strings),
+      onWipe: () => _wipe(strings),
+    ),
+    'about' => AboutScreen(
+      strings: strings,
+      productName: Meta.productName,
+      version: Meta.version,
+      author: Meta.author,
+      license: Meta.license,
+      repository: Meta.repository,
+      crashLog: _crashLog,
+      onShareCrashLog: _crashLog == null ? null : () => _shareCrashLog(strings),
+      onClearCrashLog: _crashLog == null ? null : () => _clearCrashLog(),
+    ),
+    _ => const SizedBox.shrink(),
+  };
+
   @override
   Widget build(BuildContext context) {
     final strings = _resolveStrings(_config);
     final snapshot = _snapshot;
     final verdict = _verdict;
+    final visible = _visibleTabs(strings);
 
     // Introducción de primera vez: se muestra una sola vez, antes que nada.
     if (!_loading && !_config.onboardingSeen) {
@@ -461,7 +556,10 @@ class _InspectorHomeState extends State<InspectorHome> {
     }
 
     return DefaultTabController(
-      length: 10,
+      // La key fuerza un controlador nuevo cuando cambia el número de
+      // pestañas (al cambiar de modo), evitando índices fuera de rango.
+      key: ValueKey(visible.length),
+      length: visible.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('RootCause'),
@@ -499,22 +597,7 @@ class _InspectorHomeState extends State<InspectorHome> {
           bottom: TabBar(
             isScrollable: true,
             tabs: [
-              Tab(icon: const Icon(Icons.speed), text: strings.tabSummary),
-              Tab(icon: const Icon(Icons.apps), text: strings.tabApps),
-              Tab(icon: const Icon(Icons.flag), text: strings.tabFlagged),
-              Tab(icon: const Icon(Icons.wifi), text: strings.tabNetwork),
-              Tab(icon: const Icon(Icons.storage), text: strings.tabStorage),
-              Tab(
-                icon: const Icon(Icons.phone_android),
-                text: strings.tabDevice,
-              ),
-              Tab(
-                icon: const Icon(Icons.bluetooth_searching),
-                text: strings.tabNearby,
-              ),
-              Tab(icon: const Icon(Icons.history), text: strings.tabHistory),
-              Tab(icon: const Icon(Icons.settings), text: strings.tabSettings),
-              Tab(icon: const Icon(Icons.info_outline), text: strings.tabAbout),
+              for (final t in visible) Tab(icon: Icon(t.icon), text: t.label),
             ],
           ),
         ),
@@ -531,69 +614,21 @@ class _InspectorHomeState extends State<InspectorHome> {
               )
             : TabBarView(
                 children: [
-                  SummaryScreen(
-                    snapshot: snapshot,
-                    verdict: verdict,
-                    strings: strings,
-                    onOpenSystemScreen: _openSystemScreen,
-                  ),
-                  AppsScreen(
-                    apps: snapshot.apps,
-                    auditSupported: snapshot.device.appsAuditSupported,
-                    usageAccessGranted: snapshot.device.usageAccessGranted,
-                    strings: strings,
-                    onOpenApp: (pkg) =>
-                        _openSystemScreen('app-details', packageName: pkg),
-                    onGrantUsageAccess: () => _openSystemScreen('usage-access'),
-                  ),
-                  FlaggedAppsScreen(
-                    apps: snapshot.apps,
-                    auditSupported: snapshot.device.appsAuditSupported,
-                    strings: strings,
-                    onOpenApp: (pkg) =>
-                        _openSystemScreen('app-details', packageName: pkg),
-                  ),
-                  NetworkScreen(network: snapshot.network, strings: strings),
-                  StorageScreen(
-                    storage: snapshot.storage,
-                    strings: strings,
-                    onClearCache: () => _clearOwnCache(strings),
-                  ),
-                  DeviceScreen(device: snapshot.device, strings: strings),
-                  NearbyScreen(
-                    session: _nearby,
-                    status: _nearbyStatus,
-                    strings: strings,
-                    onScan: _nearbyScan,
-                  ),
-                  HistoryScreen(history: _history, strings: strings),
-                  SettingsScreen(
-                    config: _config,
-                    strings: strings,
-                    onChanged: _updateConfig,
-                    onReport: () => _generateReport(strings),
-                    onBackup: () => _backup(strings),
-                    onRestore: () => _restore(strings),
-                    onWipe: () => _wipe(strings),
-                  ),
-                  AboutScreen(
-                    strings: strings,
-                    productName: Meta.productName,
-                    version: Meta.version,
-                    author: Meta.author,
-                    license: Meta.license,
-                    repository: Meta.repository,
-                    crashLog: _crashLog,
-                    onShareCrashLog: _crashLog == null
-                        ? null
-                        : () => _shareCrashLog(strings),
-                    onClearCrashLog: _crashLog == null
-                        ? null
-                        : () => _clearCrashLog(),
-                  ),
+                  for (final t in visible)
+                    _tabView(t.id, snapshot, verdict, strings),
                 ],
               ),
       ),
     );
   }
+}
+
+/// Descriptor de una pestaña y en qué modos de visualización aparece.
+class _TabSpec {
+  const _TabSpec(this.id, this.icon, this.label, this.modes);
+
+  final String id;
+  final IconData icon;
+  final String label;
+  final Set<String> modes;
 }

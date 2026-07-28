@@ -18,12 +18,25 @@ import 'dart:io';
 
 import 'models.dart';
 
+/// Una app que GANÓ permisos peligrosos respecto del baseline anterior —
+/// típicamente tras una actualización. Es el "¿qué cambió?" aplicado a los
+/// permisos: una app que ya tenías, ahora pide el micrófono o la ubicación.
+class AppPermGain {
+  const AppPermGain({required this.app, required this.gained});
+
+  final AppRisk app;
+
+  /// Permisos peligrosos nuevos (constantes sin prefijo) que no estaban antes.
+  final List<String> gained;
+}
+
 /// Resultado de comparar una captura contra el baseline.
 class BaselineDiff {
   const BaselineDiff({
     this.newApps = const [],
     this.updatedApps = const [],
     this.removedPackages = const [],
+    this.permissionGains = const [],
   });
 
   final List<AppRisk> newApps;
@@ -34,8 +47,15 @@ class BaselineDiff {
   /// Paquetes que estaban en el baseline y ya no están instalados.
   final List<String> removedPackages;
 
+  /// Apps ya conocidas que ganaron permisos peligrosos desde la captura
+  /// anterior (escalada de superficie).
+  final List<AppPermGain> permissionGains;
+
   bool get isEmpty =>
-      newApps.isEmpty && updatedApps.isEmpty && removedPackages.isEmpty;
+      newApps.isEmpty &&
+      updatedApps.isEmpty &&
+      removedPackages.isEmpty &&
+      permissionGains.isEmpty;
 }
 
 class BaselineStore {
@@ -60,23 +80,43 @@ class BaselineStore {
         // Primera vez: se registra lo presente, sin acusar a nadie.
         await _save(file, {
           for (final app in current)
-            app.packageName: _Entry(nowMillis, app.versionName),
+            app.packageName: _Entry(
+              nowMillis,
+              app.versionName,
+              app.dangerousPermissions,
+            ),
         });
         return const BaselineDiff();
       }
 
       final newApps = <AppRisk>[];
       final updatedApps = <AppRisk>[];
+      final permGains = <AppPermGain>[];
       for (final app in current) {
         final entry = existing[app.packageName];
         if (entry == null) {
           newApps.add(app);
-        } else if (entry.versionName != '?' &&
+          continue;
+        }
+        if (entry.versionName != '?' &&
             app.versionName != '?' &&
             entry.versionName != app.versionName) {
           // Un baseline migrado de v0.3/v0.4 (sin versión) no acusa de
           // "actualizada" a media biblioteca: registra y sigue.
           updatedApps.add(app);
+        }
+        // Escalada de permisos: solo si el baseline anterior YA registraba la
+        // lista (null = entrada migrada sin permisos → no se acusa este turno,
+        // se registran ahora para el próximo).
+        final priorPerms = entry.permissions;
+        if (priorPerms != null) {
+          final priorSet = priorPerms.toSet();
+          final gained = app.dangerousPermissions
+              .where((p) => !priorSet.contains(p))
+              .toList();
+          if (gained.isNotEmpty) {
+            permGains.add(AppPermGain(app: app, gained: gained));
+          }
         }
       }
       final currentPackages = {for (final a in current) a.packageName};
@@ -89,12 +129,14 @@ class BaselineStore {
           app.packageName: _Entry(
             existing[app.packageName]?.firstSeenMillis ?? nowMillis,
             app.versionName,
+            app.dangerousPermissions,
           ),
       });
       return BaselineDiff(
         newApps: newApps,
         updatedApps: updatedApps,
         removedPackages: removed,
+        permissionGains: permGains,
       );
     } on FileSystemException {
       // Sin disco no hay baseline; la captura en vivo sigue funcionando.
@@ -115,7 +157,7 @@ class BaselineStore {
         if (key is! String) continue;
         if (value is num) {
           // Formato v0.3/v0.4 (solo firstSeen): migra sin perder fechas.
-          result[key] = _Entry(value.toInt(), '?');
+          result[key] = _Entry(value.toInt(), '?', null);
         } else if (value is Map) {
           result[key] = _Entry(
             value['firstSeenMillis'] is num
@@ -124,6 +166,11 @@ class BaselineStore {
             value['versionName'] is String
                 ? value['versionName'] as String
                 : '?',
+            // `null` cuando el baseline es previo a v0.7.0 (sin permisos):
+            // no se acusa de escalada hasta tener una referencia real.
+            value['permissions'] is List
+                ? (value['permissions'] as List).whereType<String>().toList()
+                : null,
           );
         }
       }
@@ -143,6 +190,7 @@ class BaselineStore {
             entry.key: {
               'firstSeenMillis': entry.value.firstSeenMillis,
               'versionName': entry.value.versionName,
+              'permissions': entry.value.permissions ?? const <String>[],
             },
         },
       }),
@@ -152,8 +200,12 @@ class BaselineStore {
 }
 
 class _Entry {
-  const _Entry(this.firstSeenMillis, this.versionName);
+  const _Entry(this.firstSeenMillis, this.versionName, this.permissions);
 
   final int firstSeenMillis;
   final String versionName;
+
+  /// Permisos peligrosos registrados; `null` en entradas migradas de antes
+  /// de v0.7.0 (aún sin referencia para detectar escaladas).
+  final List<String>? permissions;
 }

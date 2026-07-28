@@ -76,8 +76,13 @@ class SnapshotJson {
           'severity': a.severity.name,
           'sideloaded': a.sideloaded,
           'dangerousPermissions': a.dangerousPermissions,
+          'grantedPermissions': a.grantedPermissions,
           'specialFlags': a.specialFlags,
           'foregroundMillis24h': a.foregroundMillis24h,
+          // El ícono (iconBase64) se omite del export a propósito: es binario
+          // y pesado; la evidencia forense es textual y comparable.
+          if (a.rxBytes24h >= 0) 'rxBytes24h': a.rxBytes24h,
+          if (a.txBytes24h >= 0) 'txBytes24h': a.txBytes24h,
         },
     ],
     'device': {
@@ -98,6 +103,10 @@ class SnapshotJson {
         'new': [for (final a in diff.newApps) a.packageName],
         'updated': [for (final a in diff.updatedApps) a.packageName],
         'removed': diff.removedPackages,
+        'permissionGains': [
+          for (final g in diff.permissionGains)
+            {'packageName': g.app.packageName, 'gained': g.gained},
+        ],
       },
   };
 

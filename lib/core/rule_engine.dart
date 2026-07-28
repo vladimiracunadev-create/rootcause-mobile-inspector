@@ -5,6 +5,7 @@
 /// recomendación, sin pretender ser un antivirus.
 library;
 
+import 'baseline_store.dart';
 import 'history_store.dart';
 import 'models.dart';
 
@@ -51,6 +52,7 @@ class RuleEngine {
     Snapshot snapshot, {
     List<HistoryRow> history = const [],
     List<AppRisk> newApps = const [],
+    List<AppPermGain> permGains = const [],
   }) {
     final findings = <Finding>[
       ..._memory(snapshot),
@@ -58,6 +60,7 @@ class RuleEngine {
       ..._battery(snapshot),
       ..._apps(snapshot),
       ..._newApps(newApps),
+      ..._permEscalation(permGains),
       ..._rootIndicators(snapshot),
       ..._patchAge(snapshot),
       ..._trend(snapshot, history),
@@ -173,6 +176,24 @@ class RuleEngine {
         id: 'new-apps',
         severity: Severity.warning,
         args: [newApps.length.toString(), names, risky.length.toString()],
+      ),
+    ];
+  }
+
+  /// Escalada de permisos: una app YA conocida ganó permisos peligrosos
+  /// desde la captura anterior (normalmente tras actualizarse). Es el
+  /// "¿por qué esta app ahora quiere el micrófono?" — indicio, no prueba.
+  List<Finding> _permEscalation(List<AppPermGain> gains) {
+    if (gains.isEmpty) return const [];
+    final summary = gains
+        .take(3)
+        .map((g) => '${g.app.label} (+${g.gained.length})')
+        .join(', ');
+    return [
+      Finding(
+        id: 'perm-escalation',
+        severity: Severity.warning,
+        args: [gains.length.toString(), summary],
       ),
     ];
   }

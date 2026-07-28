@@ -13,6 +13,7 @@ import 'rule_engine.dart';
 class AppConfig {
   const AppConfig({
     this.languageCode = '',
+    this.viewMode = 'normal',
     this.autoRefreshMinutes = 5,
     this.backgroundCapture = false,
     this.backgroundChargingOnly = true,
@@ -41,8 +42,11 @@ class AppConfig {
     } else {
       languageCode = d.languageCode;
     }
+    const validModes = {'simple', 'normal', 'advanced'};
+    final mode = map['viewMode'];
     return AppConfig(
       languageCode: languageCode,
+      viewMode: mode is String && validModes.contains(mode) ? mode : d.viewMode,
       autoRefreshMinutes: asInt(
         map['autoRefreshMinutes'],
         d.autoRefreshMinutes,
@@ -78,6 +82,11 @@ class AppConfig {
   /// resolución a un idioma concreto vive en la UI ([resolveLanguage]).
   final String languageCode;
 
+  /// Modo de visualización de la UI: `'simple'` (pocas pestañas grandes, para
+  /// personas no técnicas / tercera edad), `'normal'` (todas menos las más
+  /// técnicas) o `'advanced'` (todo). Ver `visibleTabsFor` en la UI.
+  final String viewMode;
+
   /// 0 = auto-captura apagada; el original de escritorio usa 5 minutos.
   final int autoRefreshMinutes;
   final bool backgroundCapture;
@@ -111,6 +120,7 @@ class AppConfig {
 
   AppConfig copyWith({
     String? languageCode,
+    String? viewMode,
     int? autoRefreshMinutes,
     bool? backgroundCapture,
     bool? backgroundChargingOnly,
@@ -125,6 +135,7 @@ class AppConfig {
     int? batteryTempCriticalCelsius,
   }) => AppConfig(
     languageCode: languageCode ?? this.languageCode,
+    viewMode: viewMode ?? this.viewMode,
     autoRefreshMinutes: autoRefreshMinutes ?? this.autoRefreshMinutes,
     backgroundCapture: backgroundCapture ?? this.backgroundCapture,
     backgroundChargingOnly:
@@ -144,6 +155,7 @@ class AppConfig {
 
   Map<String, Object?> toMap() => {
     'languageCode': languageCode,
+    'viewMode': viewMode,
     'autoRefreshMinutes': autoRefreshMinutes,
     'backgroundCapture': backgroundCapture,
     'backgroundChargingOnly': backgroundChargingOnly,
