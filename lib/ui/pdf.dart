@@ -21,13 +21,24 @@ class _Seg {
 }
 
 /// Una línea del documento ya lista para paginar. `size == 0` es un espaciador
-/// (solo consume [gapBefore] vertical, no dibuja nada).
+/// (solo consume [gapBefore] vertical). Si [chart] no es null, la "línea" es
+/// un gráfico vectorial que ocupa su propia altura.
 class _Line {
-  const _Line(this.segs, this.size, this.bold, this.gapBefore);
+  const _Line(this.segs, this.size, this.bold, this.gapBefore, [this.chart]);
   final List<_Seg> segs;
   final double size;
   final bool bold;
   final double gapBefore;
+  final _Chart? chart;
+}
+
+/// Gráfico de líneas: cada serie es una lista de valores 0–100; cada color es
+/// un RGB (0–1). Se dibuja con operadores de trazo del propio PDF.
+class _Chart {
+  const _Chart(this.series, this.colors, this.height);
+  final List<List<int>> series;
+  final List<List<double>> colors;
+  final double height;
 }
 
 class PdfDocument {
@@ -68,6 +79,15 @@ class PdfDocument {
 
   /// Regla horizontal barata: una fila de guiones ASCII al ancho de página.
   void rule() => _paragraph('-' * 90, 9, false, 6, 0);
+
+  /// Gráfico de líneas (mismas series porcentuales que la app). [series] y
+  /// [colors] deben tener la misma longitud; cada valor va de 0 a 100.
+  void chart(
+    List<List<int>> series,
+    List<List<double>> colors, {
+    double height = 120,
+  }) =>
+      _lines.add(_Line(const [], 0, false, 8, _Chart(series, colors, height)));
 
   /// Tabla simple de columnas de ancho uniforme. La cabecera va en negrita.
   void table(List<String> headers, List<List<String>> rows) {
@@ -207,6 +227,16 @@ class PdfDocument {
     }
 
     for (final line in _lines) {
+      final chartData = line.chart;
+      if (chartData != null) {
+        if (used && y - line.gapBefore - chartData.height < margin) flush();
+        y -= line.gapBefore;
+        final bottom = y - chartData.height;
+        content.add(_ascii(_chartOps(chartData, bottom)));
+        used = true;
+        y = bottom;
+        continue;
+      }
       if (line.size == 0) {
         y -= line.gapBefore;
         continue;
@@ -235,6 +265,39 @@ class PdfDocument {
     }
     if (used || pages.isEmpty) flush();
     return pages;
+  }
+
+  /// Operadores de trazo del gráfico (fuera de BT/ET): rejilla 0/50/100 y una
+  /// polilínea por serie, escaladas al ancho útil y a [_Chart.height].
+  String _chartOps(_Chart ch, double bottom) {
+    final b = StringBuffer();
+    final left = margin;
+    final width = _usableWidth;
+    final height = ch.height;
+    // Rejilla gris tenue en 0, 50 y 100 %.
+    b.write('0.7 0.7 0.7 RG 0.5 w\n');
+    for (final pct in const [0, 50, 100]) {
+      final gy = bottom + height * pct / 100;
+      b.write(
+        '${_fmt(left)} ${_fmt(gy)} m ${_fmt(left + width)} ${_fmt(gy)} l S\n',
+      );
+    }
+    for (var s = 0; s < ch.series.length; s++) {
+      final series = ch.series[s];
+      if (series.length < 2) continue;
+      final c = s < ch.colors.length ? ch.colors[s] : const [0.0, 0.0, 0.0];
+      b.write('${_fmt(c[0])} ${_fmt(c[1])} ${_fmt(c[2])} RG 1.5 w\n');
+      final step = width / (series.length - 1);
+      for (var i = 0; i < series.length; i++) {
+        final x = left + step * i;
+        final py = bottom + height * series[i].clamp(0, 100) / 100;
+        b.write('${_fmt(x)} ${_fmt(py)} ${i == 0 ? 'm' : 'l'}\n');
+      }
+      b.write('S\n');
+    }
+    // Restaura color de trazo negro para lo que siga.
+    b.write('0 0 0 RG\n');
+    return b.toString();
   }
 
   // ---- Texto: envoltura y codificación ---------------------------------

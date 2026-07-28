@@ -70,9 +70,12 @@ class CaptureService {
       }
     }
 
-    final verdict = RuleEngine(
-      thresholds: config.thresholds,
-    ).evaluate(snapshot, history: prior, newApps: diff.newApps);
+    final verdict = RuleEngine(thresholds: config.thresholds).evaluate(
+      snapshot,
+      history: prior,
+      newApps: diff.newApps,
+      permGains: diff.permissionGains,
+    );
 
     final wentCritical =
         verdict.severity == Severity.critical &&

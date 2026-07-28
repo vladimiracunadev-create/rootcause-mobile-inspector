@@ -419,6 +419,29 @@ class AppStrings {
     'Permessi richiesti da questa app',
     'Permissions demandées par cette app',
   );
+  String get appPermGranted =>
+      _pick('concedido', 'granted', 'concedido', 'concesso', 'accordé');
+  String get appPermRequestedOnly => _pick(
+    'pedido, no concedido',
+    'requested, not granted',
+    'pedido, não concedido',
+    'richiesto, non concesso',
+    'demandé, non accordé',
+  );
+  String get appActiveCapsTitle => _pick(
+    'Capacidades sensibles activas',
+    'Active sensitive capabilities',
+    'Capacidades sensíveis ativas',
+    'Capacità sensibili attive',
+    'Capacités sensibles actives',
+  );
+  String appDataUsage(String total) => _pick(
+    'Datos 24 h: $total',
+    '24 h data: $total',
+    'Dados 24 h: $total',
+    'Dati 24 h: $total',
+    'Données 24 h : $total',
+  );
   String appFlags(String flags) => _pick(
     'Señales: $flags',
     'Flags: $flags',
@@ -742,6 +765,26 @@ class AppStrings {
     'Automático (sistema)',
     'Automatico (sistema)',
     'Automatique (système)',
+  );
+  String get settingsViewModeTitle => _pick(
+    'Modo de visualización',
+    'Display mode',
+    'Modo de exibição',
+    'Modalità di visualizzazione',
+    'Mode d’affichage',
+  );
+  String get viewModeSimple =>
+      _pick('Simple', 'Simple', 'Simples', 'Semplice', 'Simple');
+  String get viewModeNormal =>
+      _pick('Normal', 'Normal', 'Normal', 'Normale', 'Normal');
+  String get viewModeAdvanced =>
+      _pick('Avanzado', 'Advanced', 'Avançado', 'Avanzato', 'Avancé');
+  String get settingsViewModeNote => _pick(
+    'Simple muestra solo lo esencial (Resumen, Señaladas y Configuración), ideal para quien no es técnico. Normal añade red, almacenamiento, dispositivo e historial. Avanzado muestra todo, incluida Cercanía Bluetooth.',
+    'Simple shows only the essentials (Summary, Flagged and Settings), ideal for non-technical people. Normal adds network, storage, device and history. Advanced shows everything, including Bluetooth Nearby.',
+    'Simples mostra só o essencial (Resumo, Sinalizadas e Configurações), ideal para quem não é técnico. Normal adiciona rede, armazenamento, dispositivo e histórico. Avançado mostra tudo, incluindo Proximidade Bluetooth.',
+    'Semplice mostra solo l’essenziale (Riepilogo, Segnalate e Impostazioni), ideale per chi non è tecnico. Normale aggiunge rete, archiviazione, dispositivo e cronologia. Avanzato mostra tutto, incluse le Vicinanze Bluetooth.',
+    'Simple n’affiche que l’essentiel (Résumé, Signalées et Réglages), idéal pour les non-techniciens. Normal ajoute réseau, stockage, appareil et historique. Avancé affiche tout, y compris la proximité Bluetooth.',
   );
   String get settingsNearbyHistory => _pick(
     'Histórico de Cercanía entre sesiones (detecta rastreadores multi-día)',
@@ -1257,6 +1300,13 @@ class AppStrings {
       'Patch di sicurezza obsoleta',
       'Correctif de sécurité ancien',
     ),
+    'perm-escalation' => _pick(
+      'Apps que pidieron más permisos',
+      'Apps that asked for more permissions',
+      'Apps que pediram mais permissões',
+      'App che hanno chiesto più permessi',
+      'Apps qui ont demandé plus de permissions',
+    ),
     _ => f.id,
   };
 
@@ -1345,6 +1395,13 @@ class AppStrings {
         'L’ultima patch di sicurezza ($a1) ha $a0 giorni.',
         'Le dernier correctif de sécurité ($a1) date de $a0 jours.',
       ),
+      'perm-escalation' => _pick(
+        '$a0 app(s) ganaron permisos peligrosos desde la captura anterior: $a1.',
+        '$a0 app(s) gained dangerous permissions since the previous snapshot: $a1.',
+        '$a0 app(s) ganharam permissões perigosas desde a captura anterior: $a1.',
+        '$a0 app hanno ottenuto permessi pericolosi dall’acquisizione precedente: $a1.',
+        '$a0 app(s) ont obtenu des permissions dangereuses depuis la capture précédente : $a1.',
+      ),
       _ => f.args.join(', '),
     };
   }
@@ -1412,6 +1469,13 @@ class AppStrings {
       'Busque atualizações do sistema: um aparelho sem patches acumula vulnerabilidades conhecidas e públicas.',
       'Cerca aggiornamenti di sistema: un dispositivo senza patch accumula vulnerabilità note e pubbliche.',
       'Recherchez les mises à jour système : un appareil sans correctifs accumule des vulnérabilités connues et publiques.',
+    ),
+    'perm-escalation' => _pick(
+      'Abre cada app en la pestaña Señaladas: si no reconoces por qué ahora pide ese permiso, revócalo desde la ficha del sistema.',
+      'Open each app in the Flagged tab: if you do not recognize why it now asks for that permission, revoke it from the system page.',
+      'Abra cada app na aba Sinalizadas: se você não reconhece por que agora pede essa permissão, revogue na ficha do sistema.',
+      'Apri ogni app nella scheda Segnalate: se non riconosci perché ora chiede quel permesso, revocalo dalla pagina di sistema.',
+      'Ouvrez chaque app dans l’onglet Signalées : si vous ne reconnaissez pas pourquoi elle demande cette permission, révoquez-la depuis la fiche système.',
     ),
     _ => '',
   };
@@ -1677,6 +1741,27 @@ class AppStrings {
       'Administrador do dispositivo',
       'Amministratore del dispositivo',
       'Administrateur de l’appareil',
+    ),
+    'accessibility-service' => _pick(
+      '⚠ Accesibilidad ACTIVA: puede leer tu pantalla y tocar por ti',
+      '⚠ Accessibility ACTIVE: can read your screen and tap for you',
+      '⚠ Acessibilidade ATIVA: pode ler sua tela e tocar por você',
+      '⚠ Accessibilità ATTIVA: può leggere lo schermo e toccare per te',
+      '⚠ Accessibilité ACTIVE : peut lire votre écran et toucher à votre place',
+    ),
+    'notification-listener' => _pick(
+      '⚠ Lee TODAS tus notificaciones (activo)',
+      '⚠ Reads ALL your notifications (active)',
+      '⚠ Lê TODAS as suas notificações (ativo)',
+      '⚠ Legge TUTTE le tue notifiche (attivo)',
+      '⚠ Lit TOUTES vos notifications (actif)',
+    ),
+    'device-admin-active' => _pick(
+      '⚠ Administrador del dispositivo ACTIVO: control elevado',
+      '⚠ Device administrator ACTIVE: elevated control',
+      '⚠ Administrador do dispositivo ATIVO: controle elevado',
+      '⚠ Amministratore del dispositivo ATTIVO: controllo elevato',
+      '⚠ Administrateur de l’appareil ACTIF : contrôle élevé',
     ),
     'sideloaded' => _pick(
       'Instalada fuera de la tienda oficial',

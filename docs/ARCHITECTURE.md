@@ -7,7 +7,7 @@ RootCause Mobile Inspector usa **Flutter** con una separación estricta en tres 
 ```mermaid
 flowchart TB
     subgraph UI["🖼 UI — lib/ui/ + lib/main.dart"]
-        TABS["10 pestañas Material 3"]
+        TABS["Pestañas Material 3 (3/9/10 según modo)"]
         SEM["Semáforo + hallazgos + acciones"]
         I18N["Bilingüe ES/EN (ES por defecto)"]
     end
@@ -87,9 +87,13 @@ El método `collect` devuelve:
                "metered": false, "downstreamKbps": 0, "upstreamKbps": 0,
                "totalRxBytes": 0, "totalTxBytes": 0 },
   "apps":    [ { "packageName": "...", "label": "...", "versionName": "...",
-                 "dangerousPermissions": [], "specialFlags": [],
+                 "dangerousPermissions": [], "grantedPermissions": [],
+                 "specialFlags": [],  // incluye accessibility-service /
+                 // notification-listener / device-admin-active si están ACTIVOS
                  "sideloaded": false,
-                 "foregroundMillis24h": -1 } ],  // -1 sin acceso de uso
+                 "foregroundMillis24h": -1,  // -1 sin acceso de uso
+                 "rxBytes24h": -1, "txBytes24h": -1,  // -1 sin acceso de uso
+                 "iconBase64": "" } ],  // PNG 48px; se omite del export JSON
   "device":  { "manufacturer": "...", "model": "...", "osVersion": "...",
                "sdkInt": 0, "securityPatch": "...", "cpuCores": 0,
                "uptimeMillis": 0, "rootIndicators": [],
@@ -160,7 +164,9 @@ que no conocen, y así una v0.4 puede leer un JSON de v0.5. El número solo
 sube si un cambio **rompe** la lectura de campos existentes (renombrar o
 cambiar el tipo de uno ya publicado). Los campos añadidos en v0.5.0
 (`prevHash`/`hash` de la cadena de integridad, `baselineChanges`,
-`foregroundMillis24h`, `usageAccessGranted`) son aditivos: mantienen
+`foregroundMillis24h`, `usageAccessGranted`) y en v0.7.0
+(`grantedPermissions`, `rxBytes24h`/`txBytes24h` por app y
+`baselineChanges.permissionGains`) son aditivos: mantienen
 `schemaVersion: 1`.
 
 ### Cadena de integridad del historial (v0.5.0)

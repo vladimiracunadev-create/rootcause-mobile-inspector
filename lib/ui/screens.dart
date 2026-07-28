@@ -2,6 +2,9 @@
 /// bilingües. Sin lógica de negocio: eso vive en lib/core/.
 library;
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../core/config_store.dart';
@@ -441,92 +444,183 @@ class AppCard extends StatelessWidget {
   final AppStrings strings;
   final void Function(String packageName)? onOpenApp;
 
+  /// Decodifica el ícono Base64 una sola vez por construcción; null si viene
+  /// vacío o corrupto (la tarjeta cae a un ícono genérico).
+  Uint8List? _decodeIcon() {
+    if (app.iconBase64.isEmpty) return null;
+    try {
+      return base64Decode(app.iconBase64);
+    } on FormatException {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SeverityDot(severity: app.severity),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    app.label,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+    // Las capacidades ACTIVAS (accesibilidad, notificaciones, admin) son el
+    // vector de espionaje: se muestran primero y en rojo, no mezcladas.
+    final activeFlags = app.activeCapabilities;
+    final otherFlags = app.specialFlags
+        .where((f) => !activeFlags.contains(f))
+        .toList();
+    final granted = app.grantedPermissions.toSet();
+    final requestedOnly = app.dangerousPermissions
+        .where((p) => !granted.contains(p))
+        .toList();
+    final icon = _decodeIcon();
+
+    return MergeSemantics(
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (icon != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(
+                          icon,
+                          width: 36,
+                          height: 36,
+                          gaplessPlayback: true,
+                          semanticLabel: app.label,
+                          errorBuilder: (_, _, _) =>
+                              const Icon(Icons.android, size: 36),
+                        ),
+                      ),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.only(right: 10),
+                      child: Icon(Icons.android, size: 36),
+                    ),
+                  SeverityDot(severity: app.severity),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      app.label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    strings.appRiskScore(app.riskScore),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              Text(app.packageName, style: theme.textTheme.bodySmall),
+              if (app.foregroundMillis24h >= 0)
+                Text(
+                  strings.appUsage(formatUptime(app.foregroundMillis24h)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              if (app.dataBytes24h >= 0)
                 Text(
-                  strings.appRiskScore(app.riskScore),
-                  style: theme.textTheme.bodySmall,
+                  strings.appDataUsage(formatBytes(app.dataBytes24h)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              // Capacidades activas: lo más importante, arriba y en rojo.
+              if (activeFlags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  strings.appActiveCapsTitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: severityColor(Severity.critical),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                ...activeFlags.map(
+                  (f) => _bulletLine(
+                    strings.flagLabel(f),
+                    color: severityColor(Severity.critical),
+                    bold: true,
+                  ),
                 ),
               ],
-            ),
-            Text(app.packageName, style: theme.textTheme.bodySmall),
-            if (app.foregroundMillis24h >= 0)
-              Text(
-                strings.appUsage(formatUptime(app.foregroundMillis24h)),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              if (app.dangerousPermissions.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  strings.appPermsTitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            if (app.dangerousPermissions.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                strings.appPermsTitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+                const SizedBox(height: 2),
+                // Concedidos ahora (más relevantes) primero, resaltados.
+                ...app.grantedPermissions.map(
+                  (p) => _bulletLine(
+                    '${strings.permissionLabel(p)} · ${strings.appPermGranted}',
+                    color: theme.colorScheme.primary,
+                    bold: true,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              ...app.dangerousPermissions.map(
-                (p) => _bulletLine(context, strings.permissionLabel(p)),
-              ),
+                // Pedidos pero no concedidos: informativos, atenuados.
+                ...requestedOnly.map(
+                  (p) => _bulletLine(
+                    '${strings.permissionLabel(p)} · ${strings.appPermRequestedOnly}',
+                    color: theme.disabledColor,
+                  ),
+                ),
+              ],
+              if (otherFlags.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                ...otherFlags.map(
+                  (f) =>
+                      _bulletLine(strings.flagLabel(f), color: theme.hintColor),
+                ),
+              ],
+              if (onOpenApp != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: Text(strings.actionAppDetails),
+                    onPressed: () => onOpenApp!(app.packageName),
+                  ),
+                ),
             ],
-            if (app.specialFlags.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              ...app.specialFlags.map(
-                (f) => _bulletLine(
-                  context,
-                  strings.flagLabel(f),
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-            if (onOpenApp != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  label: Text(strings.actionAppDetails),
-                  onPressed: () => onOpenApp!(app.packageName),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _bulletLine(BuildContext context, String text, {Color? color}) =>
-      Padding(
-        padding: const EdgeInsets.only(top: 1),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('•  ', style: TextStyle(fontSize: 13, color: color)),
-            Expanded(
-              child: Text(text, style: TextStyle(fontSize: 13, color: color)),
+  Widget _bulletLine(String text, {Color? color, bool bold = false}) => Padding(
+    padding: const EdgeInsets.only(top: 1),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('•  ', style: TextStyle(fontSize: 13, color: color)),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13,
+              color: color,
+              fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 /// Pestaña "Señaladas": solo las apps con superficie riesgosa o instaladas
@@ -1549,6 +1643,7 @@ class SettingsScreen extends StatelessWidget {
                 onPressed: () => onChanged(
                   AppConfig(
                     languageCode: c.languageCode,
+                    viewMode: c.viewMode,
                     autoRefreshMinutes: c.autoRefreshMinutes,
                     backgroundCapture: c.backgroundCapture,
                     backgroundChargingOnly: c.backgroundChargingOnly,
@@ -1608,6 +1703,32 @@ class SettingsScreen extends StatelessWidget {
                 ),
             ],
           ),
+        SectionCard(
+          title: strings.settingsViewModeTitle,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final (mode, label) in [
+                  ('simple', strings.viewModeSimple),
+                  ('normal', strings.viewModeNormal),
+                  ('advanced', strings.viewModeAdvanced),
+                ])
+                  ChoiceChip(
+                    label: Text(label),
+                    selected: c.viewMode == mode,
+                    onSelected: (_) => onChanged(c.copyWith(viewMode: mode)),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              strings.settingsViewModeNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
         SectionCard(
           title: strings.settingsLanguageTitle,
           children: [

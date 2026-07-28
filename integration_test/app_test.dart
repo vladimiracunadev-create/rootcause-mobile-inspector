@@ -12,7 +12,9 @@ import 'package:rootcause_mobile_inspector/ui/screens.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('arranca, captura y muestra las 10 pestañas', (tester) async {
+  testWidgets('arranca, captura y muestra las pestañas del modo normal', (
+    tester,
+  ) async {
     await tester.pumpWidget(const RootCauseApp());
     await tester.pumpAndSettle(const Duration(seconds: 5));
 
@@ -26,7 +28,8 @@ void main() {
     }
 
     expect(find.byType(TabBar), findsOneWidget);
-    expect(find.byType(Tab), findsNWidgets(10));
+    // Modo 'normal' por defecto: 9 pestañas (todas menos Cercanía).
+    expect(find.byType(Tab), findsNWidgets(9));
     // La captura real produjo un veredicto en el semáforo.
     expect(find.byType(VerdictBanner), findsOneWidget);
   });

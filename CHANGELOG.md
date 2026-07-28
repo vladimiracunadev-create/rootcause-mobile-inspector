@@ -5,6 +5,37 @@ Todos los cambios notables de RootCause Mobile Inspector. El formato sigue
 [SemVer](https://semver.org/lang/es/). La versión actual es la fuente de
 verdad en `pubspec.yaml`.
 
+## [0.7.0] - 2026-07-27 — De superficie a capacidad real
+
+### Added
+
+- **Permisos concedidos vs. solicitados**: cada app distingue los permisos
+  peligrosos que TIENE concedidos ahora (resaltados) de los que solo pide.
+  El salto de "esta app pide el micrófono" a "esta app TIENE el micrófono".
+- **Detección de stalkerware activo**: se señala en rojo, arriba de todo,
+  cuando una app tiene un **servicio de accesibilidad**, un **lector de
+  notificaciones** o un **administrador de dispositivo** ACTIVOS — el vector
+  clásico de espionaje. Suben el puntaje de riesgo con fuerza.
+- **Escalada de permisos** (`perm-escalation`): avisa cuando una app YA
+  conocida gana permisos peligrosos desde la captura anterior (típicamente
+  tras actualizarse). El "¿por qué ahora quiere el micrófono?".
+- **Consumo de datos por app** (24 h): con el acceso de uso, cada app muestra
+  cuántos datos movió — hermano del tiempo en pantalla.
+- **Íconos reales de las apps**: la lista muestra el ícono de cada app para
+  reconocerla de un vistazo (no solo el nombre).
+- **Modos de visualización** (Configuración): **Simple** (solo Resumen,
+  Señaladas y Configuración, para personas no técnicas / tercera edad),
+  **Normal** y **Avanzado** (todo, incluida Cercanía Bluetooth).
+- **Gráfico de tendencia en el informe PDF**: RAM disponible y disco libre
+  como líneas vectoriales, además de la tabla.
+
+### Changed
+
+- **Accesibilidad**: las tarjetas de app se leen como una sola unidad para
+  lectores de pantalla y respetan el tamaño de fuente del sistema.
+- El export JSON incluye los permisos concedidos, el consumo de datos y las
+  escaladas de permisos (campos nuevos, esquema compatible).
+
 ## [0.6.0] - 2026-07-27 — Cerca de quien la usa
 
 ### Added

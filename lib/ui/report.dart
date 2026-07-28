@@ -97,6 +97,24 @@ Uint8List buildForensicReportPdf({
 
   if (history.length >= 2) {
     doc.heading(strings.trendTitle);
+    // Gráfico vectorial (como en la app): de la captura más antigua a la más
+    // reciente. RAM disponible (azul) y disco libre (verde-azulado).
+    final chrono = history.reversed.toList();
+    if (chrono.length >= 3) {
+      doc.chart(
+        [
+          [for (final r in chrono) r.memAvailablePct],
+          [for (final r in chrono) r.storageFreePct],
+        ],
+        const [
+          [0.1, 0.45, 0.85],
+          [0.0, 0.6, 0.5],
+        ],
+      );
+      doc.paragraph(
+        '${strings.trendMemLegend}  ·  ${strings.trendStorageLegend}',
+      );
+    }
     doc.table(
       [
         strings.reportColSnapshot,
