@@ -34,7 +34,7 @@ diagnóstico y evidencia, con sus límites declarados por escrito.
 ### Motor de reglas Dart puro, 100 % testeable
 
 - `lib/core/rule_engine.dart` no toca plataforma: recibe un snapshot y
-  produce hallazgos con severidad, evidencia y recomendación (9 familias,
+  produce hallazgos con severidad, evidencia y recomendación (11 familias,
   incluidas la tendencia temporal `load-rising`, el baseline de apps
   `new-apps` y el parche antiguo `patch-old`, especificadas en
   [HEURISTICAS.md](HEURISTICAS.md)).
@@ -81,7 +81,7 @@ de privacidad verificable en el código y landing en GitHub Pages
 
 | Tecnología | Rol |
 |---|---|
-| Flutter / Dart | UI Material 3 bilingüe ES/EN + núcleo de reglas compartido |
+| Flutter / Dart | UI Material 3 en cinco idiomas con autodetección + núcleo de reglas compartido |
 | Kotlin | Colectores nativos Android (memoria, almacenamiento, batería, red, apps y permisos, root) |
 | Swift | Colectores nativos iOS dentro de los límites del sandbox |
 | MethodChannel | Puente propio Dart ↔ nativo, sin plugins externos |

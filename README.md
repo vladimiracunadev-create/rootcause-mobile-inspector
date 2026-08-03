@@ -309,7 +309,7 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 
 - Código fuente completo (Dart compartido + Kotlin + Swift)
 - APK release firmado publicado en Releases con hash de integridad
-- Motor de reglas local con **umbrales modificables por el usuario** y 9 familias de hallazgo (incluidas la tendencia `load-rising`, el baseline `new-apps` y el parche antiguo `patch-old`)
+- Motor de reglas local con **umbrales modificables por el usuario** y 11 familias de hallazgo, en dos capas: superficie declarada (permisos, recursos) y **comportamiento observado** (`app-usage-anomaly`, `load-rising-suspect`)
 - **Tiempo en pantalla por app** con el acceso de uso (opt-in real del usuario) y **widget de pantalla de inicio** con el semáforo
 - **De la superficie al comportamiento** (v0.8.0): **consumo anómalo por app** contra su propia mediana histórica, **correlación temporal** entre deterioro de recursos e instalaciones recientes, **elección de interfaz** en el primer arranque (básica por defecto), **tests de la capa nativa** y verificación automática de que el release **no declara `INTERNET`**
 - **De superficie a capacidad real** (v0.7.0): permisos **concedidos vs. pedidos**, detección de **stalkerware activo** (accesibilidad / lector de notificaciones / admin), **escalada de permisos**, **consumo de datos** e **íconos** por app, **modos de visualización** (Simple/Normal/Avanzado) y **gráfico de tendencia** en el PDF

@@ -1,6 +1,6 @@
 ﻿# Plan Maestro — RootCause Mobile Inspector
 
-**Versión base:** v0.5.0 · **Actualizado:** 2026-07-16
+**Versión base:** v0.8.0 · **Actualizado:** 2026-08-03
 **Propósito:** visión del producto y plan por fases. Este documento es la
 brújula; el detalle ítem por ítem vive en [ROADMAP.md](ROADMAP.md) y este plan
 nunca lo contradice.
@@ -25,18 +25,27 @@ RootCause Mobile   → sensor forense de bolsillo   (Flutter, Android + iOS)
 Ambos              → diagnóstico primero, intervención después
 ```
 
-## II. Fase actual — v0.5.x: evidencia de verdad
+## II. Fase actual — v0.8.x: de la superficie al comportamiento
 
 Qué hay hoy, verificable en el código y en los releases:
 
 - Núcleo Dart compartido + colectores nativos Kotlin/Swift por MethodChannel.
-- Motor de reglas local con 9 familias de hallazgo
+- Motor de reglas local con 11 familias de hallazgo
   (→ [HEURISTICAS.md](HEURISTICAS.md)), umbrales **modificables por el
   usuario**, tendencia `load-rising`, baseline de apps `new-apps`
   (el `persistence-change` móvil) y parche antiguo `patch-old`.
+- **Comportamiento observado** (v0.8.0): cada app comparada consigo
+  misma (`app-usage-anomaly`) y correlación temporal entre el deterioro
+  de recursos y las instalaciones recientes (`load-rising-suspect`).
+- **Capacidad real, no solo declarada** (v0.7.0): permisos concedidos vs.
+  pedidos y stalkerware **activo** (accesibilidad, lector de
+  notificaciones, administrador del dispositivo).
 - **Evidencia íntegra y portable**: historial sellado con cadena de
-  hashes SHA-256 verificable, informe forense compartible y
+  hashes SHA-256 verificable, informe forense en PDF/Markdown y
   backup/restauración/borrado de toda la evidencia.
+- **Cinco idiomas con autodetección** y elección de interfaz
+  (básica/normal/avanzada) en el primer arranque, con la básica por
+  defecto.
 - Auto-captura configurable + captura en segundo plano con WorkManager
   (opción solo-cargando) con **notificación local de veredicto crítico**
   y de **app espía** recién instalada — todo por el mismo núcleo vía
@@ -66,9 +75,11 @@ El producto ya es robusto; el freno ahora es la adopción. Ítems (detalle
 en [DISTRIBUCION.md](DISTRIBUCION.md) y [ROADMAP.md](ROADMAP.md)):
 
 - Firma permanente (secretos del keystore) — requiere acción del autor.
+  Hoy los APKs se firman con clave **efímera de CI**, así que no se puede
+  actualizar encima de una versión anterior. Es el bloqueo real.
 - Envío a IzzyOnDroid y F-Droid con la metadata ya preparada.
 - Builds reproducibles verificables públicamente.
-- Portugués (PT-BR) y refinamiento del widget.
+- Refinamiento del widget (más tamaños).
 
 ### Fase 2 — iOS de primera clase (EN PAUSA)
 

@@ -68,3 +68,6 @@ La decisión de fondo (dual license vs mantener Apache 2.0 en una eventual v1.0)
 | v0.3.0 | Apache 2.0 | Sin cambios |
 | v0.4.0 | Apache 2.0 | Sin cambios |
 | v0.5.0 | Apache 2.0 | Sin cambios |
+| v0.6.0 | Apache 2.0 | Sin cambios |
+| v0.7.0 | Apache 2.0 | Sin cambios |
+| v0.8.0 | Apache 2.0 | Texto del `LICENSE` restaurado al **verbatim** de Apache 2.0: el archivo anterior tenía cláusulas alteradas y GitHub lo detectaba como «Other», contradiciendo el badge |

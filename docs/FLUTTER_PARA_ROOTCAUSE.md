@@ -14,7 +14,7 @@ El requisito del producto es un sensor forense que corra en ambos móviles con
 la misma evidencia y el mismo veredicto. Con Flutter (3.44.6, Dart 3.12), un
 solo código Dart cubre:
 
-- la UI completa (Material 3, bilingüe ES/EN),
+- la UI completa (Material 3, cinco idiomas con autodetección),
 - el motor de reglas (`lib/core/rule_engine.dart`),
 - el export JSON forense (`lib/core/snapshot_json.dart`),
 - el historial local (`lib/core/history_store.dart`).

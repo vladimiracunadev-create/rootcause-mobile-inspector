@@ -9,10 +9,10 @@ documento tiene prioridad.
 
 | | RootCause **Windows** Inspector | RootCause **Mobile** Inspector |
 |---|---|---|
-| Versión | v0.19.0 | v0.5.0 |
+| Versión | v0.19.0 | v0.8.0 |
 | Lenguaje | Rust (GUI egui + CLI) | Flutter (Dart + Kotlin + Swift) |
 | Plataforma | Windows 10/11 | Android 8.0+ (producción) · iOS 13+ (compila en CI, distribución en pausa) |
-| Qué es | Sensor forense de escritorio con señales de comportamiento (persistencia, servicios, red local, anomalías) — declaradamente **no** un antivirus ni un EDR: complementa, no reemplaza | Sensor forense de bolsillo: distorsiones de memoria, almacenamiento, batería y red + auditoría de superficie de permisos por app |
+| Qué es | Sensor forense de escritorio con señales de comportamiento (persistencia, servicios, red local, anomalías) — declaradamente **no** un antivirus ni un EDR: complementa, no reemplaza | Sensor forense de bolsillo: distorsiones de memoria, almacenamiento, batería y red, auditoría de superficie de permisos por app y, desde v0.8.0, **comportamiento observado** (cada app comparada consigo misma) |
 | Distribución | GitHub Release: instalador, portable, CLI-only, módulo PowerShell, extensión VS Code | GitHub Release: APK firmado por ABI (arm64-v8a, armeabi-v7a) + universal |
 | Repo | <https://github.com/vladimiracunadev-create/rootcause-windows-inspector> | <https://github.com/vladimiracunadev-create/rootcause-mobile-inspector> |
 | Landing | <https://vladimiracunadev-create.github.io/rootcause-windows-inspector/> | <https://vladimiracunadev-create.github.io/rootcause-mobile-inspector/> |
@@ -30,11 +30,19 @@ documento tiene prioridad.
 
 ### Edición Mobile (Flutter)
 
-- Semáforo global + motor de reglas local con 9 familias de hallazgo:
+- Semáforo global + motor de reglas local con 11 familias de hallazgo:
   memoria, almacenamiento, temperatura/salud de batería, superficie de
-  permisos por app (Android), apps nuevas, root/jailbreak, parche de
-  seguridad antiguo y carga en ascenso sostenido
+  permisos por app (Android), apps nuevas, escalada de permisos,
+  root/jailbreak, parche de seguridad antiguo, carga en ascenso sostenido
+  y las dos de **comportamiento observado** de v0.8.0 —consumo anómalo por
+  app y correlación temporal con instalaciones recientes—
   (→ [HEURISTICAS.md](HEURISTICAS.md)), con umbrales modificables.
+- **Capacidad real, no solo declarada** (v0.7.0): permisos concedidos vs.
+  solo pedidos y detección de stalkerware **activo** (accesibilidad,
+  lector de notificaciones, administrador del dispositivo).
+- **Informe forense en PDF** e historial sellado con cadena SHA-256
+  verificable; **modos de visualización** (básico/normal/avanzado) que se
+  eligen en el primer arranque.
 - Tiempo en pantalla por app (permiso de acceso de uso, opt-in real del
   usuario) y **widget de pantalla de inicio** con el semáforo.
 - Auto-captura configurable + captura en segundo plano (WorkManager,
@@ -57,7 +65,7 @@ documento tiene prioridad.
 | Export forense comparable | JSON con **ids de hallazgo neutrales al idioma**, estables entre versiones y comparables entre ediciones y dispositivos |
 | Privacidad | Todo local: cero telemetría; la edición móvil ni siquiera declara el permiso `INTERNET` |
 | Honestidad técnica | Mapa explícito de qué se detecta y qué queda fuera por diseño del SO (`DETECCION_AMENAZAS.md` en ambos repos) |
-| Interfaz | Bilingüe español/inglés, semáforo por severidad, evidencia junto a cada hallazgo |
+| Interfaz | Semáforo por severidad y evidencia junto a cada hallazgo; la edición móvil habla **cinco idiomas** con autodetección (ES/EN/PT/IT/FR) |
 | Entrega | CI en GitHub Actions, release automatizado por tag con hashes `SHA256SUMS.txt` |
 | Licencia | Apache 2.0 en ambas |
 

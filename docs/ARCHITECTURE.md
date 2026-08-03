@@ -9,7 +9,7 @@ flowchart TB
     subgraph UI["🖼 UI — lib/ui/ + lib/main.dart"]
         TABS["Pestañas Material 3 (3/9/10 según modo)"]
         SEM["Semáforo + hallazgos + acciones"]
-        I18N["Bilingüe ES/EN (ES por defecto)"]
+        I18N["5 idiomas ES/EN/PT/IT/FR<br/>(autodetección del equipo)"]
     end
 
     subgraph CORE["🧠 Núcleo compartido — lib/core/ (Dart puro, sin Flutter)"]
@@ -109,8 +109,10 @@ Reglas del contrato:
 - `appsAuditSupported=false` en iOS: la UI muestra "no disponible por diseño
   del SO" en vez de una lista vacía engañosa.
 - Los ids de hallazgo (`mem-pressure`, `storage-low`, `battery-temp`,
-  `battery-health`, `risky-apps`, `root-indicators`, `load-rising`) son
-  estables y neutrales al idioma — mismos principios que la edición Windows.
+  `battery-health`, `risky-apps`, `root-indicators`, `load-rising`,
+  `new-apps`, `patch-old`, `perm-escalation`, `app-usage-anomaly`,
+  `load-rising-suspect`) son estables y neutrales al idioma — mismos
+  principios que la edición Windows.
 
 ## Ciclo de vida de una captura
 

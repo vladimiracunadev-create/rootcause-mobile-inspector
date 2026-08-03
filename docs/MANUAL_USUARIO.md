@@ -144,7 +144,7 @@ Como en el RootCause de escritorio:
 - **Umbrales de detección** modificables al instante.
 - **Notificación de crítico** en segundo plano (activada por defecto;
   Android 13+ pedirá el permiso de notificaciones la primera vez).
-- **Idioma** español/inglés.
+- **Idioma**: español, inglés, portugués, italiano y francés, o «automático» para seguir al del teléfono.
 
 Todo persiste entre sesiones.
 

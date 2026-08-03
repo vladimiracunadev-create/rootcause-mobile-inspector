@@ -65,7 +65,7 @@
         <img src="https://img.shields.io/badge/Flutter-3.44-blue.svg" alt="Flutter 3.44" />
         <img src="https://img.shields.io/badge/platform-Android%208%2B%20%7C%20iOS%2013%2B-lightgrey.svg" alt="Android 8+ / iOS 13+" />
         <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache 2.0" />
-        <img src="https://img.shields.io/badge/versión-0.5.0-brightgreen.svg" alt="v0.5.0" />
+        <img src="https://img.shields.io/badge/versión-0.8.0-brightgreen.svg" alt="v0.8.0" />
         <img src="https://img.shields.io/badge/telemetría-cero-success.svg" alt="Telemetría cero" />
       </div>
 
@@ -82,9 +82,18 @@
   <section id="features" class="section">
     <div class="container">
       <h2 class="section-title">⚡ Características</h2>
-      <p class="section-sub">Nueve pestañas para diagnosticar tu teléfono sin herramientas externas ni cuentas.</p>
+      <p class="section-sub">Diez pestañas para diagnosticar tu teléfono sin herramientas externas ni cuentas — y eliges cuántas ver: el modo básico deja solo tres.</p>
 
       <div class="feature-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3>Compara cada app consigo misma</h3>
+          <p>No hay una cifra de «cuántos megas al día son demasiados»: no existe igual para un reproductor de vídeo
+            que para una app de notas. RootCause mide el consumo de cada app contra <strong>su propia mediana
+            histórica</strong> y avisa cuando se dispara. Si además tiene una capacidad de espionaje activa,
+            el veredicto es <strong>crítico</strong>. (Android, con el acceso de uso)</p>
+        </div>
 
         <div class="feature-card">
           <div class="feature-icon">🚦</div>
@@ -96,15 +105,18 @@
         <div class="feature-card">
           <div class="feature-icon">🧠</div>
           <h3>Motor de reglas local</h3>
-          <p>Presión de memoria, almacenamiento crítico, temperatura y salud de batería, apps riesgosas, indicadores
-            de root y <strong>carga en ascenso sostenido</strong> — umbrales que tú ajustas, 100 % en el dispositivo.</p>
+          <p><strong>Once familias de reglas</strong>: presión de memoria, almacenamiento crítico, temperatura y salud
+            de batería, apps riesgosas, indicadores de root, parche de seguridad antiguo, apps recién instaladas,
+            escalada de permisos y <strong>carga en ascenso sostenido</strong> — umbrales que tú ajustas,
+            100 % en el dispositivo.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">🔐</div>
           <h3>Auditoría de permisos</h3>
-          <p>Puntaje de riesgo por app según los permisos peligrosos que <em>solicita</em>: cámara, micrófono, SMS,
-            ubicación, overlay, instalación de paquetes y sideload. (Android)</p>
+          <p>Distingue los permisos que una app <strong>tiene concedidos</strong> de los que solo <em>pide</em>, y
+            señala la <strong>capacidad de espionaje activa</strong> — accesibilidad, lector de notificaciones o
+            administrador del dispositivo en marcha. Con ícono real, datos y tiempo en pantalla por app. (Android)</p>
         </div>
 
         <div class="feature-card">
@@ -146,8 +158,10 @@
 
         <div class="feature-card">
           <div class="feature-icon">🌍</div>
-          <h3>Bilingüe y sin fricción</h3>
-          <p>Español por defecto e inglés a un toque desde la barra. Tema claro/oscuro. Sin cuentas, sin registro, sin anuncios.</p>
+          <h3>Cinco idiomas y sin fricción</h3>
+          <p>Español, inglés, portugués, italiano y francés, con <strong>autodetección</strong> del idioma del equipo.
+            Eliges cuánta información ver desde el primer arranque. Tema claro/oscuro. Sin cuentas, sin registro,
+            sin anuncios.</p>
         </div>
 
       </div>
@@ -210,7 +224,8 @@
           <div class="feature-icon">✂️</div>
           <h3>Sin permiso INTERNET</h3>
           <p>El APK de release no declara el permiso <code>INTERNET</code>: no <em>puede</em> abrir conexiones
-            salientes. Verificable en el manifest del código fuente.</p>
+            salientes. Y no hace falta creernos: <strong>cada build de CI falla</strong> si el permiso apareciera en
+            el manifiesto fusionado de release, incluso si lo introdujera una dependencia.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📦</div>
