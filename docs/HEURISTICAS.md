@@ -16,7 +16,14 @@ y cubierto por tests en [`test/rule_engine_test.dart`](../test/rule_engine_test.
 4. **Ids estables** neutrales al idioma: la UI traduce; el export JSON
    conserva el id.
 
-## Las 9 familias
+## Las 11 familias
+
+> **Dos capas de detección.** Las familias 1–9 evalúan **superficie
+> declarada** (qué permisos pide una app) y **recursos globales** (cuánta
+> RAM queda). Las familias 10 y 11, introducidas en v0.8.0, evalúan
+> **comportamiento observado**: qué hace cada app comparada consigo misma
+> a lo largo del tiempo. Un umbral global no puede ver a una app de notas
+> que empieza a subir 700 MB al día; su propio hábito, sí.
 
 ### 1 · `mem-pressure` — presión de memoria
 
@@ -155,6 +162,69 @@ evalúa si la plataforma expone la fecha en formato parseable
 omitida, no inventada. El hallazgo trae el botón "Buscar actualizaciones"
 que abre la pantalla de actualización del sistema.
 
+### 10 · `app-usage-anomaly` — consumo fuera de lo habitual (v0.8.0)
+
+La primera regla que mide **comportamiento**, no superficie. Cada app se
+compara **consigo misma**: no hay un umbral de "cuántos MB al día son
+demasiados", porque esa cifra no existe igual para un cliente de vídeo y
+para una app de notas.
+
+| Condición | Severidad |
+|---|---|
+| Consumo actual ≥ **3×** la mediana histórica de esa app, superando el suelo | 🟡 WARNING |
+| Lo anterior **y** la app tiene una capacidad de espionaje concedida y ACTIVA (accesibilidad / lector de notificaciones / admin) | 🔴 CRITICAL |
+
+**Métricas**: datos (rx+tx, 24 h) y tiempo en primer plano (24 h). La
+anomalía de **datos tiene prioridad**: exfiltrar es un indicio más fuerte
+que estar abierta más rato.
+
+**Suelos absolutos** (por debajo, un múltiplo alto es ruido): **50 MB**
+para datos, **30 min** para pantalla. Pasar de 1 MB a 10 MB son ×10 y no
+significan nada.
+
+**La regla clave de honestidad — la ventana de la línea base.** El SO
+entrega ventanas **móviles** de 24 h. Si la referencia se calculase con
+muestras de esas mismas 24 h, el propio pico contaminaría su referencia y
+la anomalía se escondería sola. Por eso la línea base usa **solo muestras
+anteriores a 24 h**, y hacen falta **≥ 3**. Sin ellas la regla se **omite**:
+un teléfono recién instalado no acusa a nadie.
+
+**Mediana, no media**: un único día raro no redefine lo normal.
+
+**Línea base cero** (la app nunca había consumido eso) y consumo actual por
+encima del suelo → sí es anomalía, y se reporta como `×∞` porque no hay
+múltiplo definido. Pasar de nada a algo relevante es exactamente la señal.
+
+**Requisitos**: acceso de uso concedido (opt-in real del usuario) y
+auditoría de apps → **solo Android**. Sin acceso, los colectores entregan
+`-1` y la ausencia de dato **nunca** se interpreta como cero.
+
+**Almacenamiento**: `rootcause-usage-baseline.json`, una muestra por app y
+hora, 48 h de retención. Desinstalar una app borra su historial de uso.
+
+### 11 · `load-rising-suspect` — app instalada al empezar el deterioro (v0.8.0)
+
+Correlación temporal. Solo se evalúa **si `load-rising` disparó**: cuando
+hay deterioro sostenido de memoria o disco **y** alguna app se instaló
+dentro de las **12 h** previas, se nombra la coincidencia.
+
+| Condición | Severidad |
+|---|---|
+| Hay `load-rising` **y** ≥ 1 app instalada en la ventana de correlación | 🟡 WARNING |
+
+**Evidencia**: cuántas apps y cuáles.
+
+**Coincidir en el tiempo no es causar**, y el texto del hallazgo lo dice
+explícitamente en los cinco idiomas. Su papel es dar al usuario el primer
+sitio donde mirar, no un veredicto de culpabilidad. La recomendación
+propone la comprobación que sí es concluyente: desinstalarla un rato y
+comparar dos capturas en el Historial.
+
+**Honestidad sobre la fecha de instalación**: las apps que entraron con la
+**inicialización** del baseline (la primera captura, que registra toda la
+biblioteca de golpe) quedan **excluidas** — de esas no sabemos cuándo se
+instalaron, y señalarlas sería inventar una fecha.
+
 ## Veredicto global
 
 ```text
@@ -178,5 +248,14 @@ con configuraciones distintas.
 
 Cambiar un umbral por defecto significa tocar `RuleThresholds` y su test.
 Agregar una regla nueva significa: una función privada en el engine, un id
-nuevo documentado aquí, sus tests y sus strings ES/EN. El
+nuevo documentado aquí, sus tests y sus strings en los **cinco** idiomas
+(un id sin traducir cae a mostrarse crudo, y hay un test que lo impide). El
 [ROADMAP](ROADMAP.md) lista lo previsto.
+
+Las reglas de comportamiento (10 y 11) tienen además una exigencia propia:
+pueden **señalar a una app concreta**, así que sus tests no comprueban
+sobre todo que disparen, sino que **NO disparen** cuando la evidencia no da
+para tanto — sin referencia independiente, por debajo del suelo, o con el
+dato ausente. Ver
+[`test/usage_baseline_test.dart`](../test/usage_baseline_test.dart) y
+[`test/features_v080_test.dart`](../test/features_v080_test.dart).

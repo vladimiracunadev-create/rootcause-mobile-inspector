@@ -14,7 +14,7 @@ flowchart TB
 
     subgraph CORE["🧠 Núcleo compartido — lib/core/ (Dart puro, sin Flutter)"]
         MODELS["models.dart<br/>Snapshot · Finding · Verdict · VolumeInfo"]
-        ENGINE["rule_engine.dart<br/>9 familias de reglas"]
+        ENGINE["rule_engine.dart<br/>11 familias de reglas"]
         JSON["snapshot_json.dart<br/>export forense"]
         HIST["history_store.dart<br/>JSON Lines · retención 500"]
         CFG["config_store.dart<br/>intervalos · umbrales · idioma"]
@@ -151,6 +151,9 @@ Función pura `Snapshot → Verdict`:
 | `load-rising` | caída sostenida (≥ 15 pts en ≤ 6 h) de memoria disponible o disco libre a lo largo del historial | — |
 | `new-apps` | ≥ 1 app instalada desde la captura anterior (baseline) | — |
 | `patch-old` | parche ≥ 180 días | parche ≥ 365 días |
+| `perm-escalation` | ≥ 1 app conocida gana permisos peligrosos | — |
+| `app-usage-anomaly` | consumo ≥ 3× la mediana propia de la app, sobre el suelo | lo anterior + capacidad de espionaje activa |
+| `load-rising-suspect` | hay `load-rising` **y** ≥ 1 app instalada en las 12 h previas | — |
 
 Puntaje de riesgo por app (Android): +1 por permiso peligroso solicitado,
 +3 por `SYSTEM_ALERT_WINDOW` u `REQUEST_INSTALL_PACKAGES`, +2 por
@@ -164,10 +167,10 @@ que no conocen, y así una v0.4 puede leer un JSON de v0.5. El número solo
 sube si un cambio **rompe** la lectura de campos existentes (renombrar o
 cambiar el tipo de uno ya publicado). Los campos añadidos en v0.5.0
 (`prevHash`/`hash` de la cadena de integridad, `baselineChanges`,
-`foregroundMillis24h`, `usageAccessGranted`) y en v0.7.0
+`foregroundMillis24h`, `usageAccessGranted`) en v0.7.0
 (`grantedPermissions`, `rxBytes24h`/`txBytes24h` por app y
-`baselineChanges.permissionGains`) son aditivos: mantienen
-`schemaVersion: 1`.
+`baselineChanges.permissionGains`) y en v0.8.0 (`createdMillis` en el
+baseline de apps) son aditivos: mantienen `schemaVersion: 1`.
 
 ### Cadena de integridad del historial (v0.5.0)
 
@@ -184,11 +187,40 @@ ajusta en la pestaña Configuración (`config_store.dart` los persiste como
 `rootcause-config.json`) y la regla de tendencia consume el historial
 reciente. Especificación exacta en [HEURISTICAS.md](HEURISTICAS.md).
 
+### Comportamiento observado (v0.8.0)
+
+Las nueve primeras familias evalúan un snapshot aislado (o, en el caso de
+`load-rising`, una serie de recursos globales). Las dos de v0.8.0 evalúan
+**cada app contra su propio pasado**, que es información que ningún umbral
+global puede contener.
+
+`usage_baseline.dart` mantiene `rootcause-usage-baseline.json`: una muestra
+por app y hora (48 h de retención) del consumo de datos y el tiempo en
+pantalla que reporta el SO. La decisión de diseño que lo hace honesto: como
+el SO entrega ventanas **móviles de 24 h**, la línea base se calcula
+**solo con muestras anteriores a esas 24 h**. Si se mezclaran, el propio
+pico contaminaría su referencia y la anomalía se ocultaría sola.
+
+La correlación temporal se apoya en `BaselineStore.installedWithin()`, que
+excluye las apps registradas en la **inicialización** del baseline
+(`createdMillis`): de esas no se sabe cuándo se instalaron, y señalarlas
+sería inventar una fecha.
+
 ## Persistencia e historial
 
 `history_store.dart` guarda cada captura como una línea JSON (JSON Lines) en
 el directorio de documentos de la app, con retención acotada (500 líneas).
 Sin SQLite ni plugins nativos extra: menos superficie, misma evidencia.
+
+Archivos locales del sandbox (ninguno sale del dispositivo):
+
+| Archivo | Qué guarda |
+|---|---|
+| `rootcause-history.jsonl` | Capturas selladas con la cadena SHA-256 |
+| `rootcause-config.json` | Idioma, modo de vista, intervalos y umbrales |
+| `rootcause-apps-baseline.json` | Apps conocidas, versión, permisos y `createdMillis` |
+| `rootcause-usage-baseline.json` | Series de consumo por app (v0.8.0) |
+| `rootcause-crashlog.txt` | Registro local de errores no capturados |
 
 ## Export forense
 

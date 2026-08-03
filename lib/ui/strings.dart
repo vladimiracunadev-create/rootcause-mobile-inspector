@@ -8,6 +8,12 @@ library;
 
 import '../core/models.dart';
 
+// Los textos que más crecen viven en archivos aparte. Son `part` (misma
+// librería) y no imports: así siguen viendo `_pick`, el mecanismo privado de
+// traducción, sin tener que hacerlo público solo para poder partir el archivo.
+part 'strings/findings.dart';
+part 'strings/permissions.dart';
+
 /// Idiomas soportados por la UI. El orden es el de aparición en el selector.
 enum AppLang { es, en, pt, it, fr }
 
@@ -978,6 +984,51 @@ class AppStrings {
   String get onboardStart =>
       _pick('Empezar', 'Get started', 'Começar', 'Inizia', 'Commencer');
 
+  // Elección de interfaz en el arranque (v0.8.0). La opción básica viene
+  // marcada: quien no sepa qué elegir se queda con la que menos abruma.
+  String get onboardTitleMode => _pick(
+    '¿Cómo quieres verla?',
+    'How do you want to see it?',
+    'Como você quer vê-lo?',
+    'Come vuoi vederla?',
+    'Comment voulez-vous la voir ?',
+  );
+  String get onboardBodyMode => _pick(
+    'Elige cuánta información quieres en pantalla. Puedes cambiarlo cuando quieras en Configuración.',
+    'Choose how much information you want on screen. You can change it any time in Settings.',
+    'Escolha quanta informação quer na tela. Você pode mudar quando quiser em Configurações.',
+    'Scegli quante informazioni vuoi sullo schermo. Puoi cambiarlo quando vuoi in Impostazioni.',
+    'Choisissez la quantité d’informations à l’écran. Vous pouvez la changer à tout moment dans Réglages.',
+  );
+  String get onboardModeRecommended => _pick(
+    'Recomendada',
+    'Recommended',
+    'Recomendada',
+    'Consigliata',
+    'Recommandée',
+  );
+  String get viewModeSimpleHint => _pick(
+    'Lo esencial: el semáforo, las apps señaladas y poco más.',
+    'The essentials: the traffic light, flagged apps and little else.',
+    'O essencial: o semáforo, os apps sinalizados e pouco mais.',
+    'L’essenziale: il semaforo, le app segnalate e poco altro.',
+    'L’essentiel : le feu tricolore, les apps signalées et peu d’autre.',
+  );
+  String get viewModeNormalHint => _pick(
+    'Añade red, almacenamiento, dispositivo e historial.',
+    'Adds network, storage, device and history.',
+    'Adiciona rede, armazenamento, dispositivo e histórico.',
+    'Aggiunge rete, archiviazione, dispositivo e cronologia.',
+    'Ajoute réseau, stockage, appareil et historique.',
+  );
+  String get viewModeAdvancedHint => _pick(
+    'Todo, incluida la Cercanía Bluetooth.',
+    'Everything, including Bluetooth Nearby.',
+    'Tudo, incluindo Proximidade Bluetooth.',
+    'Tutto, incluse le Vicinanze Bluetooth.',
+    'Tout, y compris la proximité Bluetooth.',
+  );
+
   // Cercanía (BLE)
   String get nearbyTitle => _pick(
     'Cercanía Bluetooth',
@@ -1236,560 +1287,4 @@ class AppStrings {
   );
 
   // Hallazgos (ids estables → texto localizado)
-  String findingTitle(Finding f) => switch (f.id) {
-    'mem-pressure' => _pick(
-      'Presión de memoria',
-      'Memory pressure',
-      'Pressão de memória',
-      'Pressione di memoria',
-      'Pression mémoire',
-    ),
-    'storage-low' => _pick(
-      'Almacenamiento bajo',
-      'Low storage',
-      'Armazenamento baixo',
-      'Archiviazione scarsa',
-      'Stockage faible',
-    ),
-    'battery-temp' => _pick(
-      'Temperatura de batería anómala',
-      'Anomalous battery temperature',
-      'Temperatura de bateria anômala',
-      'Temperatura della batteria anomala',
-      'Température de batterie anormale',
-    ),
-    'battery-health' => _pick(
-      'Salud de batería degradada',
-      'Degraded battery health',
-      'Saúde da bateria degradada',
-      'Salute della batteria degradata',
-      'Santé de batterie dégradée',
-    ),
-    'risky-apps' => _pick(
-      'Apps con superficie de permisos riesgosa',
-      'Apps with risky permission surface',
-      'Apps com superfície de permissões arriscada',
-      'App con superficie di permessi a rischio',
-      'Apps à surface de permissions risquée',
-    ),
-    'root-indicators' => _pick(
-      'Indicadores de root/jailbreak',
-      'Root/jailbreak indicators',
-      'Indicadores de root/jailbreak',
-      'Indicatori di root/jailbreak',
-      'Indicateurs de root/jailbreak',
-    ),
-    'load-rising' => _pick(
-      'Carga en ascenso sostenido',
-      'Sustained rising load',
-      'Carga em ascensão sustentada',
-      'Carico in aumento sostenuto',
-      'Charge en hausse soutenue',
-    ),
-    'new-apps' => _pick(
-      'Apps nuevas desde la última captura',
-      'New apps since last snapshot',
-      'Apps novos desde a última captura',
-      'Nuove app dall’ultima acquisizione',
-      'Nouvelles apps depuis la dernière capture',
-    ),
-    'patch-old' => _pick(
-      'Parche de seguridad antiguo',
-      'Outdated security patch',
-      'Patch de segurança antigo',
-      'Patch di sicurezza obsoleta',
-      'Correctif de sécurité ancien',
-    ),
-    'perm-escalation' => _pick(
-      'Apps que pidieron más permisos',
-      'Apps that asked for more permissions',
-      'Apps que pediram mais permissões',
-      'App che hanno chiesto più permessi',
-      'Apps qui ont demandé plus de permissions',
-    ),
-    _ => f.id,
-  };
-
-  String _metricName(String key) => switch (key) {
-    'memory' => _pick(
-      'memoria disponible',
-      'available memory',
-      'memória disponível',
-      'memoria disponibile',
-      'mémoire disponible',
-    ),
-    'storage' => _pick(
-      'disco libre',
-      'free storage',
-      'disco livre',
-      'disco libero',
-      'disque libre',
-    ),
-    _ => key,
-  };
-
-  String findingDetail(Finding f) {
-    final a0 = f.args.isNotEmpty ? f.args[0] : '?';
-    final a1 = f.args.length > 1 ? f.args[1] : '?';
-    return switch (f.id) {
-      'mem-pressure' => _pick(
-        'Solo queda $a0 % de memoria disponible.',
-        'Only $a0 % of memory remains available.',
-        'Resta apenas $a0 % de memória disponível.',
-        'Resta solo il $a0 % di memoria disponibile.',
-        'Il ne reste que $a0 % de mémoire disponible.',
-      ),
-      'storage-low' => _pick(
-        'Solo queda $a0 % de almacenamiento libre.',
-        'Only $a0 % of storage remains free.',
-        'Resta apenas $a0 % de armazenamento livre.',
-        'Resta solo il $a0 % di archiviazione libera.',
-        'Il ne reste que $a0 % de stockage libre.',
-      ),
-      'battery-temp' => _pick(
-        'La batería está a $a0 °C.',
-        'Battery temperature is $a0 °C.',
-        'A bateria está a $a0 °C.',
-        'La batteria è a $a0 °C.',
-        'La batterie est à $a0 °C.',
-      ),
-      'battery-health' => _pick(
-        'El SO reporta la salud de batería como "$a0".',
-        'The OS reports battery health as "$a0".',
-        'O SO reporta a saúde da bateria como "$a0".',
-        'Il SO segnala la salute della batteria come "$a0".',
-        'L’OS indique la santé de la batterie comme « $a0 ».',
-      ),
-      'risky-apps' => _pick(
-        '$a0 app(s) con puntaje de riesgo alto: $a1.',
-        '$a0 app(s) with high risk score: $a1.',
-        '$a0 app(s) com pontuação de risco alta: $a1.',
-        '$a0 app con punteggio di rischio alto: $a1.',
-        '$a0 app(s) à score de risque élevé : $a1.',
-      ),
-      'root-indicators' => _pick(
-        '$a0 indicador(es): $a1.',
-        '$a0 indicator(s): $a1.',
-        '$a0 indicador(es): $a1.',
-        '$a0 indicatore/i: $a1.',
-        '$a0 indicateur(s) : $a1.',
-      ),
-      'load-rising' => _pick(
-        'La ${_metricName(a0)} cayó de $a1 % a ${f.args.length > 2 ? f.args[2] : '?'} % de forma sostenida en las últimas capturas.',
-        'The ${_metricName(a0)} fell steadily from $a1 % to ${f.args.length > 2 ? f.args[2] : '?'} % across recent snapshots.',
-        'A ${_metricName(a0)} caiu de $a1 % para ${f.args.length > 2 ? f.args[2] : '?'} % de forma sustentada nas últimas capturas.',
-        'La ${_metricName(a0)} è scesa da $a1 % a ${f.args.length > 2 ? f.args[2] : '?'} % in modo costante nelle ultime acquisizioni.',
-        'La ${_metricName(a0)} a chuté de $a1 % à ${f.args.length > 2 ? f.args[2] : '?'} % de façon soutenue sur les dernières captures.',
-      ),
-      'new-apps' => _pick(
-        '$a0 app(s) instaladas desde la captura anterior: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} con superficie riesgosa o sideload.' : ''}',
-        '$a0 app(s) installed since the previous snapshot: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} with risky surface or sideload.' : ''}',
-        '$a0 app(s) instalados desde a captura anterior: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} com superfície arriscada ou sideload.' : ''}',
-        '$a0 app installate dall’acquisizione precedente: $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} con superficie a rischio o sideload.' : ''}',
-        '$a0 app(s) installées depuis la capture précédente : $a1.${f.args.length > 2 && f.args[2] != '0' ? ' ${f.args[2]} à surface risquée ou sideload.' : ''}',
-      ),
-      'patch-old' => _pick(
-        'El último parche de seguridad ($a1) tiene $a0 días.',
-        'The latest security patch ($a1) is $a0 days old.',
-        'O último patch de segurança ($a1) tem $a0 dias.',
-        'L’ultima patch di sicurezza ($a1) ha $a0 giorni.',
-        'Le dernier correctif de sécurité ($a1) date de $a0 jours.',
-      ),
-      'perm-escalation' => _pick(
-        '$a0 app(s) ganaron permisos peligrosos desde la captura anterior: $a1.',
-        '$a0 app(s) gained dangerous permissions since the previous snapshot: $a1.',
-        '$a0 app(s) ganharam permissões perigosas desde a captura anterior: $a1.',
-        '$a0 app hanno ottenuto permessi pericolosi dall’acquisizione precedente: $a1.',
-        '$a0 app(s) ont obtenu des permissions dangereuses depuis la capture précédente : $a1.',
-      ),
-      _ => f.args.join(', '),
-    };
-  }
-
-  String findingReco(Finding f) => switch (f.id) {
-    'mem-pressure' => _pick(
-      'Cierra apps en segundo plano; si persiste tras reiniciar, revisa qué app la consume.',
-      'Close background apps; if it persists after reboot, review which app consumes it.',
-      'Feche apps em segundo plano; se persistir após reiniciar, veja qual app consome.',
-      'Chiudi le app in background; se persiste dopo il riavvio, verifica quale app la consuma.',
-      'Fermez les apps en arrière-plan ; si cela persiste après redémarrage, cherchez quelle app la consomme.',
-    ),
-    'storage-low' => _pick(
-      'Libera espacio (fotos, descargas, cachés) antes de que el SO empiece a fallar.',
-      'Free up space (photos, downloads, caches) before the OS starts failing.',
-      'Libere espaço (fotos, downloads, caches) antes que o SO comece a falhar.',
-      'Libera spazio (foto, download, cache) prima che il SO inizi a dare problemi.',
-      'Libérez de l’espace (photos, téléchargements, caches) avant que l’OS ne défaille.',
-    ),
-    'battery-temp' => _pick(
-      'Deja reposar el equipo; calor sostenido sin uso intensivo merece revisar apps activas.',
-      'Let the device rest; sustained heat without heavy use warrants reviewing active apps.',
-      'Deixe o aparelho descansar; calor sustentado sem uso intenso merece revisar apps ativos.',
-      'Lascia riposare il dispositivo; calore sostenuto senza uso intenso merita di controllare le app attive.',
-      'Laissez l’appareil se reposer ; une chaleur soutenue sans usage intensif mérite d’examiner les apps actives.',
-    ),
-    'battery-health' => _pick(
-      'Considera diagnóstico de batería del fabricante.',
-      'Consider the manufacturer\'s battery diagnostics.',
-      'Considere o diagnóstico de bateria do fabricante.',
-      'Valuta la diagnostica della batteria del produttore.',
-      'Envisagez le diagnostic de batterie du fabricant.',
-    ),
-    'risky-apps' => _pick(
-      'Revisa cada app listada: ¿reconoces su origen? ¿necesita esos permisos?',
-      'Review each listed app: do you recognize its origin? Does it need those permissions?',
-      'Revise cada app listado: você reconhece a origem? ele precisa dessas permissões?',
-      'Controlla ogni app elencata: ne riconosci l’origine? le servono quei permessi?',
-      'Vérifiez chaque app listée : en reconnaissez-vous l’origine ? A-t-elle besoin de ces permissions ?',
-    ),
-    'root-indicators' => _pick(
-      'Si no rooteaste este equipo a propósito, investiga el origen del indicador.',
-      'If you did not deliberately root this device, investigate the indicator\'s origin.',
-      'Se você não rooteou este aparelho de propósito, investigue a origem do indicador.',
-      'Se non hai rootato questo dispositivo di proposito, indaga sull’origine dell’indicatore.',
-      'Si vous n’avez pas rooté cet appareil volontairement, cherchez l’origine de l’indicateur.',
-    ),
-    'load-rising' => _pick(
-      'Algo consume el recurso de forma continua. Compara las capturas del Historial y revisa qué cambió (app nueva, sincronización, proceso atascado).',
-      'Something is steadily consuming the resource. Compare History snapshots and review what changed (new app, sync, stuck process).',
-      'Algo consome o recurso de forma contínua. Compare as capturas do Histórico e veja o que mudou (app novo, sincronização, processo travado).',
-      'Qualcosa consuma la risorsa in modo continuo. Confronta le acquisizioni della Cronologia e verifica cosa è cambiato (nuova app, sincronizzazione, processo bloccato).',
-      'Quelque chose consomme la ressource en continu. Comparez les captures de l’Historique et cherchez ce qui a changé (nouvelle app, synchronisation, processus bloqué).',
-    ),
-    'new-apps' => _pick(
-      '¿Reconoces estas instalaciones? Si alguna llegó sola o por sideload, revísala en la pestaña Apps y su ficha del sistema.',
-      'Do you recognize these installs? If any arrived on its own or via sideload, review it in the Apps tab and its system page.',
-      'Você reconhece estas instalações? Se alguma chegou sozinha ou por sideload, revise na aba Apps e na ficha do sistema.',
-      'Riconosci queste installazioni? Se qualcuna è arrivata da sola o via sideload, controllala nella scheda App e nella sua pagina di sistema.',
-      'Reconnaissez-vous ces installations ? Si l’une est arrivée seule ou par sideload, vérifiez-la dans l’onglet Apps et sa fiche système.',
-    ),
-    'patch-old' => _pick(
-      'Busca actualizaciones del sistema: un equipo sin parches acumula vulnerabilidades conocidas y públicas.',
-      'Check for system updates: an unpatched device accumulates known, public vulnerabilities.',
-      'Busque atualizações do sistema: um aparelho sem patches acumula vulnerabilidades conhecidas e públicas.',
-      'Cerca aggiornamenti di sistema: un dispositivo senza patch accumula vulnerabilità note e pubbliche.',
-      'Recherchez les mises à jour système : un appareil sans correctifs accumule des vulnérabilités connues et publiques.',
-    ),
-    'perm-escalation' => _pick(
-      'Abre cada app en la pestaña Señaladas: si no reconoces por qué ahora pide ese permiso, revócalo desde la ficha del sistema.',
-      'Open each app in the Flagged tab: if you do not recognize why it now asks for that permission, revoke it from the system page.',
-      'Abra cada app na aba Sinalizadas: se você não reconhece por que agora pede essa permissão, revogue na ficha do sistema.',
-      'Apri ogni app nella scheda Segnalate: se non riconosci perché ora chiede quel permesso, revocalo dalla pagina di sistema.',
-      'Ouvrez chaque app dans l’onglet Signalées : si vous ne reconnaissez pas pourquoi elle demande cette permission, révoquez-la depuis la fiche système.',
-    ),
-    _ => '',
-  };
-
-  /// Descripción humana de un permiso peligroso de Android. La entrada es la
-  /// constante SIN el prefijo `android.permission.` (p. ej. `RECORD_AUDIO`).
-  /// Para una persona novata, esto reemplaza la "variable de programación".
-  /// Constantes desconocidas se humanizan como último recurso.
-  String permissionLabel(String perm) => switch (perm) {
-    'CAMERA' => _pick(
-      'Cámara',
-      'Camera',
-      'Câmera',
-      'Fotocamera',
-      'Appareil photo',
-    ),
-    'RECORD_AUDIO' => _pick(
-      'Micrófono (grabar audio)',
-      'Microphone (record audio)',
-      'Microfone (gravar áudio)',
-      'Microfono (registrare audio)',
-      'Microphone (enregistrer l’audio)',
-    ),
-    'ACCESS_FINE_LOCATION' => _pick(
-      'Ubicación precisa (GPS)',
-      'Precise location (GPS)',
-      'Localização precisa (GPS)',
-      'Posizione precisa (GPS)',
-      'Localisation précise (GPS)',
-    ),
-    'ACCESS_COARSE_LOCATION' => _pick(
-      'Ubicación aproximada',
-      'Approximate location',
-      'Localização aproximada',
-      'Posizione approssimativa',
-      'Localisation approximative',
-    ),
-    'ACCESS_BACKGROUND_LOCATION' => _pick(
-      'Ubicación en segundo plano (te sigue con la app cerrada)',
-      'Background location (tracks you with the app closed)',
-      'Localização em segundo plano (segue você com o app fechado)',
-      'Posizione in background (ti segue con l’app chiusa)',
-      'Localisation en arrière-plan (vous suit app fermée)',
-    ),
-    'READ_CONTACTS' => _pick(
-      'Leer tus contactos',
-      'Read your contacts',
-      'Ler seus contatos',
-      'Leggere i tuoi contatti',
-      'Lire vos contacts',
-    ),
-    'WRITE_CONTACTS' => _pick(
-      'Modificar tus contactos',
-      'Modify your contacts',
-      'Modificar seus contatos',
-      'Modificare i tuoi contatti',
-      'Modifier vos contacts',
-    ),
-    'GET_ACCOUNTS' => _pick(
-      'Ver las cuentas del teléfono',
-      'See the phone\'s accounts',
-      'Ver as contas do telefone',
-      'Vedere gli account del telefono',
-      'Voir les comptes du téléphone',
-    ),
-    'READ_SMS' => _pick(
-      'Leer tus SMS',
-      'Read your text messages',
-      'Ler seus SMS',
-      'Leggere i tuoi SMS',
-      'Lire vos SMS',
-    ),
-    'SEND_SMS' => _pick(
-      'Enviar SMS (puede costar dinero)',
-      'Send text messages (may cost money)',
-      'Enviar SMS (pode custar dinheiro)',
-      'Inviare SMS (può costare denaro)',
-      'Envoyer des SMS (peut coûter de l’argent)',
-    ),
-    'RECEIVE_SMS' => _pick(
-      'Recibir/interceptar SMS',
-      'Receive/intercept text messages',
-      'Receber/interceptar SMS',
-      'Ricevere/intercettare SMS',
-      'Recevoir/intercepter des SMS',
-    ),
-    'RECEIVE_MMS' => _pick(
-      'Recibir mensajes MMS',
-      'Receive MMS messages',
-      'Receber mensagens MMS',
-      'Ricevere messaggi MMS',
-      'Recevoir des MMS',
-    ),
-    'READ_CALL_LOG' => _pick(
-      'Leer tu historial de llamadas',
-      'Read your call history',
-      'Ler seu histórico de chamadas',
-      'Leggere il registro chiamate',
-      'Lire votre journal d’appels',
-    ),
-    'WRITE_CALL_LOG' => _pick(
-      'Modificar tu historial de llamadas',
-      'Modify your call history',
-      'Modificar seu histórico de chamadas',
-      'Modificare il registro chiamate',
-      'Modifier votre journal d’appels',
-    ),
-    'READ_PHONE_STATE' => _pick(
-      'Ver el estado y datos del teléfono',
-      'See phone status and identity',
-      'Ver o estado e a identidade do telefone',
-      'Vedere stato e identità del telefono',
-      'Voir l’état et l’identité du téléphone',
-    ),
-    'READ_PHONE_NUMBERS' => _pick(
-      'Leer tu número de teléfono',
-      'Read your phone number',
-      'Ler seu número de telefone',
-      'Leggere il tuo numero di telefono',
-      'Lire votre numéro de téléphone',
-    ),
-    'CALL_PHONE' => _pick(
-      'Llamar por teléfono sin preguntarte',
-      'Place phone calls without asking',
-      'Fazer chamadas sem perguntar',
-      'Effettuare chiamate senza chiedere',
-      'Passer des appels sans demander',
-    ),
-    'ANSWER_PHONE_CALLS' => _pick(
-      'Contestar llamadas',
-      'Answer phone calls',
-      'Atender chamadas',
-      'Rispondere alle chiamate',
-      'Répondre aux appels',
-    ),
-    'PROCESS_OUTGOING_CALLS' => _pick(
-      'Ver y desviar llamadas salientes',
-      'See and reroute outgoing calls',
-      'Ver e redirecionar chamadas efetuadas',
-      'Vedere e deviare le chiamate in uscita',
-      'Voir et rediriger les appels sortants',
-    ),
-    'READ_EXTERNAL_STORAGE' => _pick(
-      'Leer tus archivos y fotos',
-      'Read your files and photos',
-      'Ler seus arquivos e fotos',
-      'Leggere i tuoi file e foto',
-      'Lire vos fichiers et photos',
-    ),
-    'WRITE_EXTERNAL_STORAGE' => _pick(
-      'Modificar tus archivos',
-      'Modify your files',
-      'Modificar seus arquivos',
-      'Modificare i tuoi file',
-      'Modifier vos fichiers',
-    ),
-    'MANAGE_EXTERNAL_STORAGE' => _pick(
-      'Acceso total a todos tus archivos',
-      'Full access to all your files',
-      'Acesso total a todos os seus arquivos',
-      'Accesso completo a tutti i tuoi file',
-      'Accès total à tous vos fichiers',
-    ),
-    'READ_MEDIA_IMAGES' => _pick(
-      'Ver tus fotos',
-      'View your photos',
-      'Ver suas fotos',
-      'Vedere le tue foto',
-      'Voir vos photos',
-    ),
-    'READ_MEDIA_VIDEO' => _pick(
-      'Ver tus videos',
-      'View your videos',
-      'Ver seus vídeos',
-      'Vedere i tuoi video',
-      'Voir vos vidéos',
-    ),
-    'READ_MEDIA_AUDIO' => _pick(
-      'Ver tu música y audio',
-      'View your music and audio',
-      'Ver sua música e áudio',
-      'Vedere la tua musica e audio',
-      'Voir votre musique et audio',
-    ),
-    'BODY_SENSORS' => _pick(
-      'Sensores corporales (ritmo cardíaco)',
-      'Body sensors (heart rate)',
-      'Sensores corporais (ritmo cardíaco)',
-      'Sensori corporei (battito cardiaco)',
-      'Capteurs corporels (rythme cardiaque)',
-    ),
-    'ACTIVITY_RECOGNITION' => _pick(
-      'Detectar tu actividad física (pasos, movimiento)',
-      'Detect your physical activity (steps, movement)',
-      'Detectar sua atividade física (passos, movimento)',
-      'Rilevare la tua attività fisica (passi, movimento)',
-      'Détecter votre activité physique (pas, mouvement)',
-    ),
-    'READ_CALENDAR' => _pick(
-      'Leer tu calendario',
-      'Read your calendar',
-      'Ler sua agenda',
-      'Leggere il tuo calendario',
-      'Lire votre agenda',
-    ),
-    'WRITE_CALENDAR' => _pick(
-      'Modificar tu calendario',
-      'Modify your calendar',
-      'Modificar sua agenda',
-      'Modificare il tuo calendario',
-      'Modifier votre agenda',
-    ),
-    'BLUETOOTH_CONNECT' => _pick(
-      'Conectarse a dispositivos Bluetooth',
-      'Connect to Bluetooth devices',
-      'Conectar a dispositivos Bluetooth',
-      'Connettersi a dispositivi Bluetooth',
-      'Se connecter aux appareils Bluetooth',
-    ),
-    'BLUETOOTH_SCAN' => _pick(
-      'Buscar dispositivos Bluetooth cercanos',
-      'Scan for nearby Bluetooth devices',
-      'Buscar dispositivos Bluetooth próximos',
-      'Cercare dispositivi Bluetooth vicini',
-      'Rechercher les appareils Bluetooth proches',
-    ),
-    'NEARBY_WIFI_DEVICES' => _pick(
-      'Detectar dispositivos Wi-Fi cercanos',
-      'Detect nearby Wi-Fi devices',
-      'Detectar dispositivos Wi-Fi próximos',
-      'Rilevare dispositivi Wi-Fi vicini',
-      'Détecter les appareils Wi-Fi proches',
-    ),
-    'POST_NOTIFICATIONS' => _pick(
-      'Mostrar notificaciones',
-      'Show notifications',
-      'Mostrar notificações',
-      'Mostrare notifiche',
-      'Afficher des notifications',
-    ),
-    _ => _humanizeConstant(perm),
-  };
-
-  /// Descripción humana de una "señal especial" (flag) de la app.
-  String flagLabel(String flag) => switch (flag) {
-    'overlay' => _pick(
-      'Puede dibujar sobre otras apps',
-      'Can draw over other apps',
-      'Pode desenhar sobre outros apps',
-      'Può disegnare sopra altre app',
-      'Peut dessiner par-dessus les autres apps',
-    ),
-    'installs-packages' => _pick(
-      'Puede instalar otras apps',
-      'Can install other apps',
-      'Pode instalar outros apps',
-      'Può installare altre app',
-      'Peut installer d’autres apps',
-    ),
-    'device-admin' => _pick(
-      'Administrador del dispositivo',
-      'Device administrator',
-      'Administrador do dispositivo',
-      'Amministratore del dispositivo',
-      'Administrateur de l’appareil',
-    ),
-    'accessibility-service' => _pick(
-      '⚠ Accesibilidad ACTIVA: puede leer tu pantalla y tocar por ti',
-      '⚠ Accessibility ACTIVE: can read your screen and tap for you',
-      '⚠ Acessibilidade ATIVA: pode ler sua tela e tocar por você',
-      '⚠ Accessibilità ATTIVA: può leggere lo schermo e toccare per te',
-      '⚠ Accessibilité ACTIVE : peut lire votre écran et toucher à votre place',
-    ),
-    'notification-listener' => _pick(
-      '⚠ Lee TODAS tus notificaciones (activo)',
-      '⚠ Reads ALL your notifications (active)',
-      '⚠ Lê TODAS as suas notificações (ativo)',
-      '⚠ Legge TUTTE le tue notifiche (attivo)',
-      '⚠ Lit TOUTES vos notifications (actif)',
-    ),
-    'device-admin-active' => _pick(
-      '⚠ Administrador del dispositivo ACTIVO: control elevado',
-      '⚠ Device administrator ACTIVE: elevated control',
-      '⚠ Administrador do dispositivo ATIVO: controle elevado',
-      '⚠ Amministratore del dispositivo ATTIVO: controllo elevato',
-      '⚠ Administrateur de l’appareil ACTIF : contrôle élevé',
-    ),
-    'sideloaded' => _pick(
-      'Instalada fuera de la tienda oficial',
-      'Installed outside the official store',
-      'Instalada fora da loja oficial',
-      'Installata fuori dallo store ufficiale',
-      'Installée hors du magasin officiel',
-    ),
-    _ => _humanizeConstant(flag),
-  };
-
-  /// Último recurso: convierte `READ_SOME_THING` o `some-flag` en algo más
-  /// legible ("Read some thing") sin inventar una traducción falsa.
-  String _humanizeConstant(String raw) {
-    final words = raw
-        .replaceAll('.', ' ')
-        .replaceAll('_', ' ')
-        .replaceAll('-', ' ')
-        .trim()
-        .toLowerCase()
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .toList();
-    if (words.isEmpty) return raw;
-    final first = words.first;
-    final capitalized = first.isEmpty
-        ? first
-        : '${first[0].toUpperCase()}${first.substring(1)}';
-    return [capitalized, ...words.skip(1)].join(' ');
-  }
 }

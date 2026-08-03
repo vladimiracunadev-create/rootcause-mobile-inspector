@@ -38,6 +38,15 @@ android {
         }
     }
 
+    // Tests JVM de la capa nativa (v0.8.0): `CollectorLogic` no toca Android,
+    // así que corren sin emulador. El plugin de Kotlin ya registra
+    // `src/test/kotlin`; se declara explícito para que no dependa de eso.
+    sourceSets {
+        getByName("test") {
+            java.srcDirs("src/test/kotlin")
+        }
+    }
+
     buildTypes {
         release {
             signingConfig = if (System.getenv("ANDROID_KEYSTORE_PATH") != null) {
@@ -68,4 +77,8 @@ dependencies {
     // periódica en segundo plano. Sin más dependencias que estas.
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
+
+    // Solo para los tests JVM: no entran en el APK.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.3.20")
 }

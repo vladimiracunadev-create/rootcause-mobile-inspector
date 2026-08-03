@@ -72,6 +72,9 @@ AppRisk buildAppRisk({
   List<String> dangerousPermissions = const [],
   List<String> specialFlags = const [],
   bool sideloaded = false,
+  int rxBytes24h = -1,
+  int txBytes24h = -1,
+  int foregroundMillis24h = -1,
 }) => AppRisk.fromMap({
   'packageName': packageName,
   'label': label,
@@ -79,4 +82,7 @@ AppRisk buildAppRisk({
   'dangerousPermissions': dangerousPermissions,
   'specialFlags': specialFlags,
   'sideloaded': sideloaded,
+  'rxBytes24h': rxBytes24h,
+  'txBytes24h': txBytes24h,
+  'foregroundMillis24h': foregroundMillis24h,
 });

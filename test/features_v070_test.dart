@@ -122,15 +122,22 @@ void main() {
   });
 
   group('AppConfig.viewMode', () {
-    test('por defecto es normal y hace round-trip', () {
+    test('por defecto es simple y hace round-trip', () {
       const c = AppConfig(viewMode: 'advanced');
-      expect(const AppConfig().viewMode, 'normal');
+      // v0.8.0: el default pasó de 'normal' a 'simple' — la interfaz que
+      // menos abruma a quien instala esto asustado.
+      expect(const AppConfig().viewMode, 'simple');
       expect(AppConfig.fromMap(c.toMap()).viewMode, 'advanced');
     });
 
-    test('un modo inválido cae a normal', () {
+    test('un modo inválido cae al por defecto', () {
       final c = AppConfig.fromMap({'viewMode': 'xxx'});
-      expect(c.viewMode, 'normal');
+      expect(c.viewMode, 'simple');
+    });
+
+    test('una config existente conserva su modo tras actualizar', () {
+      // Un usuario de v0.7.0 que eligió 'normal' no se despierta en 'simple'.
+      expect(AppConfig.fromMap({'viewMode': 'normal'}).viewMode, 'normal');
     });
   });
 

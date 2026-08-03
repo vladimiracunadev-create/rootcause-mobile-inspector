@@ -13,7 +13,7 @@ import 'rule_engine.dart';
 class AppConfig {
   const AppConfig({
     this.languageCode = '',
-    this.viewMode = 'normal',
+    this.viewMode = 'simple',
     this.autoRefreshMinutes = 5,
     this.backgroundCapture = false,
     this.backgroundChargingOnly = true,
@@ -84,7 +84,13 @@ class AppConfig {
 
   /// Modo de visualización de la UI: `'simple'` (pocas pestañas grandes, para
   /// personas no técnicas / tercera edad), `'normal'` (todas menos las más
-  /// técnicas) o `'advanced'` (todo). Ver `visibleTabsFor` en la UI.
+  /// técnicas) o `'advanced'` (todo). Ver `_visibleTabs` en `main.dart`.
+  ///
+  /// Desde v0.8.0 el valor por defecto es `'simple'` y la introducción de
+  /// primera vez lo pregunta con esa opción ya marcada: el usuario que más
+  /// necesita este sensor es el que menos quiere ver diez pestañas técnicas.
+  /// Una config existente conserva su modo — el cambio solo afecta a
+  /// instalaciones nuevas.
   final String viewMode;
 
   /// 0 = auto-captura apagada; el original de escritorio usa 5 minutos.

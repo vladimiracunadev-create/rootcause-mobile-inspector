@@ -5,6 +5,62 @@ Todos los cambios notables de RootCause Mobile Inspector. El formato sigue
 [SemVer](https://semver.org/lang/es/). La versión actual es la fuente de
 verdad en `pubspec.yaml`.
 
+## [0.8.0] - 2026-08-03 — De la superficie al comportamiento
+
+Hasta aquí el sensor evaluaba lo que una app **declara** (permisos) y lo
+que el equipo **tiene** (RAM, disco). Esta versión añade una segunda capa:
+lo que cada app **hace**, comparada consigo misma.
+
+### Added
+
+- **Consumo fuera de lo habitual** (`app-usage-anomaly`): detecta una app
+  cuyo consumo de datos o tiempo en pantalla se dispara contra su **propia
+  mediana histórica**. No hay umbral global inventado — no existe una cifra
+  de "MB al día" que valga igual para un reproductor de vídeo y para una
+  app de notas. Es **CRÍTICO** cuando la app además tiene una capacidad de
+  espionaje concedida y activa: capacidad real + consumo disparado es la
+  coincidencia que de verdad importa.
+- **App instalada al empezar el deterioro** (`load-rising-suspect`):
+  correlación temporal entre un deterioro sostenido de recursos y las apps
+  instaladas en las 12 h previas. El hallazgo dice explícitamente, en los
+  cinco idiomas, que **coincidir en el tiempo no es causar**: da el primer
+  sitio donde mirar, no un culpable.
+- **Elección de interfaz en el primer arranque**: la introducción pregunta
+  cuánta información quieres en pantalla (Básica / Normal / Avanzada) con
+  la **básica ya marcada**. Se puede cambiar cuando sea en Configuración.
+- **Tests de la capa nativa**: la lógica de decisión Kotlin vive ahora en
+  `CollectorLogic.kt` (sin dependencias de Android) con **20 tests JVM**
+  que corren en CI sin emulador. Cubre origen de instalación, componentes
+  activos (la base de la detección de stalkerware), capa del fabricante,
+  indicadores de root y tamaño de caché.
+- **Verificación del claim "cero red"**: `scripts/check-no-internet.sh`
+  falla el build si el manifiesto **fusionado de release** declarase
+  `INTERNET`. Protege la premisa contra una dependencia futura, no solo
+  contra un descuido propio. Corre en cada build de CI.
+- **Test de integración en emulador dentro de CI**
+  (`integration-android.yml`): cada noche y a demanda. Es lo único que
+  ejercita de punta a punta el camino Kotlin ↔ MethodChannel ↔ Dart.
+
+### Changed
+
+- **El modo de visualización por defecto pasa de `normal` a `simple`.**
+  Quien instala esto asustado no debería estrellarse contra diez pestañas
+  técnicas. **Una configuración existente conserva su modo**: el cambio
+  solo afecta a instalaciones nuevas.
+- **`lib/ui/screens.dart` (1.900 líneas) partido por pestaña** bajo
+  `lib/ui/screens/`, con `screens.dart` como barril: los imports existentes
+  siguen funcionando igual. Los textos que más crecen (hallazgos y
+  permisos) salen de `strings.dart` a `lib/ui/strings/`. Sin cambios de
+  comportamiento.
+- El baseline de apps registra `createdMillis` para distinguir las apps que
+  entraron con la **inicialización** (fecha desconocida, nunca se señalan)
+  de las instalaciones realmente **observadas**.
+
+### Fixed
+
+- El ROADMAP declaraba v0.5.0 como versión actual con el proyecto en 0.7.0,
+  y listaba como pendiente el portugués, entregado en v0.6.0.
+
 ## [0.7.0] - 2026-07-27 — De superficie a capacidad real
 
 ### Added

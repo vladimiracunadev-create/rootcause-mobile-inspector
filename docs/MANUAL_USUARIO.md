@@ -10,6 +10,27 @@ envía nada a ninguna parte.
 > almacenamiento, batería, permisos de apps— puede ser el primer indicio
 > de un problema. RootCause vigila esas distorsiones y te dice dónde mirar.
 
+## La primera vez que la abres
+
+RootCause te muestra tres pantallas cortas (qué es, qué **no** es, y por
+qué todo se queda en tu teléfono) y luego te hace **una sola pregunta**:
+cuánta información quieres ver.
+
+| Opción | Qué ves |
+|---|---|
+| **Simple** (recomendada, viene marcada) | Lo esencial: el semáforo, las apps señaladas y la configuración |
+| **Normal** | Añade red, almacenamiento, dispositivo e historial |
+| **Avanzado** | Todo, incluida la Cercanía Bluetooth |
+
+Si no tocas nada y pulsas **Empezar**, te quedas con la **Simple**. Es a
+propósito: la mayoría de la gente que instala esto lo hace porque sospecha
+algo, no porque quiera un panel técnico. Todo lo demás sigue ahí y se
+activa cuando quieras.
+
+> **Puedes cambiarlo cuando sea** en **Configuración → Modo de
+> visualización**. No pierdes nada: las capturas y el historial son los
+> mismos en los tres modos, solo cambia cuánto se te muestra.
+
 ## El semáforo
 
 <p align="center">
@@ -161,9 +182,49 @@ La app está en **español e inglés** — español por defecto, como toda la
 familia RootCause. El botón 🌐 de la barra superior cambia al inglés y la
 preferencia se recuerda entre sesiones.
 
+## "Consumo fuera de lo habitual" (v0.8.0)
+
+Este hallazgo aparece cuando una app **gasta mucho más de lo que ella misma
+gastaba antes** — datos móviles/WiFi o tiempo en pantalla.
+
+No hay una cifra fija de "cuántos megas al día son demasiados", porque no
+existe: un reproductor de vídeo gasta muchísimo y es normal, una app de
+notas gasta casi nada. Por eso RootCause compara **cada app consigo
+misma**. Una app de notas que siempre movió 2 MB al día y hoy sube 700 MB
+no rompe ningún límite del teléfono, pero se delata contra su costumbre.
+
+**Lo primero que debes preguntarte: ¿la usaste tú más de lo normal?** Si la
+respuesta es sí, no hay misterio. Si es que no, mira qué permisos tiene
+concedidos y abre su ficha del sistema.
+
+Se pone **rojo** cuando, además del consumo disparado, esa app tiene una
+capacidad de espionaje activa (leer tu pantalla, leer tus notificaciones o
+administrar el dispositivo). Esa combinación es la que de verdad importa.
+
+**Necesita tiempo para funcionar.** Para saber qué es "lo habitual" de una
+app hace falta historial: unas **24-48 horas** de uso con el acceso de uso
+concedido. Antes de eso RootCause no dice nada — prefiere callarse a
+inventar. Y ojo con lo que esto significa: si el teléfono ya estaba
+comprometido cuando instalaste RootCause, ese consumo alto es lo que
+aprenderá como "normal". Detecta **cambios**, no un problema que ya venía.
+
+## "App instalada al empezar el deterioro" (v0.8.0)
+
+Cuando la memoria o el disco llevan un rato cayendo sin parar **y** hay una
+app que se instaló justo en ese periodo, RootCause te lo dice.
+
+**Coincidir en el tiempo no es ser la causa**, y la app lo deja claro: es
+el primer sitio donde mirar, no un culpable. Si no reconoces la
+instalación, revísala en **Señaladas**. Si sí la reconoces y aun así
+sospechas, la comprobación que sí resuelve la duda es desinstalarla un rato
+y comparar dos capturas en el **Historial**.
+
 ## Qué NO hace esta app
 
 - No elimina malware ni "limpia" el teléfono.
 - No mata procesos de otras apps (el SO no lo permite).
 - No lee tu tráfico, mensajes ni archivos personales.
 - No usa internet: la evidencia solo sale si tú la exportas.
+- No acusa a una app de espiarte. Te muestra indicios con evidencia para
+  que tú decidas — un consumo raro puede ser espionaje o puede ser que ese
+  día usaste mucho esa app.

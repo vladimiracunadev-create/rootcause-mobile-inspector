@@ -3,8 +3,13 @@
 #
 # Valida en cada push/PR a main:
 #   1. quality       → formato Dart + analyze + tests unitarios (ubuntu)
-#   2. build-android → APK release real (firma debug local del runner)
+#   2. build-android → tests JVM de la capa nativa + APK release real +
+#                      verificación de que el release no declara INTERNET
 #   3. build-ios     → build iOS sin firma en macos (valida el canal Swift)
+#
+# El test de integración en emulador vive aparte (integration-android.yml):
+# es lento y depende de KVM, así que no bloquea cada PR — corre cada noche
+# y a demanda.
 #
 # Robustez:
 #   - Actions oficiales pinneadas a commit SHA (no a tags móviles).
@@ -83,6 +88,24 @@ jobs:
 
       - name: Build APK release
         run: flutter build apk --release
+
+      # La capa nativa dejó de ser terreno sin tests en v0.8.0: la lógica de
+      # decisión vive en CollectorLogic.kt (sin dependencias de Android) y se
+      # prueba en la JVM, sin emulador.
+      #
+      # Va DESPUÉS del build a propósito, por dos motivos: `android/gradlew`
+      # y `android/local.properties` están AMBOS en .gitignore, y es el
+      # propio `flutter build` quien inyecta el wrapper y escribe
+      # `flutter.sdk`. Invocar Gradle antes falla — verificado, no supuesto.
+      - name: Tests JVM de la capa nativa (Kotlin)
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest --console=plain
+
+      # "Cero telemetría, cero red saliente" deja de ser una promesa y pasa a
+      # ser un hecho comprobado en cada build: si una dependencia introdujera
+      # el permiso INTERNET en el manifiesto fusionado de release, esto falla.
+      - name: Verificar que el release no declara INTERNET
+        run: bash scripts/check-no-internet.sh
 
       - name: Publicar artefacto de CI
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

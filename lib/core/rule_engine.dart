@@ -8,6 +8,7 @@ library;
 import 'baseline_store.dart';
 import 'history_store.dart';
 import 'models.dart';
+import 'usage_baseline.dart';
 
 /// Umbrales centralizados: configurables y forzables desde tests.
 class RuleThresholds {
@@ -48,12 +49,19 @@ class RuleEngine {
   /// [newApps] son las apps que el baseline detectó como instaladas desde
   /// la captura anterior (equivalente móvil del `persistence-change` de la
   /// edición Windows).
+  /// [usageAnomalies] son las apps que se despegaron de su propio hábito de
+  /// consumo (v0.8.0): comportamiento observado, no superficie declarada.
+  /// [recentInstalls] son los paquetes instalados en las últimas horas, para
+  /// correlacionarlos con un deterioro sostenido de recursos.
   Verdict evaluate(
     Snapshot snapshot, {
     List<HistoryRow> history = const [],
     List<AppRisk> newApps = const [],
     List<AppPermGain> permGains = const [],
+    List<AppUsageAnomaly> usageAnomalies = const [],
+    Set<String> recentInstalls = const {},
   }) {
+    final trend = _trend(snapshot, history);
     final findings = <Finding>[
       ..._memory(snapshot),
       ..._storage(snapshot),
@@ -61,9 +69,11 @@ class RuleEngine {
       ..._apps(snapshot),
       ..._newApps(newApps),
       ..._permEscalation(permGains),
+      ..._usageAnomaly(usageAnomalies),
       ..._rootIndicators(snapshot),
       ..._patchAge(snapshot),
-      ..._trend(snapshot, history),
+      ...trend,
+      ..._trendSuspects(snapshot, trend, recentInstalls),
     ];
 
     var severity = Severity.normal;
@@ -194,6 +204,69 @@ class RuleEngine {
         id: 'perm-escalation',
         severity: Severity.warning,
         args: [gains.length.toString(), summary],
+      ),
+    ];
+  }
+
+  /// Consumo anómalo por app: la app se compara CONSIGO MISMA, no con un
+  /// umbral global. Es el salto de superficie declarada a comportamiento
+  /// observado — una app que siempre gastó 2 MB al día y hoy sube 700 MB no
+  /// rompe ningún umbral del sistema, pero se delata contra su hábito.
+  ///
+  /// CRÍTICO cuando alguna de las apps anómalas tiene además una capacidad
+  /// de espionaje concedida y ACTIVA (accesibilidad, lector de
+  /// notificaciones, admin): capacidad real + consumo que se dispara es la
+  /// coincidencia que de verdad importa. Sigue siendo indicio, no prueba.
+  List<Finding> _usageAnomaly(List<AppUsageAnomaly> anomalies) {
+    if (anomalies.isEmpty) return const [];
+    final withCapability = anomalies.where((a) => a.hasActiveCapability);
+    final summary = anomalies.take(3).map(_describeAnomaly).join(', ');
+    return [
+      Finding(
+        id: 'app-usage-anomaly',
+        severity: withCapability.isNotEmpty
+            ? Severity.critical
+            : Severity.warning,
+        args: [
+          anomalies.length.toString(),
+          summary,
+          withCapability.isEmpty ? '0' : '1',
+        ],
+      ),
+    ];
+  }
+
+  /// Notación neutral al idioma (viaja al JSON forense sin traducirse):
+  /// `App (×7)`; `×∞` cuando la línea base era cero — no lo hacía antes.
+  String _describeAnomaly(AppUsageAnomaly a) {
+    final factor = a.factor >= 2 ? '×${a.factor.round()}' : '×∞';
+    return '${a.app.label} ($factor)';
+  }
+
+  /// Correlación temporal: si hay deterioro sostenido de recursos Y alguna
+  /// app se instaló dentro de la misma ventana, se nombra la coincidencia.
+  ///
+  /// Coincidir en el tiempo NO es causar: el hallazgo lo dice explícitamente
+  /// y su papel es dar al usuario el primer sitio donde mirar, no un
+  /// veredicto de culpabilidad.
+  static const Duration installCorrelationWindow = Duration(hours: 12);
+
+  List<Finding> _trendSuspects(
+    Snapshot s,
+    List<Finding> trend,
+    Set<String> recentInstalls,
+  ) {
+    if (trend.isEmpty || recentInstalls.isEmpty) return const [];
+    final suspects = s.apps
+        .where((a) => recentInstalls.contains(a.packageName))
+        .toList();
+    if (suspects.isEmpty) return const [];
+    final names = suspects.take(3).map((a) => a.label).join(', ');
+    return [
+      Finding(
+        id: 'load-rising-suspect',
+        severity: Severity.warning,
+        args: [suspects.length.toString(), names],
       ),
     ];
   }

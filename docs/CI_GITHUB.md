@@ -40,8 +40,9 @@ flowchart LR
 
 | Workflow | Disparo | Qué hace |
 |---|---|---|
-| [`ci.yml`](../.github/workflows/ci.yml) | push/PR a `main`, manual | `quality` (formato + analyze + tests) · `build-android` (APK release) · `build-ios` (build sin firma en macOS) |
+| [`ci.yml`](../.github/workflows/ci.yml) | push/PR a `main`, manual | `quality` (formato + analyze + 127 tests Dart) · `build-android` (20 tests JVM de Kotlin + APK release + guardián de `INTERNET`) · `build-ios` (build sin firma en macOS) |
 | [`release-android.yml`](../.github/workflows/release-android.yml) | tag `v*`, manual | coherencia tag↔pubspec → tests → APKs firmados (por ABI + universal) → `SHA256SUMS.txt` → GitHub Release |
+| [`integration-android.yml`](../.github/workflows/integration-android.yml) | cada noche (04:17 UTC), manual | levanta un emulador Android con las herramientas oficiales del SDK y corre `flutter test integration_test` — el único camino que ejercita Kotlin ↔ MethodChannel ↔ Dart de punta a punta |
 | [`deploy-landing.yml`](../.github/workflows/deploy-landing.yml) | cambios en `landing/`, manual | publica la landing en GitHub Pages |
 
 ## Decisiones de robustez

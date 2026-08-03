@@ -12,7 +12,7 @@ import 'package:rootcause_mobile_inspector/ui/screens.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('arranca, captura y muestra las pestañas del modo normal', (
+  testWidgets('arranca, captura y muestra las pestañas del modo básico', (
     tester,
   ) async {
     await tester.pumpWidget(const RootCauseApp());
@@ -20,16 +20,19 @@ void main() {
 
     // Si aparece el onboarding (primera vez), completarlo. El idioma ahora se
     // autodetecta, así que se avanza por el botón (FilledButton), no por texto.
+    // Desde v0.8.0 son 4 pasos: el último elige la interfaz y NO se toca, para
+    // verificar justo eso — que no elegir deja la básica.
     var guard = 0;
-    while (find.byType(OnboardingScreen).evaluate().isNotEmpty && guard < 5) {
+    while (find.byType(OnboardingScreen).evaluate().isNotEmpty && guard < 6) {
       await tester.tap(find.byType(FilledButton));
       await tester.pumpAndSettle(const Duration(seconds: 3));
       guard++;
     }
 
     expect(find.byType(TabBar), findsOneWidget);
-    // Modo 'normal' por defecto: 9 pestañas (todas menos Cercanía).
-    expect(find.byType(Tab), findsNWidgets(9));
+    // Sin tocar la elección, queda el modo básico: Resumen, Señaladas y
+    // Configuración.
+    expect(find.byType(Tab), findsNWidgets(3));
     // La captura real produjo un veredicto en el semáforo.
     expect(find.byType(VerdictBanner), findsOneWidget);
   });

@@ -14,10 +14,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('RootCause'), findsOneWidget);
-    // Con snapshot neutro el veredicto existe. En el modo por defecto
-    // ('normal') se muestran 9 pestañas (todas menos Cercanía, que es avanzada).
+    // Con snapshot neutro el veredicto existe. Desde v0.8.0 el modo por
+    // defecto es 'simple': 3 pestañas (Resumen, Señaladas y Configuración).
     expect(find.byType(TabBar), findsOneWidget);
-    expect(find.byType(Tab), findsNWidgets(9));
+    expect(find.byType(Tab), findsNWidgets(3));
   });
 
   testWidgets('autodetecta el idioma del equipo y el menú permite cambiarlo', (

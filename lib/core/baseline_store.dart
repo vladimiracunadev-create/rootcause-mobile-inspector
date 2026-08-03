@@ -75,9 +75,11 @@ class BaselineStore {
     if (!auditSupported) return const BaselineDiff();
     try {
       final file = _file;
-      final existing = await _load(file);
-      if (existing == null) {
-        // Primera vez: se registra lo presente, sin acusar a nadie.
+      final loaded = await _load(file);
+      if (loaded == null) {
+        // Primera vez: se registra lo presente, sin acusar a nadie. La marca
+        // `createdMillis` deja constancia de que esas fechas son de
+        // inicialización, no de instalación observada.
         await _save(file, {
           for (final app in current)
             app.packageName: _Entry(
@@ -85,9 +87,10 @@ class BaselineStore {
               app.versionName,
               app.dangerousPermissions,
             ),
-        });
+        }, createdMillis: nowMillis);
         return const BaselineDiff();
       }
+      final existing = loaded.packages;
 
       final newApps = <AppRisk>[];
       final updatedApps = <AppRisk>[];
@@ -131,7 +134,7 @@ class BaselineStore {
             app.versionName,
             app.dangerousPermissions,
           ),
-      });
+      }, createdMillis: loaded.createdMillis);
       return BaselineDiff(
         newApps: newApps,
         updatedApps: updatedApps,
@@ -144,12 +147,42 @@ class BaselineStore {
     }
   }
 
-  Future<Map<String, _Entry>?> _load(File file) async {
+  /// Paquetes cuya PRIMERA aparición observada cae dentro de [window]
+  /// contando hacia atrás desde [nowMillis].
+  ///
+  /// Los que entraron con la inicialización del baseline se excluyen: de
+  /// esos no sabemos cuándo se instalaron y señalarlos sería inventar una
+  /// fecha. Es la misma honestidad que la "primera captura silenciosa".
+  Future<Set<String>> installedWithin(
+    Duration window, {
+    required int nowMillis,
+  }) async {
+    try {
+      final loaded = await _load(_file);
+      if (loaded == null) return const {};
+      final since = nowMillis - window.inMilliseconds;
+      return {
+        for (final entry in loaded.packages.entries)
+          if (entry.value.firstSeenMillis >= since &&
+              entry.value.firstSeenMillis != loaded.createdMillis)
+            entry.key,
+      };
+    } on FileSystemException {
+      return const {};
+    }
+  }
+
+  Future<_Loaded?> _load(File file) async {
     if (!await file.exists()) return null;
     try {
       final decoded = jsonDecode(await file.readAsString());
       final packages = decoded is Map ? decoded['packages'] : null;
       if (packages is! Map) return null;
+      // Baselines anteriores a v0.8.0 no tienen la marca; con -1 ninguna
+      // entrada coincide y todas se consideran de instalación observada.
+      final created = decoded is Map && decoded['createdMillis'] is num
+          ? (decoded['createdMillis'] as num).toInt()
+          : -1;
       final result = <String, _Entry>{};
       for (final entry in packages.entries) {
         final key = entry.key;
@@ -174,17 +207,22 @@ class BaselineStore {
           );
         }
       }
-      return result;
+      return _Loaded(result, created);
     } on FormatException {
       // Baseline corrupto: se reconstruye desde cero (sin acusaciones).
       return null;
     }
   }
 
-  Future<void> _save(File file, Map<String, _Entry> packages) async {
+  Future<void> _save(
+    File file,
+    Map<String, _Entry> packages, {
+    required int createdMillis,
+  }) async {
     await file.parent.create(recursive: true);
     await file.writeAsString(
       jsonEncode({
+        'createdMillis': createdMillis,
         'packages': {
           for (final entry in packages.entries)
             entry.key: {
@@ -197,6 +235,16 @@ class BaselineStore {
       flush: true,
     );
   }
+}
+
+/// Baseline leído de disco: las entradas más la marca de inicialización.
+class _Loaded {
+  const _Loaded(this.packages, this.createdMillis);
+
+  final Map<String, _Entry> packages;
+
+  /// Instante en que se creó el baseline; -1 en archivos previos a v0.8.0.
+  final int createdMillis;
 }
 
 class _Entry {

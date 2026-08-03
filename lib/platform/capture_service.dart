@@ -12,6 +12,7 @@ import '../core/history_store.dart';
 import '../core/models.dart';
 import '../core/rule_engine.dart';
 import '../core/snapshot_json.dart';
+import '../core/usage_baseline.dart';
 import 'collectors.dart';
 
 class CaptureOutcome {
@@ -55,16 +56,31 @@ class CaptureService {
 
     var prior = const <HistoryRow>[];
     var diff = const BaselineDiff();
+    var usageAnomalies = const <AppUsageAnomaly>[];
+    var recentInstalls = const <String>{};
     HistoryStore? store;
     if (directoryPath != null) {
       store = HistoryStore(directoryPath);
       try {
         prior = await store.recent();
-        diff = await BaselineStore(directoryPath).diffAndUpdate(
+        final baseline = BaselineStore(directoryPath);
+        diff = await baseline.diffAndUpdate(
           snapshot.apps,
           nowMillis: snapshot.timestampMillis,
           auditSupported: snapshot.device.appsAuditSupported,
         );
+        // Después del diff: una app recién instalada ya tiene su fecha
+        // registrada y puede correlacionarse con el deterioro de recursos.
+        recentInstalls = await baseline.installedWithin(
+          RuleEngine.installCorrelationWindow,
+          nowMillis: snapshot.timestampMillis,
+        );
+        usageAnomalies = await UsageBaselineStore(directoryPath)
+            .updateAndDetect(
+              snapshot.apps,
+              nowMillis: snapshot.timestampMillis,
+              auditSupported: snapshot.device.appsAuditSupported,
+            );
       } on FileSystemException {
         // Sin historial/baseline no se bloquea el diagnóstico en vivo.
       }
@@ -75,6 +91,8 @@ class CaptureService {
       history: prior,
       newApps: diff.newApps,
       permGains: diff.permissionGains,
+      usageAnomalies: usageAnomalies,
+      recentInstalls: recentInstalls,
     );
 
     final wentCritical =

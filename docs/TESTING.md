@@ -4,21 +4,23 @@
 
 ```mermaid
 flowchart LR
-    subgraph JVM["flutter test — sin dispositivo, corre en CI"]
-        T1["rule_engine_test.dart<br/>umbrales y veredictos"]
-        T2["models_test.dart<br/>parsing defensivo + puntaje de apps"]
-        T3["snapshot_json_test.dart<br/>export forense"]
-        T4["history_store_test.dart<br/>persistencia JSON Lines"]
-        T5["widget_test.dart<br/>arranque + idioma + 9 pestañas"]
-        T6["trend_test.dart<br/>regla load-rising"]
-        T7["config_store_test.dart<br/>persistencia + migración"]
-        T8["volumes_test.dart · nearby_test.dart<br/>SD/USB + sesión BLE"]
+    subgraph DART["flutter test — 127 tests Dart, sin dispositivo"]
+        T1["rule_engine_test · trend_test<br/>umbrales y veredictos"]
+        T2["models_test<br/>parsing defensivo + puntaje"]
+        T3["snapshot_json_test<br/>export forense"]
+        T4["history_store_test · baseline_store_test<br/>persistencia y baseline"]
+        T5["widget_test<br/>arranque + idioma + pestañas"]
+        T6["usage_baseline_test · features_v080_test<br/>comportamiento observado"]
     end
-    subgraph MANUAL["Validación manual"]
-        E["Emulador AVD<br/>(scripts/emulador.ps1)"]
-        F["Teléfono físico<br/>(APK del release)"]
+    subgraph KOTLIN["gradlew testDebugUnitTest — 20 tests JVM"]
+        K1["CollectorLogicTest<br/>sideload · componentes activos<br/>capa fabricante · root · caché"]
     end
-    T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 --> CI["ci.yml → verde obligatorio"]
+    subgraph EMU["flutter test integration_test — emulador real"]
+        I1["app_test<br/>canal nativo de punta a punta"]
+    end
+    T1 & T2 & T3 & T4 & T5 & T6 --> CI["ci.yml → verde obligatorio"]
+    K1 --> CI
+    I1 --> NIGHT["integration-android.yml<br/>cada noche y a demanda"]
     CI --> REL["release-android.yml<br/>re-ejecuta tests como puerta"]
 ```
 
@@ -26,9 +28,21 @@ flowchart LR
 
 El motor de reglas, los modelos, el export y el historial son **Dart puro
 sin Android/iOS**: los tests corren en la JVM de CI en segundos, sin
-emulador. Lo único no testeable sin dispositivo son los colectores
-nativos — por eso son **delgados** (solo leen APIs y arman un mapa) y el
-lado Dart valida defensivamente todo lo que reciben.
+emulador.
+
+Hasta v0.7.0 la capa nativa era el punto ciego: 1.500 líneas de Kotlin y
+Swift sin un solo test, y es justo la capa donde nació el crash de arranque
+de v0.2.0. Desde v0.8.0 la estrategia es partirla en dos:
+
+- **Lo que decide** (parsear, clasificar, sumar) vive en
+  [`CollectorLogic.kt`](../android/app/src/main/kotlin/com/rootcause/mobileinspector/CollectorLogic.kt),
+  **sin una sola dependencia de Android** → 20 tests JVM que corren en
+  segundos. La regla para mover algo ahí es simple: si se puede escribir un
+  test que falle cuando la lógica esté mal, va ahí.
+- **Lo que pide el dato al SO** se queda en `AndroidCollectors` y sigue
+  siendo delgado, con validación defensiva en Dart de todo lo que entrega.
+- **El camino completo** (Kotlin ↔ MethodChannel ↔ Dart) lo cubre el test
+  de integración en un emulador real.
 
 ## Cobertura por archivo
 
@@ -45,14 +59,27 @@ lado Dart valida defensivamente todo lo que reciben.
 | `baseline_store_test.dart` | Primera captura inicializa EN SILENCIO, app nueva aparece UNA vez, reinstalar cuenta de nuevo, sin auditoría (iOS) no hay baseline, corrupto se reconstruye sin acusar |
 | `capture_service_test.dart` | La transición a crítico dispara `wentCritical` una sola vez (crítico sostenido no repite), y el hallazgo `new-apps` lleva cantidad, nombres y cuántas son riesgosas |
 | `patch_test.dart` | `patch-old` dispara en 180/365 días con la edad como evidencia, se omite con parche reciente o fecha no parseable (iOS); el uso por app degrada a -1 sin permiso y `usageAccessGranted` a false |
-| `widget_test.dart` | La app completa arranca sin canal nativo (MissingPluginException capturada), renderiza las 9 pestañas, arranca **en español por defecto** aunque el sistema esté en inglés y el botón de idioma cambia a inglés |
+| `widget_test.dart` | La app completa arranca sin canal nativo (MissingPluginException capturada), renderiza las 3 pestañas del modo básico, **autodetecta el idioma del equipo** y el menú permite cambiarlo |
+| `usage_baseline_test.dart` | La regla de comportamiento **NO acusa** sin muestras independientes, ni por debajo del suelo absoluto, ni cuando el dato es `-1` (sin acceso de uso), ni en iOS; la mediana ignora un día raro; línea base cero sí es anomalía; el muestreo horario no engorda el archivo; desinstalar borra el historial; archivo corrupto se reconstruye |
+| `features_v080_test.dart` | `app-usage-anomaly` es CRÍTICO solo con capacidad de espionaje activa; la notación `×N`/`×∞` es neutral al idioma; `load-rising-suspect` exige deterioro **Y** instalación reciente; la inicialización del baseline no cuenta como instalación observada; los dos hallazgos nuevos están traducidos a los 5 idiomas |
+| `CollectorLogicTest.kt` (JVM) | Sideload incluye el instalador ausente; el parseo de componentes activos tolera el formato de las capas de fabricante; One UI `80500` → `8.5`; un equipo limpio no genera indicadores de root y una propiedad ausente no crea indicios fantasma; el tamaño de caché recorre el árbol sin recursión |
 
 ## Ejecutar
 
 ```bash
-flutter test                 # toda la suite
-flutter test test/rule_engine_test.dart   # una suite
-.\scripts\ci-local.ps1       # réplica completa de la CI (formato+analyze+tests+APK)
+flutter test                 # los 127 tests Dart
+```
+
+```bash
+cd android && ./gradlew :app:testDebugUnitTest
+```
+
+```bash
+flutter test integration_test   # requiere emulador o teléfono conectado
+```
+
+```bash
+bash scripts/check-no-internet.sh   # tras un flutter build apk --release
 ```
 
 ## Las tres puertas de calidad
@@ -64,9 +91,15 @@ flutter test test/rule_engine_test.dart   # una suite
 
 ## Lo que los tests NO cubren (honestidad)
 
-- Los colectores Kotlin/Swift reales (requieren dispositivo). Mitigación:
-  código delgado + validación defensiva en Dart + prueba manual en
-  emulador/teléfono antes de cada release ([EMULADOR.md](EMULADOR.md)).
+- **La lectura real de las APIs del SO** en Kotlin/Swift: `CollectorLogic`
+  cubre lo que se decide, pero no lo que el sistema **entrega**. Un cambio
+  de comportamiento de Android en un fabricante concreto sigue necesitando
+  el dispositivo. Mitigación: código delgado, validación defensiva en Dart,
+  test de integración en emulador y prueba manual antes de cada release
+  ([EMULADOR.md](EMULADOR.md)).
+- **La capa Swift de iOS no tiene equivalente a `CollectorLogic`**: la
+  extracción de v0.8.0 se hizo solo en Android, que es la plataforma que
+  se distribuye. Queda pendiente si iOS sale de pausa.
 - El Worker de captura en segundo plano y el escaneo BLE nativos: se
   verifican manualmente en el emulador (forzando el job con
   `cmd jobscheduler run` y comprobando que el historial crece; escaneo

@@ -1,6 +1,56 @@
 # Roadmap
 
-## v0.5.0 — Evidencia de verdad (actual)
+## v0.8.0 — De la superficie al comportamiento (actual)
+
+El salto conceptual: hasta aquí el sensor evaluaba lo que una app
+**declara** (permisos) y lo que el equipo **tiene** (RAM, disco). Ahora
+evalúa lo que cada app **hace**, comparada consigo misma.
+
+- ✅ **`app-usage-anomaly`**: una app cuyo consumo de datos o tiempo en
+  pantalla se dispara contra su **propia mediana histórica**. Sin umbral
+  global inventado: no existe una cifra de "MB al día" que valga igual para
+  un reproductor de vídeo y para una app de notas. **CRÍTICO** si además
+  tiene una capacidad de espionaje concedida y activa.
+- ✅ **`load-rising-suspect`**: correlación temporal — si hay deterioro
+  sostenido de recursos Y una app se instaló en la ventana de 12 h, se
+  nombra la coincidencia, diciendo explícitamente que **coincidir no es
+  causar**.
+- ✅ **Elección de interfaz en el arranque**: la introducción de primera vez
+  pregunta cuánta información quieres en pantalla, con la **básica marcada**.
+  Quien instala esto asustado no debería estrellarse contra diez pestañas
+  técnicas; el modo por defecto pasó de `normal` a `simple`.
+- ✅ **La capa nativa deja de ser terreno sin tests**: la lógica de decisión
+  vive en `CollectorLogic.kt` (sin dependencias de Android) con **20 tests
+  JVM** en CI, y el test de integración en emulador corre en CI cada noche
+  ([`integration-android.yml`](../.github/workflows/integration-android.yml)).
+- ✅ **"Cero red" pasa de promesa a hecho verificado**: `check-no-internet.sh`
+  falla el build si el manifiesto **fusionado de release** declarase
+  `INTERNET`. Protege el claim contra una dependencia futura, no solo
+  contra un descuido propio.
+- ✅ **Deuda estructural saldada**: `screens.dart` (1.900 líneas) partido por
+  pestaña bajo `ui/screens/`, y los textos que más crecen (hallazgos y
+  permisos) fuera de `strings.dart`. Sin cambios de comportamiento.
+
+## v0.7.0 — De superficie a capacidad real
+
+- ✅ **Permisos concedidos vs. solicitados**: de "esta app pide el
+  micrófono" a "esta app **TIENE** el micrófono".
+- ✅ **Stalkerware activo**: accesibilidad, lector de notificaciones y
+  administrador de dispositivo ACTIVOS, señalados arriba y en rojo.
+- ✅ **`perm-escalation`**: una app ya conocida gana permisos peligrosos.
+- ✅ **Consumo de datos por app** (24 h) e **íconos reales**.
+- ✅ **Modos de visualización** Simple / Normal / Avanzado.
+- ✅ **Gráfico de tendencia en el informe PDF**.
+
+## v0.6.0 — Cerca de quien la usa
+
+- ✅ **Pestaña Señaladas**: solo las apps que importan, ordenadas por riesgo.
+- ✅ **Cinco idiomas con autodetección** (ES/EN/PT/IT/FR).
+- ✅ **Permisos en lenguaje humano**: "Micrófono (grabar audio)" en vez de
+  `RECORD_AUDIO`.
+- ✅ **Informe forense en PDF** compartible.
+
+## v0.5.0 — Evidencia de verdad
 
 Robustez de producto: la evidencia se vuelve portable, íntegra y que
 avisa a tiempo.
@@ -111,35 +161,24 @@ diferencia", "no puedo ver dispositivos cerca".
 - ✅ UI Material 3 bilingüe ES/EN con semáforo y evidencia
 - ✅ CI multiplataforma (Android + iOS) y release Android automatizado
 
+
 ## Pendiente
 
-- [ ] Firma permanente y envío a IzzyOnDroid / F-Droid (requiere acción
-  del autor — ver [DISTRIBUCION.md](DISTRIBUCION.md))
-- [ ] Builds reproducibles verificables públicamente
-- [ ] Portugués (PT-BR) — la arquitectura de strings ES/EN es extensible
-- [ ] Refinamiento del widget (más tamaños)
+Lo que sigue abierto, con el motivo real por el que lo está.
 
-## iOS de primera clase (EN PAUSA, sin versión asignada)
-
-> Decisión 2026-07-15: la distribución iOS queda en pausa por decisión del
-> autor. El build iOS se mantiene compilando en CI como vigilancia de
-> regresión del código compartido, sin trabajo adicional de plataforma.
-
-- [ ] Cuenta Apple Developer + `release-ios.yml` (TestFlight)
-- [ ] Colector iOS ampliado (memoria con mach APIs, jailbreak avanzado)
-- [ ] Paridad de UI/estado por plataforma documentada
-
-## Ideas evaluadas y pospuestas
-
-| Idea | Por qué se pospone |
-|---|---|
-| VPN local para inspección de tráfico | Gran superficie de código y de confianza; contradice la regla "cero red" del producto |
-| Análisis de APK (hashes contra listas) | Requiere red o bases locales grandes |
-| Modo empresa (MDM) | Primero validar el producto individual |
-| Núcleo Rust compartido vía FFI (colectores en Rust, UI Flutter) | Ganancia real solo si el peso/consumo se vuelven críticos; hoy el costo de complejidad no se justifica — ver trade-off en [ARCHITECTURE.md](ARCHITECTURE.md#trade-off-honesto-peso-del-apk-flutter-vs-rust) |
-
-## Principios que no cambian
-
-1. Todo hallazgo declarado debe ser **verificable en el código**.
-2. Ninguna promesa que el SO no permita cumplir.
-3. Privacidad por diseño: sin `INTERNET`, evidencia solo local/exportada.
+- [ ] **Firma permanente y envío a IzzyOnDroid / F-Droid**. Es el cuello de
+      botella de adopción, no de código: mientras el único camino sea
+      descargar un APK y autorizar orígenes desconocidos, la base de
+      usuarios queda en quienes ya saben hacerlo — que no son las personas
+      que más necesitan un detector de stalkerware. **Requiere una acción
+      del autor** (generar y custodiar la clave permanente) →
+      [DISTRIBUCION.md](DISTRIBUCION.md).
+- [ ] **Builds reproducibles verificables públicamente**: el complemento
+      natural de `check-no-internet.sh` — que cualquiera pueda comprobar
+      que el APK publicado sale exactamente de este código.
+- [ ] **Distribución iOS**: requiere cuenta Apple Developer. Hasta
+      entonces la plataforma se valida compilando en CI (`--no-codesign`).
+- [ ] **Anomalía de uso en la propia UI**: hoy `app-usage-anomaly` llega
+      como hallazgo en Resumen; falta mostrar la serie histórica de una app
+      concreta ("esto es lo que hacía, esto es lo que hace").
+- [ ] **Refinamiento del widget** (más tamaños).

@@ -110,20 +110,7 @@ class AndroidCollectors(private val context: Context) {
         return result
     }
 
-    private fun directorySize(dir: File): Long {
-        if (!dir.exists()) return 0L
-        var total = 0L
-        val stack = ArrayDeque<File>()
-        stack.addLast(dir)
-        while (stack.isNotEmpty()) {
-            val current = stack.removeLast()
-            val children = current.listFiles() ?: continue
-            for (child in children) {
-                if (child.isDirectory) stack.addLast(child) else total += child.length()
-            }
-        }
-        return total
-    }
+    private fun directorySize(dir: File): Long = CollectorLogic.directorySize(dir)
 
     private fun battery(): Map<String, Any?> {
         val intent: Intent? = context.registerReceiver(
@@ -276,14 +263,14 @@ class AndroidCollectors(private val context: Context) {
         val requested = pkg.requestedPermissions?.toList() ?: emptyList()
         val grantFlags = pkg.requestedPermissionsFlags
         val dangerous = requested
-            .filter { it in DANGEROUS_PERMISSIONS }
+            .filter { it in CollectorLogic.DANGEROUS_PERMISSIONS }
             .map { it.removePrefix("android.permission.") }
         // Permisos peligrosos CONCEDIDOS ahora mismo (no solo solicitados):
         // el bit REQUESTED_PERMISSION_GRANTED del arreglo paralelo de flags.
         val granted = requested.mapIndexedNotNull { i, perm ->
             val isGranted = grantFlags != null && i < grantFlags.size &&
                 (grantFlags[i] and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
-            if (perm in DANGEROUS_PERMISSIONS && isGranted) {
+            if (perm in CollectorLogic.DANGEROUS_PERMISSIONS && isGranted) {
                 perm.removePrefix("android.permission.")
             } else {
                 null
@@ -327,14 +314,9 @@ class AndroidCollectors(private val context: Context) {
 
     /** Paquetes de los componentes habilitados en un setting `pkg/Clase:…`. */
     private fun enabledComponentPackages(setting: String): Set<String> = try {
-        val raw = Settings.Secure.getString(context.contentResolver, setting)
-        if (raw.isNullOrBlank()) {
-            emptySet()
-        } else {
-            raw.split(':')
-                .mapNotNull { it.substringBefore('/').takeIf { p -> p.isNotBlank() } }
-                .toSet()
-        }
+        CollectorLogic.packagesFromFlattenedComponents(
+            Settings.Secure.getString(context.contentResolver, setting),
+        )
     } catch (_: Throwable) {
         emptySet()
     }
@@ -439,7 +421,7 @@ class AndroidCollectors(private val context: Context) {
         } catch (_: Exception) {
             null
         }
-        return installer == null || installer !in TRUSTED_INSTALLERS
+        return CollectorLogic.isSideloaded(installer)
     }
 
     private fun device(): Map<String, Any?> = mapOf(
@@ -462,17 +444,7 @@ class AndroidCollectors(private val context: Context) {
      * falla o el equipo es Android puro, se entrega cadena vacía y la UI
      * omite la fila.
      */
-    private fun vendorSkin(): String {
-        sysProp("ro.build.version.oneui")?.toIntOrNull()?.let { v ->
-            // Samsung codifica 8.5 como 80500: mayor*10000 + menor*100.
-            return if (v >= 10000) "One UI ${v / 10000}.${(v % 10000) / 100}" else "One UI $v"
-        }
-        sysProp("ro.miui.ui.version.name")?.let { return "MIUI $it" }
-        sysProp("ro.build.version.opporom")?.let { return "ColorOS $it" }
-        sysProp("ro.build.version.emui")?.let { return it.replace('_', ' ') }
-        sysProp("ro.build.version.oplusrom")?.let { return "OxygenOS/ColorOS $it" }
-        return ""
-    }
+    private fun vendorSkin(): String = CollectorLogic.vendorSkin(::sysProp)
 
     /** Lectura defensiva de una propiedad de sistema; null si no existe. */
     private fun sysProp(name: String): String? = try {
@@ -487,83 +459,18 @@ class AndroidCollectors(private val context: Context) {
      * Indicadores honestos de root: binarios `su` en rutas conocidas y build
      * firmado con test-keys. Es un INDICIO, no una prueba.
      */
-    private fun rootIndicators(): List<String> {
-        val indicators = mutableListOf<String>()
-        val suPaths = listOf(
-            "/system/bin/su",
-            "/system/xbin/su",
-            "/sbin/su",
-            "/system/sd/xbin/su",
-            "/data/local/bin/su",
-            "/data/local/xbin/su",
-            "/data/local/su",
-        )
-        for (path in suPaths) {
+    private fun rootIndicators(): List<String> = CollectorLogic.rootIndicators(
+        suPathExists = { path ->
             try {
-                if (File(path).exists()) indicators += path
+                File(path).exists()
             } catch (_: SecurityException) {
                 // Sin permiso para consultar esa ruta: se omite, no se especula.
+                false
             }
-        }
-        if (Build.TAGS?.contains("test-keys") == true) {
-            indicators += "build:test-keys"
-        }
-        // Integridad de arranque (v0.5.0): un bootloader desbloqueado o un
-        // verified boot no-verde son indicios de que el sistema pudo ser
-        // modificado — complementan (no reemplazan) los binarios su.
-        sysProp("ro.boot.verifiedbootstate")?.let { state ->
-            if (state.lowercase() != "green") indicators += "verifiedboot:$state"
-        }
-        if (sysProp("ro.boot.flash.locked") == "0") {
-            indicators += "bootloader-unlocked"
-        }
-        return indicators
-    }
+        },
+        buildTags = Build.TAGS,
+        verifiedBootState = sysProp("ro.boot.verifiedbootstate"),
+        bootloaderFlashLocked = sysProp("ro.boot.flash.locked"),
+    )
 
-    private companion object {
-        val TRUSTED_INSTALLERS = setOf(
-            "com.android.vending",
-            "com.google.android.feedback",
-            "com.amazon.venezia",
-            "com.huawei.appmarket",
-            "com.sec.android.app.samsungapps",
-            "org.fdroid.fdroid",
-        )
-
-        val DANGEROUS_PERMISSIONS = setOf(
-            "android.permission.CAMERA",
-            "android.permission.RECORD_AUDIO",
-            "android.permission.ACCESS_FINE_LOCATION",
-            "android.permission.ACCESS_COARSE_LOCATION",
-            "android.permission.ACCESS_BACKGROUND_LOCATION",
-            "android.permission.READ_CONTACTS",
-            "android.permission.WRITE_CONTACTS",
-            "android.permission.GET_ACCOUNTS",
-            "android.permission.READ_SMS",
-            "android.permission.SEND_SMS",
-            "android.permission.RECEIVE_SMS",
-            "android.permission.RECEIVE_MMS",
-            "android.permission.READ_CALL_LOG",
-            "android.permission.WRITE_CALL_LOG",
-            "android.permission.READ_PHONE_STATE",
-            "android.permission.READ_PHONE_NUMBERS",
-            "android.permission.CALL_PHONE",
-            "android.permission.ANSWER_PHONE_CALLS",
-            "android.permission.PROCESS_OUTGOING_CALLS",
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-            "android.permission.MANAGE_EXTERNAL_STORAGE",
-            "android.permission.READ_MEDIA_IMAGES",
-            "android.permission.READ_MEDIA_VIDEO",
-            "android.permission.READ_MEDIA_AUDIO",
-            "android.permission.BODY_SENSORS",
-            "android.permission.ACTIVITY_RECOGNITION",
-            "android.permission.READ_CALENDAR",
-            "android.permission.WRITE_CALENDAR",
-            "android.permission.BLUETOOTH_CONNECT",
-            "android.permission.BLUETOOTH_SCAN",
-            "android.permission.NEARBY_WIFI_DEVICES",
-            "android.permission.POST_NOTIFICATIONS",
-        )
-    }
 }

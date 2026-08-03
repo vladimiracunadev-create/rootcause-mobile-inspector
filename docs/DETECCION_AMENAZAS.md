@@ -22,18 +22,20 @@ procesos está prometiendo algo que el SO no le permite hacer.
 | Apps instaladas entre capturas (v0.3.0) | baseline local de paquetes vistos | `new-apps` |
 | Transición del veredicto a crítico (v0.3.0) | captura en segundo plano + notificación LOCAL | alerta en el dispositivo |
 | Dispositivos BLE persistentes cerca (v0.2.0) | escaneo manual opt-in `BluetoothLeScanner` (Android) | marca PERSISTENTE en pestaña Cercanía (no entra al export) |
+| Consumo de una app fuera de SU hábito (v0.8.0) | serie local de datos y tiempo en pantalla por app, con la mediana de muestras anteriores a 24 h | `app-usage-anomaly` |
+| Instalación coincidente con un deterioro (v0.8.0) | baseline de apps + regla de tendencia | `load-rising-suspect` |
 
 ## Amenaza por amenaza
 
 | Familia | ¿RootCause Mobile la ve? | Detalle honesto |
 |---|---|---|
-| **Apps espía (stalkerware)** | 🟡 Parcial | Si solicita la tríada típica (micrófono+ubicación+SMS) y llegó por sideload, su puntaje de riesgo sube y aparece en `risky-apps`. Desde v0.3.0, si se instala mientras RootCause vigila, además aparece como `new-apps` en la siguiente captura. No podemos ver si los permisos se USAN, solo si se solicitan. |
+| **Apps espía (stalkerware)** | 🟡 Parcial, y la señal más fuerte que damos | Tres capas: (1) superficie — la tríada típica (micrófono+ubicación+SMS) y el sideload suben el puntaje (`risky-apps`); (2) capacidad real (v0.7.0) — accesibilidad, lector de notificaciones o admin **concedidos y activos**, que es leer tu pantalla y tus notificaciones de verdad; (3) comportamiento (v0.8.0) — si además su consumo se dispara contra su propio hábito, el veredicto es **CRÍTICO**. Sigue sin poder verse el contenido de lo que hace: capacidad + volumen anómalo es lo máximo que el SO permite observar. |
 | **Malware con overlay (bankers)** | 🟡 Parcial | `SYSTEM_ALERT_WINDOW` solicitado suma +3 al puntaje. No detectamos el overlay en acto. |
 | **Droppers (instalan otros APK)** | 🟡 Parcial | `REQUEST_INSTALL_PACKAGES` suma +3; sideload suma +2. |
 | **Root/jailbreak malicioso o heredado** | 🟡 Indicio | Binarios `su`, test-keys, rutas de jailbreak. Un dispositivo rooteado a propósito da el mismo indicio: contexto humano necesario. |
 | **Cryptojacking** | 🟡 Indirecto | Sin acceso al CPU de otros procesos, los indicios visibles son temperatura de batería sostenida (`battery-temp`) y, desde v0.2.0, la caída sostenida de recursos entre capturas (`load-rising`) con la auto-captura activada. Correlación indirecta y así se declara. |
 | **Rastreadores BLE ajenos (tipo AirTag)** | 🟡 Indicio (v0.2.0) | Un dispositivo BLE que reaparece en varios escaneos a lo largo de la sesión se marca PERSISTENTE. Las MAC aleatorizadas pueden fragmentar la detección y tus propios accesorios también persisten: indicio para revisar, no identificación. |
-| **Exfiltración de datos** | 🔴 No | Una app de usuario no puede inspeccionar tráfico ajeno sin ser VPN local — renuncia deliberada (contradice la regla "cero red"); el contador global de tráfico es contexto, no detección. |
+| **Exfiltración de datos** | 🟡 Indicio de VOLUMEN (v0.8.0) | Seguimos sin inspeccionar tráfico: eso exigiría ser VPN local y contradice la regla "cero red". Pero el SO sí expone **cuántos bytes movió cada app** en 24 h, y `app-usage-anomaly` señala a la que multiplica por 3 su propia mediana. Sabemos que una app movió mucho más de lo habitual; **no** sabemos qué movió ni adónde. Es un indicio de volumen, no una prueba de exfiltración. |
 | **Ransomware móvil** | 🔴 No | Sin acceso al filesystem de otras apps no hay señal de cifrado masivo observable. |
 | **Phishing / smishing** | 🔴 No | Fuera de alcance: requiere leer SMS/notificaciones, contrario a la política de privacidad del producto. |
 | **Vulnerabilidades sin parchear** | 🟡 Regla automática (v0.4.0) | `patch-old`: parche ≥ 180 días → warning, ≥ 365 → critical, con botón a la actualización del sistema. No sabemos QUÉ CVEs aplican (eso requiere bases externas y red); sabemos que la ventana de exposición crece. |

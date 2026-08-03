@@ -11,7 +11,7 @@
 ║  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝      ║
 ║                                                                                   ║
 ║                          M O B I L E   I N S P E C T O R                          ║
-║                  Sensor forense de diagnóstico · Flutter · v0.7.0                 ║
+║                  Sensor forense de diagnóstico · Flutter · v0.8.0                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -19,7 +19,7 @@
 [![Release Android](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml/badge.svg)](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/actions/workflows/release-android.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](docs/LIMITACIONES.md)
-[![Version](https://img.shields.io/badge/version-0.7.0-green.svg)](docs/ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.8.0-green.svg)](docs/ROADMAP.md)
 
 📲 **[Descargar APK (último release) →](https://github.com/vladimiracunadev-create/rootcause-mobile-inspector/releases/latest)**  ·  📘 **[Manual de usuario →](docs/MANUAL_USUARIO.md)** (qué es cada cosa, en claro)
 
@@ -90,6 +90,8 @@ flutter build apk --release
 | ¿Hay indicios de root/jailbreak? | Indicadores honestos (binarios `su`, build `test-keys`) — indicio, no prueba |
 | ¿La batería se comporta raro? | Temperatura, salud y estado de carga con umbrales de alerta |
 | ¿Cómo dejo evidencia del estado actual? | Export JSON forense + historial local de capturas |
+| ¿Esta app está haciendo algo raro? | Compara cada app **consigo misma**: consumo de datos y tiempo en pantalla contra su propia mediana histórica (Android) |
+| El teléfono empeoró, ¿desde cuándo? | Correlación entre el deterioro sostenido de recursos y las apps instaladas en esa ventana |
 
 ---
 
@@ -128,7 +130,7 @@ ABI `x86_64`; verificada también en dispositivo Android real):
 | **Dispositivo** | Hardware, versión de OS, parche de seguridad e indicadores de root/jailbreak |
 | **Cercanía** | Escaneo Bluetooth LE manual (opt-in) con marca de **persistencia** — sin usar internet |
 | **Historial** | Gráfico de **tendencia** (RAM/disco), **comparación A→B** con deltas, y la regla de carga en ascenso alimentada por la auto-captura |
-| **Configuración** | **Modo de visualización** (Simple / Normal / Avanzado), auto-captura (5 min por defecto), captura en segundo plano (solo-cargando opcional) con **alerta local de crítico**, umbrales modificables e **idioma (5 idiomas + automático)** |
+| **Configuración** | **Modo de visualización** (Simple / Normal / Avanzado — se pregunta en el primer arranque, con la básica marcada), auto-captura (5 min por defecto), captura en segundo plano (solo-cargando opcional) con **alerta local de crítico**, umbrales modificables e **idioma (5 idiomas + automático)** |
 | **Acerca** | Versión, autor, filosofía y política de privacidad local |
 
 Toda captura puede exportarse como **JSON forense** con ids de hallazgo neutrales
@@ -164,6 +166,28 @@ Dart puro (100 % testeable sin dispositivo):
   critical, con botón directo a la actualización del sistema
 - **Carga en ascenso** (v0.2.0): caída sostenida de memoria/disco a lo
   largo del historial — la distorsión que crece como indicio temprano
+- **Consumo fuera de lo habitual** (v0.8.0): una app cuyo consumo de datos
+  o tiempo en pantalla se dispara contra su **propia mediana histórica**
+- **App instalada al empezar el deterioro** (v0.8.0): correlación temporal
+  entre el deterioro de recursos y las instalaciones recientes
+
+### Dos capas: lo que declara y lo que hace
+
+Las siete primeras familias miden **superficie declarada** (qué permisos
+pide una app) y **recursos globales** (cuánta RAM queda). Las dos de
+v0.8.0 miden **comportamiento observado**: cada app se compara **consigo
+misma**, no con un umbral inventado.
+
+Es la diferencia entre "esta app pide el micrófono" y "esta app, que
+siempre gastó 2 MB al día, hoy subió 700 MB". Lo segundo no viola ningún
+umbral del sistema — pero se delata contra su propio hábito.
+
+La honestidad que lo sostiene: el SO entrega ventanas **móviles** de 24 h,
+así que la línea base usa **solo muestras anteriores a esas 24 h** (si no,
+el propio pico contaminaría su referencia). Sin al menos 3 muestras
+independientes, la regla se **omite** — un teléfono recién instalado no
+acusa a nadie. Detalle completo en
+[`docs/HEURISTICAS.md`](docs/HEURISTICAS.md).
 
 Cada hallazgo lleva severidad, evidencia y recomendación. El veredicto global
 es el máximo de severidad + un puntaje acumulado. Los umbrales son
@@ -188,24 +212,55 @@ rootcause-mobile-inspector/
 │   │   ├── nearby.dart   ← sesión BLE en memoria (persistencia de cercanía)
 │   │   ├── snapshot_json.dart ← export forense JSON
 │   │   └── history_store.dart ← historial local (JSON Lines)
+│   │   ├── usage_baseline.dart ← línea base de uso por app (comportamiento)
+│   │   └── history_store.dart ← historial local (JSON Lines)
 │   ├── platform/collectors.dart ← puente MethodChannel a nativo
-│   └── ui/               ← pantallas y tema
+│   └── ui/               ← pantallas, textos y tema
+│       ├── screens.dart  ← barril: reexporta todas las pestañas
+│       ├── screens/      ← una pestaña por archivo
+│       ├── widgets.dart  ← piezas de UI compartidas
+│       └── strings/      ← textos de hallazgos y permisos (5 idiomas)
 ├── android/              ← colectores Kotlin + Worker de captura en 2.º plano
+│   └── app/src/test/     ← tests JVM de CollectorLogic (sin emulador)
 ├── ios/                  ← proyecto iOS + colectores Swift (MethodChannel)
 ├── test/                 ← tests Dart del motor de reglas y export
+├── integration_test/     ← test end-to-end con canal nativo real
+├── scripts/              ← check-no-internet.sh y utilidades de CI
 ├── docs/                 ← arquitectura, manual, CI, releases, limitaciones
-└── .github/workflows/    ← ci.yml (Android+iOS+tests) · release-android.yml
+└── .github/workflows/    ← ci.yml · release-android.yml · integration-android.yml
 ```
 
 ---
 
 ## 🚀 Validación automática
 
-- **`ci.yml`** — formato Dart, análisis estático, tests, build APK release
-  (ubuntu) y build iOS sin firma (macos), en cada push/PR a `main`.
+- **`ci.yml`** — formato Dart, análisis estático, **127 tests Dart**, **20
+  tests JVM de la capa nativa**, build APK release (ubuntu) y build iOS sin
+  firma (macos), en cada push/PR a `main`. Incluye el guardián de
+  `INTERNET` (abajo).
+- **`integration-android.yml`** — test de integración en **emulador real**
+  (canal nativo incluido), cada noche y a demanda. Vive aparte porque
+  arrancar un emulador tarda ~15 min: meterlo en cada PR haría el CI lento
+  y expuesto a fallos de infraestructura ajenos al código.
 - **`release-android.yml`** — tag `v*` → tests como puerta + APK release
   firmado + `SHA256SUMS.txt` + GitHub Release automático.
 - Actions pinneadas a commit SHA y permisos mínimos por workflow.
+
+### "Cero red" es comprobable, no una promesa
+
+El claim central de este producto se apoya en un hecho verificable: la app
+**no declara el permiso `INTERNET`**. Sin él, el sistema operativo impide
+cualquier socket saliente — no hay que confiar en nadie.
+
+[`scripts/check-no-internet.sh`](scripts/check-no-internet.sh) lo verifica
+en **cada build de CI** sobre el manifiesto **fusionado de release**, que
+es el que se instala. Eso protege el claim también contra una dependencia
+futura que lo introdujera sin que nadie tocara nuestro manifiesto.
+
+> Los builds de **debug** sí declaran `INTERNET`: lo exige el tooling de
+> Flutter para hot reload y breakpoints. Ese permiso no viaja en ningún APK
+> publicado, y por eso el guardián mira release — el claim es sobre lo que
+> se distribuye.
 
 Guía completa → [`docs/CI_GITHUB.md`](docs/CI_GITHUB.md)
 
@@ -256,6 +311,7 @@ Proceso completo (incluida la firma y el camino a iOS/App Store) →
 - APK release firmado publicado en Releases con hash de integridad
 - Motor de reglas local con **umbrales modificables por el usuario** y 9 familias de hallazgo (incluidas la tendencia `load-rising`, el baseline `new-apps` y el parche antiguo `patch-old`)
 - **Tiempo en pantalla por app** con el acceso de uso (opt-in real del usuario) y **widget de pantalla de inicio** con el semáforo
+- **De la superficie al comportamiento** (v0.8.0): **consumo anómalo por app** contra su propia mediana histórica, **correlación temporal** entre deterioro de recursos e instalaciones recientes, **elección de interfaz** en el primer arranque (básica por defecto), **tests de la capa nativa** y verificación automática de que el release **no declara `INTERNET`**
 - **De superficie a capacidad real** (v0.7.0): permisos **concedidos vs. pedidos**, detección de **stalkerware activo** (accesibilidad / lector de notificaciones / admin), **escalada de permisos**, **consumo de datos** e **íconos** por app, **modos de visualización** (Simple/Normal/Avanzado) y **gráfico de tendencia** en el PDF
 - **Cerca de quien la usa** (v0.6.0): pestaña **Señaladas** (apps riesgosas), permisos **en lenguaje humano**, apps en **orden alfabético**, **5 idiomas con autodetección** e **informe forense en PDF**
 - **Evidencia de verdad** (v0.5.0): historial sellado con **cadena de hashes SHA-256** verificable, **informe forense compartible**, **backup/restauración/borrado**, alerta de app espía y registro local de errores

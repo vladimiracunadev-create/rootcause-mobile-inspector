@@ -425,8 +425,12 @@ class _InspectorHomeState extends State<InspectorHome> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _finishOnboarding() async {
-    await _updateConfig(_config.copyWith(onboardingSeen: true));
+  /// Cierra la introducción guardando la interfaz que el usuario eligió en
+  /// el último paso (básica si no tocó nada).
+  Future<void> _finishOnboarding(String viewMode) async {
+    await _updateConfig(
+      _config.copyWith(onboardingSeen: true, viewMode: viewMode),
+    );
   }
 
   Future<void> _shareCrashLog(AppStrings strings) async {

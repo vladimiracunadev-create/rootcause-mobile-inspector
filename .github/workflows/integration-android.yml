@@ -1,0 +1,98 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Test de integración en emulador — RootCause Mobile Inspector
+#
+# Ejecuta `flutter test integration_test` en un emulador Android real. A
+# diferencia de los tests de `test/`, aquí SÍ hay canal nativo: es lo único
+# que ejercita de punta a punta el camino Kotlin ↔ MethodChannel ↔ Dart, que
+# es exactamente donde nació el crash de arranque de v0.2.0.
+#
+# Por qué vive fuera de ci.yml: arrancar un emulador tarda ~10-15 min y
+# depende de KVM en el runner. Meterlo en cada PR haría el CI lento y
+# expuesto a fallos de infraestructura ajenos al código. Aquí corre cada
+# noche y a demanda, que es cuando aporta sin bloquear.
+#
+# Sin actions de terceros: el emulador se instala y arranca con las
+# herramientas oficiales del SDK que ya trae el runner.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Integración (emulador Android)
+
+on:
+  schedule:
+    # Cada día a las 04:17 UTC (minuto arbitrario: evita el pico en punto).
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.6"
+  ANDROID_API: "34"
+
+jobs:
+  emulator:
+    name: flutter test integration_test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: JDK 17
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar Flutter (tag exacto)
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Dependencias
+        run: flutter pub get
+
+      # Sin KVM el emulador arranca por software y tarda tanto que agota el
+      # timeout: habilitarlo no es una optimización, es un requisito.
+      - name: Habilitar KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Instalar imagen de sistema y crear AVD
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager --install \
+            "system-images;android-${ANDROID_API};google_apis;x86_64" \
+            "platforms;android-${ANDROID_API}" \
+            "platform-tools" "emulator"
+          echo no | avdmanager create avd \
+            -n rootcause-ci \
+            -k "system-images;android-${ANDROID_API};google_apis;x86_64" \
+            --force
+
+      - name: Arrancar emulador
+        run: |
+          "$ANDROID_HOME/emulator/emulator" -avd rootcause-ci \
+            -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect -accel on &
+          # Esperar el arranque completo: sin esto el test corre contra un
+          # sistema a medio levantar y falla por motivos que no son el código.
+          adb wait-for-device
+          timeout 600 adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 3; done'
+          adb shell input keyevent 82 || true
+          adb devices
+
+      - name: Test de integración
+        run: flutter test integration_test
+
+      - name: Diagnóstico si falla
+        if: failure()
+        run: |
+          adb logcat -d -t 500 || true

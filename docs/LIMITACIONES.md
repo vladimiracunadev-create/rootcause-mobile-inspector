@@ -23,6 +23,7 @@ soporta cada plataforma (`appsAuditSupported`) y la UI lo comunica.
 | Captura en segundo plano | ✅ (WorkManager, mín. 15 min) | ❌ | BGTaskScheduler quedó fuera del alcance iOS actual |
 | Abrir pantallas del sistema (liberar espacio, batería, ficha de app) | ✅ | 🟡 solo ajustes de la propia app | iOS no expone esas pantallas a terceros |
 | Tiempo en pantalla por app (24 h) | ✅ solo con acceso de uso (opt-in en Ajustes) | ❌ | Permiso especial `PACKAGE_USAGE_STATS`; la app no puede autoconcedérselo |
+| Anomalía de consumo por app (`app-usage-anomaly`) | ✅ solo con acceso de uso **y tras 24 h de historial** | ❌ | Se apoya en el tiempo en pantalla y los datos por app, que iOS no expone |
 | Widget de pantalla de inicio | ✅ | ❌ | Fuera del alcance iOS actual |
 | CPU/RAM de OTRAS apps | ❌ | ❌ | Restringido por el SO desde Android 8 / siempre en iOS (el tiempo en pantalla vía acceso de uso es lo máximo que el SO permite) |
 | Matar procesos ajenos | ❌ | ❌ | Restringido por el SO |
@@ -34,7 +35,23 @@ soporta cada plataforma (`appsAuditSupported`) y la UI lo comunica.
   moderno puede ocultarse, y un dispositivo rooteado a propósito genera el
   mismo indicio. **Indicio, no prueba.**
 - El puntaje de riesgo por app mide **superficie de permisos solicitada**,
-  no comportamiento observado.
+  no comportamiento observado. Desde v0.8.0 el comportamiento SÍ se mide,
+  pero en una regla aparte (`app-usage-anomaly`) y con sus propios límites,
+  descritos justo debajo.
+- La **anomalía de consumo** compara cada app consigo misma, así que
+  necesita historial: hacen falta **al menos 3 muestras anteriores a las
+  últimas 24 h** (unas 24-48 h de uso real con el acceso de uso concedido).
+  Antes de eso la regla se **omite**, no se aproxima. También significa que
+  un teléfono ya comprometido en el momento de instalar RootCause tiene ese
+  consumo alto como su "normal": la regla detecta **cambios**, no un estado
+  malo preexistente.
+- Un consumo anómalo **no es prueba de espionaje**: usar más una app un día
+  concreto produce la misma señal. Por eso el hallazgo pregunta primero
+  "¿la usaste tú más de lo normal?" antes de sugerir nada.
+- La **correlación temporal** (`load-rising-suspect`) señala coincidencia,
+  no causa. Una app instalada a la vez que empieza un deterioro puede ser
+  irrelevante; la comprobación concluyente sigue siendo desinstalarla y
+  comparar dos capturas.
 - Las direcciones Bluetooth LE modernas **rotan** (MAC aleatorizada): en
   Cercanía un mismo aparato puede aparecer como varios, y la marca
   PERSISTENTE es un indicio de sesión, no una identificación. En Android
