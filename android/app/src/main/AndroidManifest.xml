@@ -45,7 +45,8 @@
     <application
         android:label="RootCause Mobile Inspector"
         android:name=".RootCauseApplication"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
 
         <!-- WorkManager se inicializa BAJO DEMANDA (RootCauseApplication
              implementa Configuration.Provider): se quita su inicializador

@@ -60,6 +60,14 @@ lo que cada app **hace**, comparada consigo misma.
 
 - El ROADMAP declaraba v0.5.0 como versión actual con el proyecto en 0.7.0,
   y listaba como pendiente el portugués, entregado en v0.6.0.
+- **Ícono de aplicación propio** (Android e iOS): la app se instalaba con el
+  ícono genérico de Flutter. Ahora usa la marca ya publicada en la landing
+  —anillos concéntricos sobre fondo profundo, con las proporciones exactas
+  de `landing/assets/favicon.svg`— en variante adaptativa (Android 8+),
+  redonda, monocroma para el tema de Android 13+ y el juego completo de
+  iOS. Se genera con `python scripts/make_app_icons.py`. Los artefactos de
+  v0.8.0 se republicaron con este cambio: **misma versión, mismo código de
+  la app, distinto SHA-256** — `SHA256SUMS.txt` del release está al día.
 
 ## [0.7.0] - 2026-07-27 — De superficie a capacidad real
 
