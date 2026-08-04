@@ -99,25 +99,58 @@ jobs:
 
       - name: Instalar imagen de sistema y crear AVD
         run: |
+          SYSIMG="system-images;android-${ANDROID_API};google_apis;x86_64"
           yes | sdkmanager --licenses > /dev/null
-          sdkmanager --install \
-            "system-images;android-${ANDROID_API};google_apis;x86_64" \
+          sdkmanager --install "$SYSIMG" \
             "platforms;android-${ANDROID_API}" \
             "platform-tools" "emulator"
-          echo no | avdmanager create avd \
-            -n rootcause-ci \
-            -k "system-images;android-${ANDROID_API};google_apis;x86_64" \
-            --force
+
+          # avdmanager y el emulador solo coinciden en dónde vive el AVD si
+          # se les fija la misma raíz: se fija explícitamente.
+          AVD_HOME="$HOME/.android/avd"
+          mkdir -p "$AVD_HOME"
+          echo "ANDROID_AVD_HOME=$AVD_HOME" >> "$GITHUB_ENV"
+          export ANDROID_AVD_HOME="$AVD_HOME"
+
+          # Sin `-d`, avdmanager pregunta por un perfil de hardware a medida
+          # y en CI muere en ese prompt **saliendo con código 0**: el paso se
+          # pintaba verde sin AVD. Con perfil no hay prompt; si el id no
+          # existe en esta versión de cmdline-tools, se reintenta sin él.
+          create_avd() {
+            echo no | avdmanager create avd -n rootcause-ci -k "$SYSIMG" --force "$@"
+          }
+          create_avd -d pixel_6 || create_avd || true
+
+          # No fiarse del código de salida: comprobar que el AVD existe.
+          if [ ! -f "$AVD_HOME/rootcause-ci.ini" ]; then
+            echo "::error::El AVD no se creó en $AVD_HOME."
+            avdmanager list avd || true
+            exit 1
+          fi
+          avdmanager list avd
 
       - name: Arrancar emulador
         run: |
           "$ANDROID_HOME/emulator/emulator" -avd rootcause-ci \
             -no-window -no-audio -no-boot-anim -no-snapshot \
             -gpu swiftshader_indirect -accel on &
+          EMULATOR_PID=$!
+
+          # `adb wait-for-device` no tiene límite: cuando el emulador ni
+          # arranca se comía los 60 min enteros del job para no decir nada.
+          # Acotado, un fallo de infraestructura cuesta minutos y deja rastro.
+          if ! timeout 300 adb wait-for-device; then
+            echo "::error::El emulador no registró dispositivo en 5 min."
+            kill "$EMULATOR_PID" 2>/dev/null || true
+            exit 1
+          fi
+
           # Esperar el arranque completo: sin esto el test corre contra un
           # sistema a medio levantar y falla por motivos que no son el código.
-          adb wait-for-device
-          timeout 600 adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 3; done'
+          if ! timeout 600 adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 3; done'; then
+            echo "::error::El emulador no terminó de arrancar en 10 min."
+            exit 1
+          fi
           adb shell input keyevent 82 || true
           adb devices
 
