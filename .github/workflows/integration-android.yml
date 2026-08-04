@@ -56,6 +56,38 @@ jobs:
       - name: Dependencias
         run: flutter pub get
 
+      # El runner sigue trayendo el SDK de Android, pero ya no publica
+      # `cmdline-tools` ni `platform-tools` en el PATH: sin este paso,
+      # `sdkmanager` y `adb` fallan con "command not found" (exit 127).
+      # Se resuelve la raíz del SDK y el bin de cmdline-tools por búsqueda,
+      # no por ruta fija, para no volver a romperse con la próxima imagen.
+      - name: Herramientas del SDK de Android en el PATH
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Android/Sdk}}"
+          if [ ! -d "$SDK" ]; then
+            echo "::error::No se encontró el SDK de Android en '$SDK'."
+            exit 1
+          fi
+          CLI_BIN="$SDK/cmdline-tools/latest/bin"
+          if [ ! -x "$CLI_BIN/sdkmanager" ]; then
+            CLI_BIN="$(find "$SDK/cmdline-tools" -maxdepth 2 -name sdkmanager -type f \
+              -printf '%h\n' 2>/dev/null | sort | tail -1)"
+          fi
+          if [ -z "$CLI_BIN" ]; then
+            echo "::error::No se encontró sdkmanager bajo '$SDK/cmdline-tools'."
+            exit 1
+          fi
+          {
+            echo "ANDROID_HOME=$SDK"
+            echo "ANDROID_SDK_ROOT=$SDK"
+          } >> "$GITHUB_ENV"
+          {
+            echo "$CLI_BIN"
+            echo "$SDK/platform-tools"
+            echo "$SDK/emulator"
+          } >> "$GITHUB_PATH"
+          echo "SDK=$SDK · cmdline-tools=$CLI_BIN"
+
       # Sin KVM el emulador arranca por software y tarda tanto que agota el
       # timeout: habilitarlo no es una optimización, es un requisito.
       - name: Habilitar KVM
